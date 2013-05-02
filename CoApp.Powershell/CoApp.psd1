@@ -8,7 +8,7 @@
 # RootModule = ''
 
 # Version number of this module.
-ModuleVersion = '1.0'
+ModuleVersion ='1.23.1.0'
 
 # ID used to uniquely identify this module
 GUID = 'C0AAa993-f2cd-4d12-aee7-7484d48eAA0C'
@@ -35,7 +35,7 @@ Copyright = '(c) 2013 CoApp Project, Outercurve Foundation.'
 # PowerShellHostVersion = ''
 
 # Minimum version of the .NET Framework required by this module
-# DotNetFrameworkVersion = '4.0.0.0'
+DotNetFrameworkVersion = '4.0.0.0'
 
 # Minimum version of the common language runtime (CLR) required by this module
 # CLRVersion = ''

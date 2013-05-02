@@ -68,3 +68,5 @@ $($_.Exception) $($_.InvocationInfo.PositionMessage)
 	Remove-PSDrive temp
 }
 
+New-Alias -Name ptk -Value Invoke-Build -Scope Global
+New-Alias -Name autopackage -Value Write-NuGetPackage -Scope Global

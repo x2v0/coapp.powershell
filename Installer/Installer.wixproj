@@ -26,9 +26,11 @@
     <PostBuildEvent>cd $(TargetDir)
 
 "C:\Program Files (x86)\Windows Kits\8.0\bin\x86\signtool.exe" sign /a /t http://timestamp.verisign.com/scripts/timstamp.dll $(TargetDir)\coapp.tools.powershell.msi 
+cd \
 
-powershell copy-itemex -force $(TargetDir)\CoApp.Tools.Powershell.msi coapp:files\
+powershell set-executionpolicy unrestricted
 
+powershell  " ipmo %27C:\Program Files (x86)\Outercurve Foundation\Modules\CoApp\CoApp.psd1%27 %3b copy-itemex -force $(TargetDir)\CoApp.Tools.Powershell.msi coapp:files\Beta.CoApp.Tools.Powershell.msi"
 
 pskill powershell
 msiexec /i $(TargetDir)\CoApp.Tools.Powershell.msi</PostBuildEvent>
