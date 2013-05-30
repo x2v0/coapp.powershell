@@ -1,0 +1,25 @@
+﻿
+VC_V100_WIN32 { 
+	.SetEnvironmentFromTarget.Target = "VC_V100_X86";
+};
+
+VC_V100_AMD64 {
+	.SetEnvironmentFromTarget.Target = "VC_V100_X64";
+};
+
+VC_V100_X64 {
+	// do what is neccesary to generate the environment.
+	.GetEnvironmentFromBatchFile { 
+	  BatchFile="C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\vcvarsall.bat";
+	  Parameters="amd64";
+    };
+};
+
+
+VC_V100_X86 {
+	// do what is neccesary to generate the environment.
+	.GetEnvironmentFromBatchFile { 
+	  BatchFile="C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\vcvarsall.bat";
+	  Parameters="x86";
+    };
+};

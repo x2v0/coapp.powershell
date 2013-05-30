@@ -1,0 +1,6 @@
+﻿@import vc11.toolinfo;
+@import vc10.toolinfo;
+
+default {
+
+};

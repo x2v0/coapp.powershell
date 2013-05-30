@@ -81,9 +81,15 @@
     <UsingTask AssemblyFile="$(ExtensionTasksPath)CoApp.Powershell.Tools.dll" TaskName="MSBuild.ExtensionPack.Web.WebClient"/>
     <UsingTask AssemblyFile="$(ExtensionTasksPath)CoApp.Powershell.Tools.dll" TaskName="MSBuild.ExtensionPack.Xml.XmlFile"/>
     <UsingTask AssemblyFile="$(ExtensionTasksPath)CoApp.Powershell.Tools.dll" TaskName="MSBuild.ExtensionPack.Xml.XmlTask"/>
+    <UsingTask AssemblyFile="$(ExtensionTasksPath)CoApp.Powershell.Tools.dll" TaskName="ClrPlus.Scripting.MsBuild.Building.Tasks.ExecEx"/>
+    <UsingTask AssemblyFile="$(ExtensionTasksPath)CoApp.Powershell.Tools.dll" TaskName="ClrPlus.Scripting.MsBuild.Building.Tasks.PushEnvironment"/>
+    <UsingTask AssemblyFile="$(ExtensionTasksPath)CoApp.Powershell.Tools.dll" TaskName="ClrPlus.Scripting.MsBuild.Building.Tasks.PopEnvironment"/>
+    <UsingTask AssemblyFile="$(ExtensionTasksPath)CoApp.Powershell.Tools.dll" TaskName="ClrPlus.Scripting.MsBuild.Building.Tasks.GetEnvironmentFromBatchFile"/>
+    <UsingTask AssemblyFile="$(ExtensionTasksPath)CoApp.Powershell.Tools.dll" TaskName="ClrPlus.Scripting.MsBuild.Building.Tasks.LoadSystemEnvironment"/>
+    <UsingTask AssemblyFile="$(ExtensionTasksPath)CoApp.Powershell.Tools.dll" TaskName="ClrPlus.Scripting.MsBuild.Building.Tasks.SetEnvironmentFromTarget"/>
+  <UsingTask AssemblyFile="$(ExtensionTasksPath)CoApp.Powershell.Tools.dll" TaskName="ClrPlus.Scripting.MsBuild.Building.Tasks.Script"/>
 
-
-    <!-- ============== Git ============== -->
+  <!-- ============== Git ============== -->
     <UsingTask AssemblyFile="$(ExtensionTasksPath)CoApp.Powershell.Tools.dll" TaskName="MSBuild.ExtensionPack.Git.Clone"/>
 
 </Project>

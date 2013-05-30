@@ -43,6 +43,18 @@ namespace CoApp.Powershell.Commands {
         [Parameter]
         public string[] Defines {get;set;}
 
+        [Parameter]
+        public SwitchParameter SaveScript {
+            get;
+            set;
+        }
+
+        [Parameter]
+        public SwitchParameter DumpScript {
+            get;
+            set;
+        }
+
         protected override void BeginProcessing() {
             if (Remote) {
                 ProcessRecordViaRest();
@@ -66,21 +78,22 @@ namespace CoApp.Powershell.Commands {
                 using (var local = LocalEventSource) {
                     local.Events += new SourceError((code, location, message, objects) => {
                         location = location ?? SourceLocation.Unknowns;
-                        Host.UI.WriteErrorLine("{0}:Error {1}:{2}".format(location.FirstOrDefault(), code, message.format(objects)));
+                        Host.UI.WriteErrorLine(message);
                         return true;
                     });
 
                     if (!NoWarnings) {
                         local.Events += new SourceWarning((code, location, message, objects) => {
-                            WriteWarning("{0}:Warning {1}:{2}".format((location ?? SourceLocation.Unknowns).FirstOrDefault(), message.format(objects)));
+                            WriteWarning(message);
                             return false;
                         });
                     }
 
                     local.Events += new SourceDebug((code, location, message, objects) => {
-                        WriteVerbose("{0}:DebugMessage {1}:{2}".format((location ?? SourceLocation.Unknowns).FirstOrDefault(), code, message.format(objects)));
+                        WriteVerbose(message);
                         return false;
                     });
+
                     using (var buildScript = new BuildScript(ScriptFile)) {
                         if (Defines != null) {
                             foreach (var i in Defines) {
@@ -98,7 +111,24 @@ namespace CoApp.Powershell.Commands {
                                 buildScript.AddMacro(k, v);
                             }
                         }
+                        if (Targets.IsNullOrEmpty()) {
+                            Targets = new string[] {
+                                "default"
+                            };
+                        }
+
+                        if (SaveScript) {
+                            WriteObject("Script Saved To: {0}".format( buildScript.EmitScript()));
+                            return;
+                        } 
+
+                        if (DumpScript) {
+                            WriteObject(buildScript.ScriptText());
+                            return;
+                        } 
+
                         buildScript.Execute(Targets);
+                        
                     }
                 }
             }
