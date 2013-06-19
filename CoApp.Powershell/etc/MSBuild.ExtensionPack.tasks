@@ -3,6 +3,7 @@
     <PropertyGroup>
         <BuildPath Condition="'$(BuildPath)' == ''">$(MSBuildProjectDirectory)</BuildPath>
         <ExtensionTasksPath >$(MSBuildThisFileDirectory)\..\</ExtensionTasksPath>
+        <CoAppEtcDirectory >$(MSBuildThisFileDirectory)</CoAppEtcDirectory>
     </PropertyGroup>
 
     <!-- ============== Framework ============== -->

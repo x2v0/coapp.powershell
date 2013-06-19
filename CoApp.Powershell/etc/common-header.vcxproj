@@ -1,0 +1,227 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" InitialTargets="GenProjectGuid" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildProjectDirectory)\$(MSBuildProjectName).guid" Condition="Exists('$(MSBuildProjectDirectory)\$(MSBuildProjectName).guid')" />
+  <Import Project="$(CoAppEtcDirectory)MSBuild.ExtensionPack.tasks" />
+  <Import Project="$(MSBuildProjectDirectory)\dependencies.props" Condition="exists('$(MSBuildProjectDirectory)\dependencies.props')"/>
+
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+      <PlatformToolset Condition="'$(PlatformToolset)' == ''">v110</PlatformToolset>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+      <PlatformToolset Condition="'$(PlatformToolset)' == ''">v110</PlatformToolset>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+      <PlatformToolset Condition="'$(PlatformToolset)' == ''">v110</PlatformToolset>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+      <PlatformToolset Condition="'$(PlatformToolset)' == ''">v110</PlatformToolset>
+    </ProjectConfiguration>
+  </ItemGroup>
+
+
+  <Target Name="GenProjectGuid" Condition="!Exists('$(MSBuildProjectDirectory)\$(MSBuildProjectName).guid') AND '$(ProjectGuid)'=='' ">
+    <PropertyGroup  Label="Globals">
+      <ProjectGuid>{$([System.Guid]::NewGuid())}</ProjectGuid>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectGuidTemplate Include="&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;"/>
+      <ProjectGuidTemplate Include="&lt;Project ToolsVersion=&quot;4.0&quot; xmlns=&quot;http://schemas.microsoft.com/developer/msbuild/2003&quot;&gt;"/>
+      <ProjectGuidTemplate Include="&lt;PropertyGroup Label=&quot;Globals&quot;&gt;"/>
+      <ProjectGuidTemplate Include="&lt;ProjectGuid&gt;$(ProjectGuid)&lt;/ProjectGuid&gt;"/>
+      <ProjectGuidTemplate Include="&lt;/PropertyGroup&gt;"/>
+      <ProjectGuidTemplate Include="&lt;/Project&gt;"/>
+    </ItemGroup>
+
+    <File TaskAction="Create" Files="$(MSBuildProjectDirectory)\$(MSBuildProjectName).guid" />
+    <File TaskAction="WriteLines" Files="$(MSBuildProjectDirectory)\$(MSBuildProjectName).guid" Lines="@(ProjectGuidTemplate)"/>
+  </Target>
+
+  <PropertyGroup Label="Globals">
+    <RootNamespace>$(MSBuildProjectName)</RootNamespace>
+  </PropertyGroup>
+
+
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+
+  <PropertyGroup Condition="'$(Configuration)'=='Debug'" Label="Configuration">
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)'=='Release'" Label="Configuration">
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+
+  <Import Project="$(CoAppEtcDirectory)vcxproj.inc" Condition="Exists('$(CoAppEtcDirectory)vcxproj.inc')" />
+
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+
+  <ImportGroup Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <PreprocessorDefinitions>$(Defines);%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(IncludeDirectories);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <WarningLevel>Level3</WarningLevel>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>$(Defines);%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(IncludeDirectories);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Link>
+      <!-- do we have a .def file -->
+      <ModuleDefinitionFile Condition="Exists('..\$(LibName).def')">..\$(LibName).def</ModuleDefinitionFile>
+      <ModuleDefinitionFile Condition="Exists('$(LibName).def')">$(LibName).def</ModuleDefinitionFile>
+      <ModuleDefinitionFile Condition="Exists('$(ModuleDefinitionFile)')">$(ModuleDefinitionFile)</ModuleDefinitionFile>
+      <AdditionalLibraryDirectories>$(OutDir);$(LibraryDirectories);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>$(Libraries);%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+
+  <ItemDefinitionGroup Condition="'$(Platform)'=='Win32'">
+    <ClCompile>
+      <PreprocessorDefinitions>WIN32;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <AdditionalOptions>/MACHINE:X86 %(AdditionalOptions)</AdditionalOptions>
+    </Link>
+    <Lib>
+      <TargetMachine>MachineX86</TargetMachine>
+    </Lib>
+  </ItemDefinitionGroup>
+
+  <ItemDefinitionGroup Condition="'$(Platform)'=='x64'">
+    <ClCompile>
+      <PreprocessorDefinitions>WIN64;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <AdditionalOptions>/MACHINE:X64 %(AdditionalOptions)</AdditionalOptions>
+    </Link>
+    <Lib>
+      <TargetMachine>MachineX64</TargetMachine>
+    </Lib>
+  </ItemDefinitionGroup>
+
+  <ItemDefinitionGroup Condition="'$(Configuration)'=='Debug'">
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+    </ClCompile>
+  </ItemDefinitionGroup>
+
+  <ItemDefinitionGroup Condition="'$(Configuration)'=='Release'">
+    <ClCompile>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+    </ClCompile>
+    <Link>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+
+  <Target Name="PreBuildCmds" >
+    <Message Text="Running PreBuild Script" />
+    <Script Condition="'$(PreBuild)' != ''" Batch="$(PreBuild)" >
+      <Output TaskParameter="StdOut" PropertyName="StdOut" />
+      <Output TaskParameter="StdOut" ItemName="StdOut" />
+      <Output TaskParameter="StdErr" PropertyName="StdErr" />
+      <Output TaskParameter="StdErr" ItemName="StdErr" />
+      <Output TaskParameter="ExitCode" PropertyName="ExitCode" />
+      <Output TaskParameter="ExitCode" ItemName="ExitCode" />
+    </Script>
+    <!-- <Message Condition="'$(PreBuild)' != ''"  Text="%(StdOut.Identity)" Importance="High"/> -->
+    <!-- <Message Condition="'$(PreBuild)' != ''"  Text="%(StdErr.Identity)" Importance="High"/> -->
+  </Target>
+
+  <Target Name="PostBuildCmds" >
+    <Message Text="Running PostBuild Script" />
+    <Script Condition="'$(PostBuild)' != ''" Batch="$(PreBuild)" >
+      <Output TaskParameter="StdOut" PropertyName="StdOut" />
+      <Output TaskParameter="StdOut" ItemName="StdOut" />
+      <Output TaskParameter="StdErr" PropertyName="StdErr" />
+      <Output TaskParameter="StdErr" ItemName="StdErr" />
+      <Output TaskParameter="ExitCode" PropertyName="ExitCode" />
+      <Output TaskParameter="ExitCode" ItemName="ExitCode" />
+    </Script>
+    <!-- <Message Condition="'$(PreBuild)' != ''"  Text="%(StdOut.Identity)" Importance="High"/> -->
+    <!-- <Message Condition="'$(PreBuild)' != ''"  Text="%(StdErr.Identity)" Importance="High"/> -->
+  </Target>
+
+  <Target Name="PreLinkCmds" BeforeTargets="Link" >
+    <Message Text="Running PreLink Script" />
+    <Script Condition="'$(PreLink)' != ''" Batch="$(PreLink)" >
+      <Output TaskParameter="StdOut" PropertyName="StdOut" />
+      <Output TaskParameter="StdOut" ItemName="StdOut" />
+      <Output TaskParameter="StdErr" PropertyName="StdErr" />
+      <Output TaskParameter="StdErr" ItemName="StdErr" />
+      <Output TaskParameter="ExitCode" PropertyName="ExitCode" />
+      <Output TaskParameter="ExitCode" ItemName="ExitCode" />
+    </Script>
+    <!-- <Message Condition="'$(PreBuild)' != ''"  Text="%(StdOut.Identity)" Importance="High"/> -->
+    <!-- <Message Condition="'$(PreBuild)' != ''"  Text="%(StdErr.Identity)" Importance="High"/> -->
+  </Target>
+
+  <Target Name="PostLinkCmds" AfterTargets="Link">
+    <Message Text="Running PostLink Script" />
+    <Script Condition="'$(PostLink)' != ''" Batch="$(PostLink)" >
+      <Output TaskParameter="StdOut" PropertyName="StdOut" />
+      <Output TaskParameter="StdOut" ItemName="StdOut" />
+      <Output TaskParameter="StdErr" PropertyName="StdErr" />
+      <Output TaskParameter="StdErr" ItemName="StdErr" />
+      <Output TaskParameter="ExitCode" PropertyName="ExitCode" />
+      <Output TaskParameter="ExitCode" ItemName="ExitCode" />
+    </Script>
+    <!-- <Message Condition="'$(PreBuild)' != ''"  Text="%(StdOut.Identity)" Importance="High"/> -->
+    <!-- <Message Condition="'$(PreBuild)' != ''"  Text="%(StdErr.Identity)" Importance="High"/> -->
+  </Target>
+
+  <Target Name="PreLibCmds" BeforeTargets="Lib" >
+    <Message Text="Running PreLib Script" />
+    <Script Condition="'$(PreLib)' != ''" Batch="$(PreLib)" >
+      <Output TaskParameter="StdOut" PropertyName="StdOut" />
+      <Output TaskParameter="StdOut" ItemName="StdOut" />
+      <Output TaskParameter="StdErr" PropertyName="StdErr" />
+      <Output TaskParameter="StdErr" ItemName="StdErr" />
+      <Output TaskParameter="ExitCode" PropertyName="ExitCode" />
+      <Output TaskParameter="ExitCode" ItemName="ExitCode" />
+    </Script>
+    <!-- <Message Condition="'$(PreBuild)' != ''"  Text="%(StdOut.Identity)" Importance="High"/> -->
+    <!-- <Message Condition="'$(PreBuild)' != ''"  Text="%(StdErr.Identity)" Importance="High"/> -->
+  </Target>
+
+  <Target Name="PostLibCmds" AfterTargets="Lib">
+    <Message Text="Running PostLib Script" />
+    <Script Condition="'$(PostLib)' != ''" Batch="$(PostLib)" >
+      <Output TaskParameter="StdOut" PropertyName="StdOut" />
+      <Output TaskParameter="StdOut" ItemName="StdOut" />
+      <Output TaskParameter="StdErr" PropertyName="StdErr" />
+      <Output TaskParameter="StdErr" ItemName="StdErr" />
+      <Output TaskParameter="ExitCode" PropertyName="ExitCode" />
+      <Output TaskParameter="ExitCode" ItemName="ExitCode" />
+    </Script>
+    <!-- <Message Condition="'$(PreBuild)' != ''"  Text="%(StdOut.Identity)" Importance="High"/> -->
+    <!-- <Message Condition="'$(PreBuild)' != ''"  Text="%(StdErr.Identity)" Importance="High"/> -->
+  </Target>
+
+  <Target Name="PreBuildTargets" >
+    <CallTarget Condition="'$(PreBuildTargets)' != ''" Targets="$(PreBuildTargets)"/>
+  </Target>
+
+  <Target Name="PostBuildTargets" >
+    <CallTarget Condition="'$(PostBuildTargets)' != ''" Targets="$(PostBuildTargets)"/>
+  </Target>
+</Project>

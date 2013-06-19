@@ -1,0 +1,32 @@
+﻿@import default_tools;
+
+default {
+    (PlatformToolsets, Architectures, ReleaseOrDebug, Linkage, "===PROJECTS===" ) => {
+        .PushEnvironment{};
+        .LoadSystemEnvironment{};
+        .SetEnvironmentFromTarget.Target = "VC_${0}_${1}";
+        
+        .Message.Text = @"Environment vc_${0}_${1} -- ${2}  ${3}  *** IsValid => $(IsEnvironmentValid)";
+
+        .Warning{
+            Condition="!$(IsEnvironmentValid)";
+            Text = @"********\r\nSKIPPING: vc_${0}_${1} -- ${2}  ${3}  ";
+        };
+
+        .Exec {
+            Condition="$(IsEnvironmentValid)";
+            Command = @"msbuild ${4} /p:PlatformToolset=${0};Platform=${1};Configuration=${2};UsesConfigurationType=${3}";
+        };
+
+        .PopEnvironment{};
+    };
+};
+
+clean {
+    .RemoveDir.Directories = @"intermediate";
+};
+
+nuke {
+    .RemoveDir.Directories = @"output";
+    .RemoveDir.Directories = @"intermediate";
+};

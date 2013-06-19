@@ -77,8 +77,8 @@ namespace CoApp.Powershell.Commands {
 
                 using (var local = LocalEventSource) {
                     local.Events += new SourceError((code, location, message, objects) => {
-                        location = location ?? SourceLocation.Unknowns;
-                        Host.UI.WriteErrorLine(message);
+                        location = location.IsNullOrEmpty() ? SourceLocation.Unknowns : location;
+                        Host.UI.WriteErrorLine("{0}:Error {1}:{2}".format(location.FirstOrDefault(), code, message.format(objects)));
                         return true;
                     });
 

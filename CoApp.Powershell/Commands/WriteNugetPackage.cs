@@ -13,7 +13,7 @@
 namespace CoApp.Powershell.Commands {
     using System;
     using System.IO;
-    using System.Linq;
+    using System.Linq;  
     using System.Management.Automation;
     using ClrPlus.Core.Extensions;
     using ClrPlus.Platform;
@@ -79,13 +79,13 @@ namespace CoApp.Powershell.Commands {
 
                 if (!NoWarnings) {
                     local.Events += new SourceWarning((code, location, message, objects) => {
-                        WriteWarning("{0}:Warning {1}:{2}".format(location.FirstOrDefault(), code, message.format(objects)));
+                        WriteWarning("{0}:Warning {1}:{2}".format((location ?? SourceLocation.Unknowns).FirstOrDefault(), message.format(objects)));
                         return false;
                     });
                 }
 
                 local.Events += new SourceDebug((code, location, message, objects) => {
-                    WriteVerbose("{0}:Debug {1}:{2}".format(location.FirstOrDefault(), code, message.format(objects)));
+                    WriteVerbose("{0}:DebugMessage {1}:{2}".format((location ?? SourceLocation.Unknowns).FirstOrDefault(), code, message.format(objects)));
                     return false;
                 });
 

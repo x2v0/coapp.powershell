@@ -30,6 +30,9 @@ namespace CoApp.Powershell.Commands {
         [Parameter(HelpMessage = "Get the latest 'beta' build, instead of the latest 'stable' build.")]
         public SwitchParameter Beta;
 
+        [Parameter(HelpMessage = "Get the absolute latest build off the dev box. Warning: This may be broken from time-to-time!")]
+        public SwitchParameter Development;
+
         protected override void ProcessRecord() {
             if(Remote) {
                 ProcessRecordViaRest();
@@ -38,7 +41,9 @@ namespace CoApp.Powershell.Commands {
 
             var wc = new WebClient();
             var tmp = "coapp.tools.powershell.msi".GenerateTemporaryFilename();
-            if (Beta) {
+            if(Development) {
+                wc.DownloadFile(@"http://downloads.coapp.org/files/Development.CoApp.Tools.Powershell.msi", tmp);
+            } else if (Beta) {
                 wc.DownloadFile(@"http://downloads.coapp.org/files/Beta.CoApp.Tools.Powershell.msi", tmp);
             } else {
                 wc.DownloadFile(@"http://downloads.coapp.org/files/CoApp.Tools.Powershell.msi", tmp);

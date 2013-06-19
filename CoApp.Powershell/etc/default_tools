@@ -1,5 +1,22 @@
 ﻿@import vc11.toolinfo;
+@import vc12.toolinfo;
 @import vc10.toolinfo;
+
+PlatformToolsets : {
+	V110, V100, V120
+};
+
+Architectures : {
+	Win32, x64
+};
+
+ReleaseOrDebug : {
+	Release, Debug
+};
+
+Linkage : {
+	Dynamic, Static, ltcg
+};
 
 default {
 

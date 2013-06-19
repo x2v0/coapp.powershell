@@ -1,0 +1,52 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup Label="Global">
+    <IS_LIBRARY>false</IS_LIBRARY>
+    <IS_APPLICATION>false</IS_APPLICATION>
+    
+    <IS_STATIC>false</IS_STATIC>
+    <IS_DYNAMIC>false</IS_DYNAMIC>
+    <IS_LTCG>false</IS_LTCG>
+    
+    <IS_X64>false</IS_X64>
+    <IS_WIN32>false</IS_WIN32>
+    <IS_X86>false</IS_X86>
+    <IS_ARM>false</IS_ARM>
+
+    <IS_RELEASE>false</IS_RELEASE>
+    <IS_DEBUG>false</IS_DEBUG>
+
+    <IS_V120>false</IS_V120>
+    <IS_V110>false</IS_V110>
+    <IS_V100>false</IS_V100>
+    <IS_V90>false</IS_V90>
+    
+    <IS_CDECL>false</IS_CDECL>
+    <IS_STDCALL>false</IS_STDCALL>
+
+    <IS_LIBRARY Condition="$(ConfigurationType.ToLower().IndexOf('library'))!=-1">true</IS_LIBRARY>
+    <IS_APPLICATION Condition="$(ConfigurationType.ToLower().IndexOf('application'))!=-1">true</IS_APPLICATION>
+
+    <IS_STATIC Condition="$(UsesConfigurationType.ToLower().IndexOf('static'))!=-1">true</IS_STATIC>
+    <IS_DYNAMIC Condition="$(UsesConfigurationType.ToLower().IndexOf('dynamic'))!=-1">true</IS_DYNAMIC>
+    <IS_LTCG Condition="$(UsesConfigurationType.ToLower().IndexOf('ltcg'))!=-1">true</IS_LTCG>
+
+    <IS_X64 Condition="'$(Platform.ToLower())' == 'x64'">true</IS_X64>
+    <IS_WIN32 Condition="'$(Platform.ToLower())' == 'win32' OR '$(Platform.ToLower())' == 'x86'">true</IS_WIN32>
+    <IS_X86 Condition="'$(Platform.ToLower())' == 'win32' OR '$(Platform.ToLower())' == 'x86'">true</IS_X86>
+    <IS_ARM Condition="'$(Platform.ToLower())' == 'arm'">true</IS_ARM>
+
+    <IS_RELEASE Condition="$(Configuration.ToLower().IndexOf('debug')) == -1">true</IS_RELEASE>
+    <IS_DEBUG Condition="$(Configuration.ToLower().IndexOf('debug')) != -1">true</IS_DEBUG>
+
+    <IS_V120 Condition="$(PlatformToolset.ToLower().IndexOf('v120')) != -1">true</IS_V120>
+    <IS_V110 Condition="$(PlatformToolset.ToLower().IndexOf('v110')) != -1">true</IS_V110>
+    <IS_V100 Condition="$(PlatformToolset.ToLower().IndexOf('v100')) != -1">true</IS_V100>
+    <IS_V90 Condition="$(PlatformToolset.ToLower().IndexOf('v90')) != -1">true</IS_V90>
+
+    <IS_CDECL Condition="$(CallingConvention.ToLower().IndexOf('cdecl')) != -1 OR '$(CallingConvention)' == ''">true</IS_CDECL>
+    <IS_STDCALL Condition="$(CallingConvention.ToLower().IndexOf('stdcall')) != -1">true</IS_STDCALL>
+
+    <HAS_COMMON_VARIABLES>true</HAS_COMMON_VARIABLES>
+  </PropertyGroup>
+</Project>
