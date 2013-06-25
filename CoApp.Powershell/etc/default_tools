@@ -23,22 +23,26 @@ default {
     CoAppToolsVersion = 1.8;
 };
 
-buildpackage {
+package {
     .Message.Text = "Building NuGet Packages.";
     .WriteNugetPackage.Package = "$(MSBuildThisFileDirectory)\${ProjectName}.autopkg";
+    .Message.Text= "Created Packages:";
+    .Message.Text = "»   %(AllPackages.Identity)";
 }
 
-publishpackage {
-    DependsOnTargets = publishpackage;
+publish {
+     DependsOnTargets = package;
     
     .Message.Text = "Pushing NuGet Packages to server using stored credentials.";
-    .Nuget.Push = "%(MainPackages.Identity)";
-    .Nuget.Push = "%(RedistPackages.Identity)";
+    
+    .NuGet.Push = "%(MainPackages.Identity)";
+    .NuGet.Push = "%(RedistPackages.Identity)";
     
     .Message.Text = "Hiding Redist Packages ...";
-    .Nuget.Delete = "%(RedistPackages.pkgIdentity)";
-};
+    .NuGet.Delete = "%(RedistPackages.pkgIdentity)";
 
+    .Message.Text = "Completed publishing.";
+};
 
 clean {
     .RemoveDir.Directories = @"intermediate";
@@ -52,7 +56,3 @@ nuke {
 build {
     DependsOnTargets = default;
 };
-
-publish {
-    DependsOnTargets = "build;publishpackage";
-}
