@@ -14,9 +14,6 @@
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
     <RestorePackages>true</RestorePackages>
   </PropertyGroup>
-  <Target Name="myTarget" BeforeTargets="PreBuildEvent">
-    <Exec Command="C:\Windows\Microsoft.NET\Framework64\v4.0.30319\MSBuild.exe /p:Configuration=$(Configuration) $(SolutionDir)..\ClrPlus\ClrPlus.sln" />
-  </Target>
   <Import Project="$(SolutionDir)\CoApp.Powershell.sln.props" Condition="Exists('$(SolutionDir)\CoApp.Powershell.sln.props')" />
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -108,13 +105,11 @@
     </Reference>
     <Reference Include="Microsoft.Cci.SourceModel">
     </Reference>
-    <Reference Include="Microsoft.Data.Edm, Version=5.4.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Microsoft.Data.Edm.5.4.0\lib\net40\Microsoft.Data.Edm.dll</HintPath>
+    <Reference Include="Microsoft.Data.Edm, Version=5.5.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Data.Edm.5.5.0\lib\net40\Microsoft.Data.Edm.dll</HintPath>
     </Reference>
-    <Reference Include="Microsoft.Data.OData, Version=5.4.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Microsoft.Data.OData.5.4.0\lib\net40\Microsoft.Data.OData.dll</HintPath>
+    <Reference Include="Microsoft.Data.OData, Version=5.5.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Data.OData.5.5.0\lib\net40\Microsoft.Data.OData.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Deployment.WindowsInstaller, Version=3.0.0.0, Culture=neutral, PublicKeyToken=ce35f76fcda82bad, processorArchitecture=MSIL">
       <HintPath>..\packages\DTF-Unofficial.3.6.2928\lib\Microsoft.Deployment.WindowsInstaller.dll</HintPath>
@@ -172,29 +167,29 @@
     <Reference Include="NSch">
       <HintPath>..\packages\ngit2.2.1.0.20130431\lib\net40\NSch.dll</HintPath>
     </Reference>
-    <Reference Include="ServiceStack, Version=3.9.46.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\ServiceStack.3.9.46\lib\net35\ServiceStack.dll</HintPath>
+    <Reference Include="ServiceStack, Version=3.9.54.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\ServiceStack.3.9.54\lib\net35\ServiceStack.dll</HintPath>
     </Reference>
-    <Reference Include="ServiceStack.Common, Version=3.9.46.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\ServiceStack.Common.3.9.46\lib\net35\ServiceStack.Common.dll</HintPath>
+    <Reference Include="ServiceStack.Common, Version=3.9.54.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\ServiceStack.Common.3.9.54\lib\net35\ServiceStack.Common.dll</HintPath>
     </Reference>
-    <Reference Include="ServiceStack.Interfaces, Version=3.9.46.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\ServiceStack.Common.3.9.46\lib\net35\ServiceStack.Interfaces.dll</HintPath>
+    <Reference Include="ServiceStack.Interfaces, Version=3.9.54.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\ServiceStack.Common.3.9.54\lib\net35\ServiceStack.Interfaces.dll</HintPath>
     </Reference>
-    <Reference Include="ServiceStack.OrmLite, Version=3.9.45.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\ServiceStack.OrmLite.SqlServer.3.9.45\lib\ServiceStack.OrmLite.dll</HintPath>
+    <Reference Include="ServiceStack.OrmLite, Version=3.9.54.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\ServiceStack.OrmLite.SqlServer.3.9.54\lib\ServiceStack.OrmLite.dll</HintPath>
     </Reference>
-    <Reference Include="ServiceStack.OrmLite.SqlServer, Version=3.9.45.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\ServiceStack.OrmLite.SqlServer.3.9.45\lib\ServiceStack.OrmLite.SqlServer.dll</HintPath>
+    <Reference Include="ServiceStack.OrmLite.SqlServer, Version=3.9.54.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\ServiceStack.OrmLite.SqlServer.3.9.54\lib\ServiceStack.OrmLite.SqlServer.dll</HintPath>
     </Reference>
-    <Reference Include="ServiceStack.Redis, Version=3.9.45.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\ServiceStack.Redis.3.9.45\lib\net35\ServiceStack.Redis.dll</HintPath>
+    <Reference Include="ServiceStack.Redis, Version=3.9.54.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\ServiceStack.Redis.3.9.54\lib\net35\ServiceStack.Redis.dll</HintPath>
     </Reference>
-    <Reference Include="ServiceStack.ServiceInterface, Version=3.9.46.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\ServiceStack.3.9.46\lib\net35\ServiceStack.ServiceInterface.dll</HintPath>
+    <Reference Include="ServiceStack.ServiceInterface, Version=3.9.54.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\ServiceStack.3.9.54\lib\net35\ServiceStack.ServiceInterface.dll</HintPath>
     </Reference>
-    <Reference Include="ServiceStack.Text, Version=3.9.45.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\ServiceStack.Text.3.9.46\lib\net35\ServiceStack.Text.dll</HintPath>
+    <Reference Include="ServiceStack.Text, Version=3.9.54.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\ServiceStack.Text.3.9.54\lib\net35\ServiceStack.Text.dll</HintPath>
     </Reference>
     <Reference Include="Sharpen">
       <HintPath>..\packages\ngit2.2.1.0.20130431\lib\net40\Sharpen.dll</HintPath>
@@ -214,9 +209,8 @@
       <HintPath>..\packages\Microsoft.Bcl.1.0.19\lib\net40\System.Runtime.dll</HintPath>
     </Reference>
     <Reference Include="System.Runtime.Serialization" />
-    <Reference Include="System.Spatial, Version=5.4.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\System.Spatial.5.4.0\lib\net40\System.Spatial.dll</HintPath>
+    <Reference Include="System.Spatial, Version=5.5.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Spatial.5.5.0\lib\net40\System.Spatial.dll</HintPath>
     </Reference>
     <Reference Include="System.Threading.Tasks, Version=2.5.19.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.Bcl.1.0.19\lib\net40\System.Threading.Tasks.dll</HintPath>
@@ -255,6 +249,7 @@
     </None>
     <None Include="etc\common-variables.vcxproj">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <SubType>Designer</SubType>
     </None>
     <None Include="etc\MSBuild.ExtensionPack.tasks">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -284,6 +279,7 @@
   <ItemGroup>
     <None Include="etc\vcxproj.inc">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <SubType>Designer</SubType>
     </None>
     <None Include="etc\autopackage.targets" />
     <None Include="CoApp.Powershell.Tools.dll-help.xml">
@@ -307,7 +303,12 @@
   </PropertyGroup>
   <PropertyGroup>
     <PostBuildEvent Condition="'$(Configuration)' == 'Debug'">cd $(TargetDir)
-  copy coapp.powershell.dll coapp.powershell.tools.dll 
+  REM copy coapp.powershell.dll coapp.powershell.tools.dll 
+  
+  $(SolutionDir)\tools\il-repack.exe   /targetplatform:v4 /lib:. /lib:"C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0" /lib:"C:\Program Files (x86)\Reference Assemblies\Microsoft\WindowsPowerShell\3.0" /parallel /union /out:CoApp.Powershell.Tools.dll CoApp.Powershell.dll ClrPlus.Core.dll ClrPlus.Platform.dll ClrPlus.Powershell.Azure.dll ClrPlus.Powershell.Core.dll ClrPlus.Powershell.Provider.dll ClrPlus.Powershell.Rest.dll ClrPlus.Scripting.dll ClrPlus.Scripting.MsBuild.dll ClrPlus.Windows.Api.dll ClrPlus.Windows.PeBinary.dll Microsoft.Cci.Analysis.ControlAndDataFlowGraph.dll Microsoft.Cci.AstsProjectedAsCodeModel.dll Microsoft.Cci.CodeModel.dll Microsoft.Cci.CodeModelToIL.dll Microsoft.Cci.ContractExtractor.dll Microsoft.Cci.CSharpSourceEmitter.dll Microsoft.Cci.ILGenerator.dll Microsoft.Cci.MetadataHelper.dll Microsoft.Cci.MetadataModel.dll Microsoft.Cci.MutableCodeModel.dll Microsoft.Cci.MutableMetadataModel.dll Microsoft.Cci.NewILToCodeModel.dll Microsoft.Cci.PdbReader.dll Microsoft.Cci.PdbWriter.dll Microsoft.Cci.PeReader.dll Microsoft.Cci.PeWriter.dll Microsoft.Cci.ReflectionEmitter.dll Microsoft.Cci.SourceEmitter.dll Microsoft.Cci.SourceModel.dll Microsoft.Threading.Tasks.dll Microsoft.Threading.Tasks.Extensions.dll Microsoft.Threading.Tasks.Extensions.Desktop.dll System.Runtime.dll System.Threading.Tasks.dll Microsoft.WindowsAzure.Configuration.dll Microsoft.WindowsAzure.Storage.dll ServiceStack.Common.dll ServiceStack.dll ServiceStack.Interfaces.dll ServiceStack.ServiceInterface.dll ServiceStack.Text.dll  ServiceStack.OrmLite.dll Microsoft.Deployment.WindowsInstaller.dll CSScriptLibrary.dll Mono.CSharp.dll Microsoft.Data.OData.dll Microsoft.Data.Edm.dll Ionic.Zip.dll MSBuild.ExtensionPack.dll MSBuild.ExtensionPack.Git.dll MSBuild.ExtensionPack.Loggers.dll MSBuild.ExtensionPack.TaskFactory.PowerShell.dll Sharpen.dll  ICSharpCode.SharpZipLib.dll NGit.dll NSch.dll CSharpTest.Net.RpcLibrary.dll Mono.Security.dll
+
+
+  
 "C:\Program Files (x86)\Windows Kits\8.0\bin\x86\signtool.exe" sign /a /t http://timestamp.verisign.com/scripts/timstamp.dll $(TargetDir)\CoApp.Powershell.Tools.dll
 "C:\Program Files (x86)\Windows Kits\8.0\bin\x86\signtool.exe" sign /a /t http://timestamp.verisign.com/scripts/timstamp.dll $(TargetDir)\CoApp.psd1
 "C:\Program Files (x86)\Windows Kits\8.0\bin\x86\signtool.exe" sign /a /t http://timestamp.verisign.com/scripts/timstamp.dll $(TargetDir)\SigningService.psm1
@@ -353,7 +354,7 @@ call replace.cmd ".UpgradeVersion.OnlyDetect=""no"".*" "&lt;UpgradeVersion OnlyD
 
 call replace.cmd "ModuleVersion = '.*" "ModuleVersion ='%25NEWVER%25'" %25SLNDIR%25\CoApp.Powershell\CoApp.psd1</PreBuildEvent>
   </PropertyGroup>
-  <Import Project="..\packages\Microsoft.Bcl.Build.1.0.5\tools\Microsoft.Bcl.Build.targets" />
+  <Import Project="..\packages\Microsoft.Bcl.Build.1.0.7\tools\Microsoft.Bcl.Build.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

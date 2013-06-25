@@ -25,7 +25,6 @@ namespace CoApp.Powershell.Commands {
     using ClrPlus.Scripting.MsBuild.Utility;
     using Microsoft.Build.Construction;
     using Microsoft.Build.Evaluation;
-    using ProcessStartInfo = ClrPlus.Platform.Process.ProcessStartInfo;
     using System.Text.RegularExpressions;
 
     [Cmdlet(AllVerbs.ConvertFrom, "VcxProject")]
@@ -37,7 +36,10 @@ namespace CoApp.Powershell.Commands {
         public string OutputFile { get; set; }
 
         [Parameter(HelpMessage = "Replace value in script", Position = 2)]
-        public Hashtable Overrides { get; set; } 
+        public Hashtable Overrides { get; set; }
+
+        [Parameter(HelpMessage = "Overwrite the destination file")]
+        public SwitchParameter Force;
 
         protected override void ProcessRecord() {
             if(Remote) {
@@ -45,8 +47,7 @@ namespace CoApp.Powershell.Commands {
                 return;
             }
 
-            var pwd = SessionState.PSVariable.GetValue("pwd") ?? "";
-            System.Environment.CurrentDirectory = pwd.ToString();
+            System.Environment.CurrentDirectory = (SessionState.PSVariable.GetValue("pwd") ?? "").ToString();
 
             var replacements =Overrides != null ? Overrides.Keys.Cast<object>().ToDictionary(k => new Regex(k.ToString(), RegexOptions.Compiled | RegexOptions.IgnoreCase), k => Overrides[k].ToString()) : new Dictionary<Regex, string>();
 
@@ -66,13 +67,16 @@ namespace CoApp.Powershell.Commands {
                         throw new ClrPlusException("Source file '{0}' does not have a .vcxproj extension.".format(SourceFile));
                     }
 
+                    if(Force && File.Exists(OutputFile)) {
+                        OutputFile.TryHardToDelete();
+                    }
+                    
                     if (File.Exists(OutputFile)) {
 #if DEBUG
                         OutputFile.TryHardToDelete();
-#else 
-                    throw new ClrPlusException("Destination file '{0}' already exists.".format(OutputFile));
+#else
+                        throw new ClrPlusException("Destination file '{0}' already exists.".format(OutputFile));
 #endif
-
                     }
 
                     var text = System.IO.File.ReadAllText(SourceFile);
@@ -90,15 +94,13 @@ namespace CoApp.Powershell.Commands {
 
                     File.WriteAllText(tmpFile, text);
 
-                    var msbuild = Path.Combine(BuildScript.DotNetFrameworkFolder, "msbuild.exe");
+                    var msbuild = Path.Combine(EnvironmentUtility.DotNetFrameworkFolder, "msbuild.exe");
 
                     var proc = AsyncProcess.Start(
                         new ProcessStartInfo(msbuild, "/pp /p:Configuration=Debug;Platform=Win32 {0}".format(tmpFile)) {
                             WindowStyle = ProcessWindowStyle.Normal,
                         });
                     proc.WaitForExit();
-
-                    text = "";
 
                     // get the processed script.
                     text = proc.StandardOutput.Aggregate((c, e) => c + "\r\n" + e);
@@ -115,8 +117,6 @@ namespace CoApp.Powershell.Commands {
                     Environment.CurrentDirectory = originalProjectFolder;
 
                     project = new Project(OutputFile);
-
-                    
 
                     doc.CopyItemsToProject(project, outputFolder, "ClCompile", "C Source Files");
                     doc.CopyItemsToProject(project, outputFolder, "ResourceCompile", "Resource Files");
@@ -155,9 +155,17 @@ namespace CoApp.Powershell.Commands {
                         conditionedConfigurations.Where(each => each.IsStatic).ProcessConfiguration(project, "$(IS_STATIC) Or $(IS_LTCG)", outputFolder);
                         conditionedConfigurations.Where(each => each.IsDynamic).ProcessConfiguration(project, "$(IS_DYNAMIC)", outputFolder);
 
+                        // conditionedConfigurations.Where(each => !each.IsStatic && each.IsLibrary).ProcessConfiguration(project, "$(IS_DYNAMIC) And $(IS_LIBRARY)", outputFolder);
+                        // conditionedConfigurations.Where(each => !each.IsDynamic && each.IsLibrary).ProcessConfiguration(project, "($(IS_STATIC) Or $(IS_LTCG)) And $(IS_LIBRARY)", outputFolder);
+
                         conditionedConfigurations.Where(each => each.IsLibrary).ProcessConfiguration(project, "", outputFolder);
                         conditionedConfigurations.Where(each => each.IsApplication).ProcessConfiguration(project, "", outputFolder);
 
+                        // if this is an app, set the configuration type.
+                        if (conditionedConfigurations.Any(each => each.IsApplication)) {
+                            var pgpe = project.FindOrCreatePropertyGroup("ConfigurationSettings");
+                            pgpe.Properties.FirstOrDefault(each => each.Name == "ConfigurationType").Value = "Application";
+                        }
 
                         // now do the referenced variables
                         

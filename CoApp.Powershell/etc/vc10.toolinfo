@@ -1,10 +1,12 @@
 ﻿
 VC_V100_WIN32 { 
 	.SetEnvironmentFromTarget.Target = "VC_V100_X86";
+    .Error.Condition = !$(IsEnvironmentValid);
 };
 
 VC_V100_AMD64 {
 	.SetEnvironmentFromTarget.Target = "VC_V100_X64";
+    .Error.Condition = !$(IsEnvironmentValid);
 };
 
 VC_V100_X64 {

@@ -10,6 +10,9 @@
     <ConfigurationType Condition="'$(UsesConfigurationType.ToLower())'!='ltcg'">$(UsesConfigurationType)Library</ConfigurationType>
     <ConfigurationType Condition="'$(UsesConfigurationType.ToLower())'=='ltcg'">StaticLibrary</ConfigurationType>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(OverrideConfigurationType)' != '' ">
+    <ConfigurationType>$(OverrideConfigurationType)</ConfigurationType>
+  </PropertyGroup>
   <PropertyGroup>
     <LibName Condition="'|$(LibName)|'=='||'">$(ProjectName)</LibName>
     <UseDebugLibraries Condition="$(Configuration.ToLower().IndexOf('debug'))!=-1">true</UseDebugLibraries>
@@ -18,9 +21,9 @@
     <OutName>$(LibName)$(OutNameSuffix)</OutName>
     <ProjectRootDir Condition="'$(SolutionDir)' != ''">$(SolutionDir)</ProjectRootDir>
     <ProjectRootDir Condition="'$(SolutionDir)' == ''">./</ProjectRootDir>
-    <OutDir>$(ProjectRootDir)Output/$(PlatformToolset)/$(Platform)/$(Configuration)/$(UsesConfigurationType)/$(CallingConvention)/</OutDir>
-    <IntDir>$(ProjectRootDir)Intermediate/$(ProjectName)/$(PlatformToolset)/$(Platform)/$(Configuration)/$(UsesConfigurationType)/$(CallingConvention)/</IntDir>
     <TargetName>$(OutName)</TargetName>
+    <OutDir>$(ProjectRootDir)Output/$(PlatformToolset)/$(Platform)/$(Configuration)/$(UsesConfigurationType)/$(CallingConvention)/</OutDir>
+    <IntDir>$(ProjectRootDir)Intermediate/$(TargetName)/$(PlatformToolset)/$(Platform)/$(Configuration)/$(UsesConfigurationType)/$(CallingConvention)/</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup>
     <ClCompile>

@@ -385,11 +385,18 @@ function New-VCProject {
     [ValidateNotNullOrEmpty()]
     [string] $OutputPath
     )
+    
+    $oldpwd = [System.Environment]::CurrentDirectory
+    [System.Environment]::CurrentDirectory = $pwd
+
+
     $hasext = ($OutputPath.ToLower().EndsWith("vcxproj"))
 
     if( $hasext -eq $false ) {
        $OutputPath = $OutputPath + ".vcxproj"
     }
+
+    $OutputPath = [System.IO.Path]::GetFullPath( $OutputPath )
 
     $exists = Test-Path $OutputPath
     if ($exists -eq $true)
@@ -397,9 +404,17 @@ function New-VCProject {
       throw "project file exists: $OutputPath"
     }
 
-    mkdir (split-path $OutputPath)
+    $OutputDir = (split-path $OutputPath)
+    
+    $exists  = Test-Path $OutputDir 
+    
+    if ($exists -eq $false)
+    {more 
+      mkdir $OutputDir
+    }
 
     copy-item (((get-itemproperty  HKLM:\SOFTWARE\Outercurve\CoApp.Powershell\etc ).'(default)').Trim('/').Trim('\') + '\template-project.vcxproj' ) $OutputPath
+    [System.Environment]::CurrentDirectory = $oldpwd
 }
 
 function New-BuildInfo { 
@@ -408,6 +423,8 @@ function New-BuildInfo {
         [ValidateNotNullOrEmpty()]
         [string[]] $VCProjects
     )
+    $oldpwd = [System.Environment]::CurrentDirectory
+    [System.Environment]::CurrentDirectory = $pwd
 
     $exists = Test-Path ".buildinfo"
     if ($exists -eq $true)
@@ -416,12 +433,12 @@ function New-BuildInfo {
     }
 
     $projs = ""
-
+    
     foreach ($proj in $VCProjects) {
         $files = ls $proj
         foreach( $file in $files ) {
             $loc = [CoAppUtils.PathUtil]::RelativePathTo(  $PWD.Path , $file.FullName )
-            $projs = $projs +$loc + ","
+            $projs = $projs +$loc + "\r\n        ,"
         }
     }
 
@@ -435,6 +452,7 @@ function New-BuildInfo {
     set-content -Path ".buildinfo" -Value $templ.Replace("===PROJECTS===",$projs).Trim(",")
     
     Write-Host Generated .buildinfo file.
+    [System.Environment]::CurrentDirectory = $oldpwd
 }
 
 New-Alias -Name ptk -Value Invoke-Build 

@@ -9,10 +9,12 @@ VC_V110_X64 {
 
 VC_V110_WIN32 { 
     .SetEnvironmentFromTarget.Target = "VC_V110_X86";
+    .Error.Condition = !$(IsEnvironmentValid);
 };
 
 VC_V110_AMD64 {
     .SetEnvironmentFromTarget.Target = "VC_V110_X64";
+    .Error.Condition = !$(IsEnvironmentValid);
 };
 
 VC_V110_X86 {

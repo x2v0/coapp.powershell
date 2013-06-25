@@ -11,6 +11,7 @@
 //-----------------------------------------------------------------------
 
 namespace CoApp.Powershell.Commands {
+    using System;
     using System.IO;
     using System.Linq;
     using System.Management.Automation;
@@ -44,6 +45,9 @@ namespace CoApp.Powershell.Commands {
         public string[] Defines {get;set;}
 
         [Parameter]
+        public int MaxThreads {get;set;}
+
+        [Parameter]
         public SwitchParameter SaveScript {
             get;
             set;
@@ -54,6 +58,15 @@ namespace CoApp.Powershell.Commands {
             get;
             set;
         }
+
+        protected override void StopProcessing() {
+            // user pressed ctrl-c
+            if (buildScript != null) {
+                buildScript.Stop();
+            }
+        }
+
+        private BuildScript buildScript;
 
         protected override void BeginProcessing() {
             if (Remote) {
@@ -78,7 +91,7 @@ namespace CoApp.Powershell.Commands {
                 using (var local = LocalEventSource) {
                     local.Events += new SourceError((code, location, message, objects) => {
                         location = location.IsNullOrEmpty() ? SourceLocation.Unknowns : location;
-                        Host.UI.WriteErrorLine("{0}:Error {1}:{2}".format(location.FirstOrDefault(), code, message.format(objects)));
+                        Host.UI.WriteErrorLine("{0}:{1}:{2}".format(location.FirstOrDefault(), code, message.format(objects)));
                         return true;
                     });
 
@@ -94,7 +107,7 @@ namespace CoApp.Powershell.Commands {
                         return false;
                     });
 
-                    using (var buildScript = new BuildScript(ScriptFile)) {
+                    using (buildScript = new BuildScript(ScriptFile)) {
                         if (Defines != null) {
                             foreach (var i in Defines) {
                                 var p = i.IndexOf("=");
@@ -125,10 +138,11 @@ namespace CoApp.Powershell.Commands {
                         if (DumpScript) {
                             WriteObject(buildScript.ScriptText());
                             return;
-                        } 
+                        }
 
+                        Environment.SetEnvironmentVariable("MaxThreads", ""+MaxThreads);
+                        buildScript.MaxThreads = MaxThreads;
                         buildScript.Execute(Targets);
-                        
                     }
                 }
             }

@@ -3,21 +3,56 @@
 @import vc10.toolinfo;
 
 PlatformToolsets : {
-	V110, V100, V120
+    V110, V100, V120
 };
 
 Architectures : {
-	Win32, x64
+    Win32, x64
 };
 
 ReleaseOrDebug : {
-	Release, Debug
+    Release, Debug
 };
 
 Linkage : {
-	Dynamic, Static, ltcg
+    Dynamic, Static, ltcg
 };
 
 default {
-
+    // this simply forces the default task to exist even if it isn't declared.
+    CoAppToolsVersion = 1.8;
 };
+
+buildpackage {
+    .Message.Text = "Building NuGet Packages.";
+    .WriteNugetPackage.Package = "$(MSBuildThisFileDirectory)\${ProjectName}.autopkg";
+}
+
+publishpackage {
+    DependsOnTargets = publishpackage;
+    
+    .Message.Text = "Pushing NuGet Packages to server using stored credentials.";
+    .Nuget.Push = "%(MainPackages.Identity)";
+    .Nuget.Push = "%(RedistPackages.Identity)";
+    
+    .Message.Text = "Hiding Redist Packages ...";
+    .Nuget.Delete = "%(RedistPackages.pkgIdentity)";
+};
+
+
+clean {
+    .RemoveDir.Directories = @"intermediate";
+};
+
+nuke {
+    .RemoveDir.Directories = @"output";
+    .RemoveDir.Directories = @"intermediate";
+};
+
+build {
+    DependsOnTargets = default;
+};
+
+publish {
+    DependsOnTargets = "build;publishpackage";
+}
