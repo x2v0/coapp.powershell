@@ -119,6 +119,7 @@ namespace CoApp.Powershell.Commands {
                     project = new Project(OutputFile);
 
                     doc.CopyItemsToProject(project, outputFolder, "ClCompile", "C Source Files");
+                    doc.CopyItemsToProject(project, outputFolder, "ClInclude", "C Header Files");
                     doc.CopyItemsToProject(project, outputFolder, "ResourceCompile", "Resource Files");
 
                     using (var local = CurrentTask.Local.Events) {
@@ -163,7 +164,7 @@ namespace CoApp.Powershell.Commands {
 
                         // if this is an app, set the configuration type.
                         if (conditionedConfigurations.Any(each => each.IsApplication)) {
-                            var pgpe = project.FindOrCreatePropertyGroup("ConfigurationSettings");
+                            var pgpe = project.FindOrCreatePropertyGroup("Globals");
                             pgpe.Properties.FirstOrDefault(each => each.Name == "ConfigurationType").Value = "Application";
                         }
 
@@ -201,6 +202,11 @@ namespace CoApp.Powershell.Commands {
                         }
 
                     }
+
+                    project.FindOrCreateItemGroup("C Source Files").Label = "";
+                    project.FindOrCreateItemGroup("C Header Files").Label = "";
+                    project.FindOrCreateItemGroup("Resource Files").Label = "";
+    
 
                     project.Save();
                 } finally {
@@ -432,7 +438,7 @@ namespace CoApp.Powershell.Commands {
 
         public static void ProcessConfiguration(this IEnumerable<Configuration> configurations, Project project, string conditionToApply, string outputFolder) {
             
-            var pgpe = project.FindOrCreatePropertyGroup("ConfigurationSettings");
+            var pgpe = project.FindOrCreatePropertyGroup("Globals");
             var cfgs = configurations.ToArray();
 
             cfgs.ProcessPathPropertyList(project, conditionToApply, pgpe, "IncludeDirectories", "ClCompile", "AdditionalIncludeDirectories", outputFolder);

@@ -3,4 +3,13 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
 
   <Import Project="$(MSBuildProjectDirectory)\dependencies.targets" Condition="exists('$(MSBuildProjectDirectory)\dependencies.targets')"/>
+
+  <Import Project="$(MSBuildThisFileDirectory)\common-overrides.vcxproj" Condition="'$(BuildingProject)' == 'true' AND '$(BuildingInsideVisualStudio)' == 'true' AND '$(UsePTKFromVisualStudio)' == 'true'"/>
+
+  <ItemDefinitionGroup>
+    <Link>
+      <AdditionalLibraryDirectories>$(OutDir);$(LibraryDirectories);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Link>
+  </ItemDefinitionGroup>
+  
 </Project>

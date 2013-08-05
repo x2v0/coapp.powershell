@@ -17,7 +17,6 @@
     <LibName Condition="'|$(LibName)|'=='||'">$(ProjectName)</LibName>
     <UseDebugLibraries Condition="$(Configuration.ToLower().IndexOf('debug'))!=-1">true</UseDebugLibraries>
     <UseDebugLibraries Condition="$(Configuration.ToLower().IndexOf('debug'))==-1">false</UseDebugLibraries>
-    <OutNameSuffix></OutNameSuffix>
     <OutName>$(LibName)$(OutNameSuffix)</OutName>
     <ProjectRootDir Condition="'$(SolutionDir)' != ''">$(SolutionDir)</ProjectRootDir>
     <ProjectRootDir Condition="'$(SolutionDir)' == ''">./</ProjectRootDir>
@@ -66,6 +65,7 @@
     <Message Text="*  UsesConfigurationType  :  '$(UsesConfigurationType)'" Importance="high" />
     <Message Text="*  CallingConvention      :  '$(CallingConvention)'" Importance="high" />
     <Message Text="*******************************************************************************" Importance="high" />
+    <Message Importance="high" Text="Building in vs?: '$(BuildingInsideVisualStudio)'/'$(VisualStudioVersion)'" />
     <MakeDir Directories="$(OutDir);$(IntDir);$(TargetDir)"/>
   </Target>
 </Project>

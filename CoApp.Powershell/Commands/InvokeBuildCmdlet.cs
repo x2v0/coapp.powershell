@@ -68,6 +68,11 @@ namespace CoApp.Powershell.Commands {
 
         private BuildScript buildScript;
 
+        private static string[] filterMessages = new[] {
+            "due to false condition", "Environment Variables passed to tool"
+        };
+
+
         protected override void BeginProcessing() {
             if (Remote) {
                 ProcessRecordViaRest();
@@ -104,6 +109,48 @@ namespace CoApp.Powershell.Commands {
 
                     local.Events += new SourceDebug((code, location, message, objects) => {
                         WriteVerbose(message);
+                        return false;
+                    });
+
+                    local.Events += new MSBuildMessage((obj) => {
+                        switch (obj.EventType) {
+
+                            case "BuildWarning":
+                                if (!NoWarnings) {
+                                    Host.UI.WriteLine("{0}:{1}:{2}".format(obj.File, obj.Code, obj.Message));
+                                }
+                                break;
+
+                            case "BuildError":
+                                Host.UI.WriteErrorLine("{0}:{1}:{2}".format(obj.File, obj.Code, obj.Message));
+                             
+                                break;
+
+                            case "ProjectStarted":
+                            case "ProjectFinished":
+                            case "TaskStarted":
+                            case "TaskFinished":
+                            case "TargetStarted":
+                            case "TargetFinished":
+                            case "BuildStarted":
+                            case "BuildFinished":
+                                WriteVerbose(obj.Message);
+                                break;
+
+                            case "BuildMessage":
+                                if (filterMessages.Any(each => obj.Message.IndexOf(each) > -1)) {
+                                    WriteVerbose(obj.Message);
+                                }
+                                else {
+                                    Host.UI.WriteLine(obj.Message);
+                                }
+
+                                break;
+
+                            default:
+                                WriteVerbose(obj.Message);
+                                break;
+                        }
                         return false;
                     });
 

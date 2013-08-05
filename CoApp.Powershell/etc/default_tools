@@ -18,6 +18,7 @@ Linkage : {
     Dynamic, Static, ltcg
 };
 
+
 default {
     // this simply forces the default task to exist even if it isn't declared.
     CoAppToolsVersion = 1.8;
@@ -45,12 +46,12 @@ publish {
 };
 
 clean {
-    .RemoveDir.Directories = @"intermediate";
+    .Remove.Directories = @"intermediate";
 };
 
 nuke {
-    .RemoveDir.Directories = @"output";
-    .RemoveDir.Directories = @"intermediate";
+    .Remove.Directories = @"output";
+    .Remove.Directories = @"intermediate";
 };
 
 build {

@@ -389,7 +389,6 @@ function New-VCProject {
     $oldpwd = [System.Environment]::CurrentDirectory
     [System.Environment]::CurrentDirectory = $pwd
 
-
     $hasext = ($OutputPath.ToLower().EndsWith("vcxproj"))
 
     if( $hasext -eq $false ) {
@@ -409,11 +408,14 @@ function New-VCProject {
     $exists  = Test-Path $OutputDir 
     
     if ($exists -eq $false)
-    {more 
+    {
       mkdir $OutputDir
     }
 
-    copy-item (((get-itemproperty  HKLM:\SOFTWARE\Outercurve\CoApp.Powershell\etc ).'(default)').Trim('/').Trim('\') + '\template-project.vcxproj' ) $OutputPath
+    $templ = Get-Content (((get-itemproperty  HKLM:\SOFTWARE\Outercurve\CoApp.Powershell\etc ).'(default)').Trim('/').Trim('\') + '\template-project.vcxproj' ) 
+    set-content -Path $OutputPath -Value $templ.Replace("===NEWGUID===", ( [System.Guid]::NewGuid() ).ToString("B") )
+
+    # copy-item (((get-itemproperty  HKLM:\SOFTWARE\Outercurve\CoApp.Powershell\etc ).'(default)').Trim('/').Trim('\') + '\template-project.vcxproj' ) $OutputPath
     [System.Environment]::CurrentDirectory = $oldpwd
 }
 
@@ -438,7 +440,7 @@ function New-BuildInfo {
         $files = ls $proj
         foreach( $file in $files ) {
             $loc = [CoAppUtils.PathUtil]::RelativePathTo(  $PWD.Path , $file.FullName )
-            $projs = $projs +$loc + "\r\n        ,"
+            $projs = $projs +"`r`n        "+$loc  + ","
         }
     }
 

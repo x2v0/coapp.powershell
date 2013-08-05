@@ -93,6 +93,8 @@
   <UsingTask AssemblyFile="$(ExtensionTasksPath)CoApp.Powershell.Tools.dll" TaskName="ClrPlus.Scripting.MsBuild.Building.Tasks.NuGet"/>
   <UsingTask AssemblyFile="$(ExtensionTasksPath)CoApp.Powershell.Tools.dll" TaskName="ClrPlus.Scripting.MsBuild.Building.Tasks.MsBuildEx"/>
   <UsingTask AssemblyFile="$(ExtensionTasksPath)CoApp.Powershell.Tools.dll" TaskName="ClrPlus.Scripting.MsBuild.Building.Tasks.WaitForTasks"/>
+  <UsingTask AssemblyFile="$(ExtensionTasksPath)CoApp.Powershell.Tools.dll" TaskName="ClrPlus.Scripting.MsBuild.Building.Tasks.InvokeBuild"/>
+  <UsingTask AssemblyFile="$(ExtensionTasksPath)CoApp.Powershell.Tools.dll" TaskName="ClrPlus.Scripting.MsBuild.Building.Tasks.Remove"/>
 
   <!-- ============== Git ============== -->
   <UsingTask AssemblyFile="$(ExtensionTasksPath)CoApp.Powershell.Tools.dll" TaskName="MSBuild.ExtensionPack.Git.Clone"/>

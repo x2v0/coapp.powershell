@@ -1,0 +1,37 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Target Name="Build" >
+    <PropertyGroup>
+        <BuildingInsideVisualStudio>false</BuildingInsideVisualStudio>
+        <MSBuildLoadMicrosoftTargetsReadOnly>true</MSBuildLoadMicrosoftTargetsReadOnly>
+    </PropertyGroup>
+    <MSBuild.ExtensionPack.Computer.EnvironmentVariable TaskAction="Set" Variable="MSBuildLoadMicrosoftTargetsReadOnly " Value="true" />
+    <MSBuild.ExtensionPack.Computer.EnvironmentVariable TaskAction="Set" Variable="BuildingInsideVisualStudio " Value="false" />
+    
+    <InvokeBuild Location="$(MSBuildProjectDirectory)" Targets="default" />
+  </Target>
+
+  <Target Name="Clean"  >
+    <PropertyGroup>
+      <BuildingInsideVisualStudio>false</BuildingInsideVisualStudio>
+      <MSBuildLoadMicrosoftTargetsReadOnly>true</MSBuildLoadMicrosoftTargetsReadOnly>
+    </PropertyGroup>
+    <MSBuild.ExtensionPack.Computer.EnvironmentVariable TaskAction="Set" Variable="MSBuildLoadMicrosoftTargetsReadOnly " Value="true" />
+    <MSBuild.ExtensionPack.Computer.EnvironmentVariable TaskAction="Set" Variable="BuildingInsideVisualStudio " Value="false" />
+    
+    <InvokeBuild Location="$(MSBuildProjectDirectory)" Targets="nuke" />
+    <MSBuild.ExtensionPack.Computer.EnvironmentVariable TaskAction="Set" Variable="MSBuildLoadMicrosoftTargetsReadOnly " Value="false" />
+  </Target>
+
+  <Target Name="Rebuild" >
+    <PropertyGroup>
+      <BuildingInsideVisualStudio>false</BuildingInsideVisualStudio>
+      <MSBuildLoadMicrosoftTargetsReadOnly>true</MSBuildLoadMicrosoftTargetsReadOnly>
+    </PropertyGroup>
+    <MSBuild.ExtensionPack.Computer.EnvironmentVariable TaskAction="Set" Variable="MSBuildLoadMicrosoftTargetsReadOnly " Value="true" />
+    <MSBuild.ExtensionPack.Computer.EnvironmentVariable TaskAction="Set" Variable="BuildingInsideVisualStudio " Value="false" />
+     
+    <InvokeBuild Location="$(MSBuildProjectDirectory)" Targets="nuke;default" />
+    <MSBuild.ExtensionPack.Computer.EnvironmentVariable TaskAction="Set" Variable="MSBuildLoadMicrosoftTargetsReadOnly " Value="false" />
+  </Target>
+</Project>

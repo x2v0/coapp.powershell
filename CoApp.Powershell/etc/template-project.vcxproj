@@ -2,12 +2,24 @@
 <Project DefaultTargets="PreBuildCmds;PreBuildTargets;Build;PostBuildCmds;PostBuildTargets" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup Label="CoApp" >
     <CoAppEtcDirectory>$(registry:HKEY_LOCAL_MACHINE\Software\Outercurve\CoApp.Powershell\etc)</CoAppEtcDirectory>
+    
+    <!-- Set to true to make visual studio use PTK when building.-->
+    <UsePTKFromVisualStudio>false</UsePTKFromVisualStudio>
   </PropertyGroup>
-  
+
+  <PropertyGroup Label="Configuration" >
+    <!-- This lets Visual Studio see this as a VC11 project by default -->
+    <PlatformToolset Condition="'$(PlatformToolset)' == ''">v110</PlatformToolset>
+  </PropertyGroup>
+
   <Import Condition="Exists('$(CoAppEtcDirectory)\common-variables.vcxproj')" Project="$(CoAppEtcDirectory)\common-variables.vcxproj" />
+  
   <PropertyGroup Label="CustomSettings" />
   
-  <PropertyGroup Label="ConfigurationSettings">
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>===NEWGUID===</ProjectGuid>
+    <RootNamespace>$(MSBuildProjectName)</RootNamespace>
+    
     <!-- set to Application or DynamicLibrary (DynamicLibrary can get altered to StaticLibrary by PTK -->
     <ConfigurationType>DynamicLibrary</ConfigurationType>
 
