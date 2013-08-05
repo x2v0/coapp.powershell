@@ -66,7 +66,7 @@ namespace CoApp.Powershell.Commands {
                 ProcessRecordViaRest();
                 return;
             }
-             
+
             ProviderInfo packagePathProviderInfo;
             var pkgPath = SessionState.Path.GetResolvedProviderPathFromPSPath(Package, out packagePathProviderInfo);
 
