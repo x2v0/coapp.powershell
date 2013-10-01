@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
-  <Product Id="*" Name="CoApp.Powershell (v1.23.583.0)" Language="1033" Version="1.23.583.0" Manufacturer="Outercurve Foundation, CoApp Project" UpgradeCode="a43c25d7-b22a-411c-b780-3a83479b1d26">
+  <Product Id="*" Name="CoApp.Powershell (v2.4.119.0)" Language="1033" Version="2.4.119.0" Manufacturer="Outercurve Foundation, CoApp Project" UpgradeCode="a43c25d7-b22a-411c-b780-3a83479b1d26">
 
     <Package Description="CoApp Developer Tools" InstallPrivileges="elevated" Comments="CoApp Developer Tools Installer" InstallerVersion="200" Compressed="yes"></Package>
 
     <Upgrade Id="a43c25d7-b22a-411c-b780-3a83479b1d26">
-      <UpgradeVersion OnlyDetect="no" Property="PREVIOUSFOUND" Minimum="1.0.0" IncludeMinimum="yes" Maximum="1.23.583.0" IncludeMaximum="no"></UpgradeVersion>
+      <UpgradeVersion OnlyDetect="no" Property="PREVIOUSFOUND" Minimum="1.0.0" IncludeMinimum="yes" Maximum="2.4.119.0" IncludeMaximum="no"></UpgradeVersion>
     </Upgrade>
 
     <WixVariable Id="WixUILicenseRtf" Value="License.rtf"></WixVariable>
@@ -37,6 +37,8 @@
         <File Source="$(var.SolutionDir)\output\v40\AnyCPU\$(var.Configuration)\bin\CoApp.Powershell.Tools.dll" />
         <File Source="$(var.SolutionDir)\output\v40\AnyCPU\$(var.Configuration)\bin\CoApp.Powershell.Tools.dll-help.xml" />
         <File Source="$(var.SolutionDir)\output\v40\AnyCPU\$(var.Configuration)\bin\CoApp.psd1"/>
+        
+        
         <RegistryValue Root="HKLM" Key="Software\Outercurve\CoApp.Powershell\etc" Value="[INSTALLFOLDER]CoApp\etc/" Type="string" Action="write" />
       </Component>
 
@@ -62,6 +64,9 @@
         <File Source="$(var.SolutionDir)\output\v40\AnyCPU\$(var.Configuration)\bin\etc\common-overrides.vcxproj"/>
         <File Source="$(var.SolutionDir)\output\v40\AnyCPU\$(var.Configuration)\bin\etc\template-project.vcxproj"/>
         <File Source="$(var.SolutionDir)\output\v40\AnyCPU\$(var.Configuration)\bin\etc\buildinfo-template"/>
+
+        <File Source="$(var.SolutionDir)\output\v40\AnyCPU\$(var.Configuration)\bin\etc\CoApp.NuGetNativeMSBuildTasks.dll"/>
+        <File Source="$(var.SolutionDir)\output\v40\AnyCPU\$(var.Configuration)\bin\etc\CoApp.NuGetNativeExtensions.dll"/>
       </Component>
     </ComponentGroup>
 

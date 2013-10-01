@@ -1,0 +1,197 @@
+@import "version.inc" ;
+
+#define {
+    next-version: "${version++}";
+};
+
+
+#product-info {
+    product-name: "clrplus";
+    version: "${version}";
+    original-source-location: "git@github.com:perpetual-motion/clrplus.git";
+    original-source-website: "https://github.com/perpetual-motion/clrplus";
+    license: "Apache2.0";
+    packager: "garrett serack <garretts@microsoft.com>";
+}
+
+set-version { 
+    compiler:vc11;
+    build-command: @"
+        REM REQUIRES NODE.JS 
+        REM REQUIRES npm -g replace
+        
+        call replace.cmd ""version: .*;"" ""version: ${new-version};"" copkg\version.inc
+        call replace.cmd ""\[assembly: AssemblyVersion.*"" ""[assembly: AssemblyVersion(""""${new-version}"""")]"" common\assemblystrongname.cs
+        call replace.cmd ""\[assembly: AssemblyFileVersion.*"" ""[assembly: AssemblyFileVersion(""""${new-version}"""")]"" common\assemblystrongname.cs
+        for /d %%v in (*) do (for %%z in (%%v\*.nuspec) do call replace.cmd ""<version>.*</version>"" ""<version>${new-version}</version>"" %%z)
+        for /d %%v in (*) do (for %%z in (%%v\*.nuspec) do call replace.cmd ""(id=.ClrPlus.*version=.)(\d*\.\d*\.\d*\.\d*)(.*)"" ""$1${new-version}$3""  %%z)
+        
+        for %%z in (*.nuspec) do call replace.cmd ""<version>.*</version>"" ""<version>${new-version}</version>"" %%z
+        for %%z in (*.nuspec) do call replace.cmd ""(id=.ClrPlus.*version=.)(\d*\.\d*\.\d*\.\d*)(.*)"" ""$1${new-version}$3""  %%z
+    ";
+}
+
+increment-version { 
+    compiler:vc11;
+    build-command: @"
+        ptk set-version --new-version=${next-version} 
+    ";
+}
+
+package {
+    compiler:vc11;
+    build-command: @"
+        ptk build-release           || goto FAILED
+        ptk make-nuget-packages     || goto FAILED
+        ptk increment-version       || goto FAILED
+    ";
+}
+
+publish {
+   compiler:vc11;
+    build-command: @"
+        ptk build-release           || goto FAILED
+        ptk make-nuget-packages     || goto FAILED
+        ptk publish-nuget-packages  || goto FAILED
+        ptk increment-version       || goto FAILED
+    ";
+}
+
+build-release {
+    compiler:vc11;
+    build-command: @"
+        :: Scrub the output directories clean.
+        msbuild /t:Clean ClrPlus.sln /p:Configuration=Release /p:TargetFrameworkVersion=v4.0
+        msbuild /t:Clean ClrPlus.sln /p:Configuration=Release /p:TargetFrameworkVersion=v4.5
+
+        rmdir /s /q output\v40
+        rmdir /s /q output\v45
+        rmdir /s /q intermediate\v40
+        rmdir /s /q intermediate\v45
+        
+        :: Build .NET 4.0 and 4.5 versions
+        msbuild /t:Rebuild ClrPlus.sln /p:Configuration=Release /p:TargetFrameworkVersion=v4.0
+        msbuild /t:Rebuild ClrPlus.sln /p:Configuration=Release /p:TargetFrameworkVersion=v4.5
+        
+        :: Do merges for monolithic packages
+        echo Merging Monolithic builds for .NET 4.0
+        pushd output\v40\AnyCPU\Release\bin
+        
+		
+        ..\..\..\..\..\tools\il-repack.exe /log:merge.log /t:library /xmldocs /targetplatform:v4 /lib:""C:\Program Files (x86)\Reference Assemblies\Microsoft\WindowsPowerShell\3.0"" /out:ClrPlus.Powershell.dll  ClrPlus.Powershell.Rest.dll ServiceStack.Interfaces.dll ClrPlus.Powershell.Azure.dll ServiceStack.ServiceInterface.dll ServiceStack.dll ServiceStack.Common.dll ServiceStack.Text.dll ServiceStack.OrmLite.dll ClrPlus.Core.dll ClrPlus.Scripting.dll ClrPlus.Scripting.MsBuild.dll ClrPlus.Platform.dll ClrPlus.Windows.Api.dll ClrPlus.Powershell.Core.dll || goto failed
+        
+        :: rem skip ClrPlus.Powershell.Azure.dll for now.
+        
+        ..\..\..\..\..\tools\il-repack.exe /log:merge.log /t:library /xmldocs /targetplatform:v4 /lib:""C:\Program Files (x86)\Reference Assemblies\Microsoft\WindowsPowerShell\3.0"" /out:ClrPlus.dll ClrPlus.CommandLine.dll ClrPlus.Console.dll ClrPlus.Core.dll  ClrPlus.Crypto.dll ClrPlus.Networking.dll ClrPlus.Platform.dll ClrPlus.Powershell.Core.dll ClrPlus.Powershell.Provider.dll ClrPlus.Powershell.Rest.dll ClrPlus.Remoting.dll ClrPlus.Scripting.dll ClrPlus.Scripting.MsBuild.dll ClrPlus.Windows.Api.dll ClrPlus.Windows.Debugging.dll ClrPlus.Windows.PeBinary.dll Microsoft.Cci.MetadataHelper.dll Microsoft.Cci.MetadataModel.dll Microsoft.Cci.MutableMetadataModel.dll Microsoft.Cci.PeReader.dll Microsoft.Cci.PeWriter.dll Microsoft.Cci.SourceModel.dll Microsoft.Data.Edm.dll Microsoft.Data.OData.dll Microsoft.WindowsAzure.Storage.dll ServiceStack.Common.dll ServiceStack.dll ServiceStack.Interfaces.dll ServiceStack.OrmLite.dll ServiceStack.ServiceInterface.dll ServiceStack.Text.dll System.Spatial.dll  ClrPlus.Powershell.Azure.dll Microsoft.Threading.Tasks.dll Microsoft.Threading.Tasks.Extensions.dll Microsoft.Threading.Tasks.Extensions.Desktop.dll System.Runtime.dll System.Threading.Tasks.dll || goto failed
+        popd 
+                
+        echo Merging Monolithic builds for .NET 4.5
+        pushd output\v45\AnyCPU\Release\bin
+        
+        ..\..\..\..\..\tools\il-repack.exe /log:merge.log /t:library /xmldocs /targetplatform:v4 /lib:""C:\Program Files (x86)\Reference Assemblies\Microsoft\WindowsPowerShell\3.0"" /out:ClrPlus.Powershell.dll ClrPlus.Powershell.Azure.dll ClrPlus.Powershell.Rest.dll ServiceStack.Interfaces.dll ServiceStack.ServiceInterface.dll ServiceStack.dll ServiceStack.Common.dll ServiceStack.Text.dll ServiceStack.OrmLite.dll ClrPlus.Core.dll ClrPlus.Scripting.dll ClrPlus.Scripting.MsBuild.dll ClrPlus.Platform.dll ClrPlus.Windows.Api.dll ClrPlus.Powershell.Core.dll || goto failed
+        
+        :: rem skip ClrPlus.Powershell.Azure.dll for now.
+        
+        ..\..\..\..\..\tools\il-repack.exe /log:merge.log /t:library /xmldocs /targetplatform:v4 /lib:""C:\Program Files (x86)\Reference Assemblies\Microsoft\WindowsPowerShell\3.0"" /out:ClrPlus.dll ClrPlus.CommandLine.dll ClrPlus.Console.dll ClrPlus.Core.dll  ClrPlus.Crypto.dll ClrPlus.Networking.dll ClrPlus.Platform.dll ClrPlus.Powershell.Core.dll ClrPlus.Powershell.Provider.dll ClrPlus.Powershell.Rest.dll ClrPlus.Remoting.dll ClrPlus.Scripting.dll ClrPlus.Scripting.MsBuild.dll ClrPlus.Windows.Api.dll ClrPlus.Powershell.Azure.dll ClrPlus.Windows.Debugging.dll ClrPlus.Windows.PeBinary.dll Microsoft.Cci.MetadataHelper.dll Microsoft.Cci.MetadataModel.dll Microsoft.Cci.MutableMetadataModel.dll Microsoft.Cci.PeReader.dll Microsoft.Cci.PeWriter.dll Microsoft.Cci.SourceModel.dll Microsoft.Data.Edm.dll Microsoft.Data.OData.dll Microsoft.WindowsAzure.Storage.dll ServiceStack.Common.dll ServiceStack.dll ServiceStack.Interfaces.dll ServiceStack.OrmLite.dll ServiceStack.ServiceInterface.dll ServiceStack.Text.dll System.Spatial.dll  || goto failed
+        popd
+    ";
+}
+
+build-debug {
+    compiler:vc11;
+    build-command: @"
+        :: Scrub the output directories clean.
+        msbuild /t:Clean ClrPlus.sln /p:Configuration=Debug /p:TargetFrameworkVersion=v4.0
+        msbuild /t:Clean ClrPlus.sln /p:Configuration=Debug /p:TargetFrameworkVersion=v4.5
+
+        rmdir /s /q output\v40
+        rmdir /s /q output\v45
+        rmdir /s /q intermediate\v40
+        rmdir /s /q intermediate\v45
+        
+        :: Build .NET 4.0 and 4.5 versions
+        msbuild /t:Rebuild ClrPlus.sln /p:Configuration=Debug /p:TargetFrameworkVersion=v4.0
+        msbuild /t:Rebuild ClrPlus.sln /p:Configuration=Debug /p:TargetFrameworkVersion=v4.5
+        
+        :: Do merges for monolithic packages
+        echo Merging Monolithic builds for .NET 4.0
+        pushd output\v40\AnyCPU\Debug\bin
+        
+        ..\..\..\..\..\tools\il-repack.exe /log:merge.log /t:library /xmldocs /targetplatform:v4 /lib:""C:\Program Files (x86)\Reference Assemblies\Microsoft\WindowsPowerShell\3.0"" /out:ClrPlus.Powershell.dll  ClrPlus.Powershell.Rest.dll ServiceStack.Interfaces.dll ClrPlus.Powershell.Azure.dll ServiceStack.ServiceInterface.dll ServiceStack.dll ServiceStack.Common.dll ServiceStack.Text.dll ServiceStack.OrmLite.dll ClrPlus.Core.dll ClrPlus.Scripting.dll ClrPlus.Scripting.MsBuild.dll ClrPlus.Platform.dll ClrPlus.Windows.Api.dll ClrPlus.Powershell.Core.dll || goto failed
+        
+        :: rem skip ClrPlus.Powershell.Azure.dll for now.
+        
+        ..\..\..\..\..\tools\il-repack.exe /log:merge.log /t:library /xmldocs /targetplatform:v4 /lib:""C:\Program Files (x86)\Reference Assemblies\Microsoft\WindowsPowerShell\3.0"" /out:ClrPlus.dll ClrPlus.CommandLine.dll ClrPlus.Console.dll ClrPlus.Core.dll  ClrPlus.Crypto.dll ClrPlus.Networking.dll ClrPlus.Platform.dll ClrPlus.Powershell.Core.dll ClrPlus.Powershell.Provider.dll ClrPlus.Powershell.Rest.dll ClrPlus.Remoting.dll ClrPlus.Scripting.dll ClrPlus.Scripting.MsBuild.dll ClrPlus.Windows.Api.dll ClrPlus.Windows.Debugging.dll ClrPlus.Windows.PeBinary.dll Microsoft.Cci.MetadataHelper.dll Microsoft.Cci.MetadataModel.dll Microsoft.Cci.MutableMetadataModel.dll Microsoft.Cci.PeReader.dll Microsoft.Cci.PeWriter.dll Microsoft.Cci.SourceModel.dll Microsoft.Data.Edm.dll Microsoft.Data.OData.dll Microsoft.WindowsAzure.Storage.dll ServiceStack.Common.dll ServiceStack.dll ServiceStack.Interfaces.dll ServiceStack.OrmLite.dll ServiceStack.ServiceInterface.dll ServiceStack.Text.dll System.Spatial.dll  ClrPlus.Powershell.Azure.dll Microsoft.Threading.Tasks.dll Microsoft.Threading.Tasks.Extensions.dll Microsoft.Threading.Tasks.Extensions.Desktop.dll System.Runtime.dll System.Threading.Tasks.dll || goto failed
+        popd 
+                
+        echo Merging Monolithic builds for .NET 4.5
+        pushd output\v45\AnyCPU\Debug\bin
+        
+        ..\..\..\..\..\tools\il-repack.exe /log:merge.log /t:library /xmldocs /targetplatform:v4 /lib:""C:\Program Files (x86)\Reference Assemblies\Microsoft\WindowsPowerShell\3.0"" /out:ClrPlus.Powershell.dll ClrPlus.Powershell.Azure.dll ClrPlus.Powershell.Rest.dll ServiceStack.Interfaces.dll ServiceStack.ServiceInterface.dll ServiceStack.dll ServiceStack.Common.dll ServiceStack.Text.dll ServiceStack.OrmLite.dll ClrPlus.Core.dll ClrPlus.Scripting.dll ClrPlus.Scripting.MsBuild.dll ClrPlus.Platform.dll ClrPlus.Windows.Api.dll ClrPlus.Powershell.Core.dll || goto failed
+        
+        :: rem skip ClrPlus.Powershell.Azure.dll for now.
+        
+        ..\..\..\..\..\tools\il-repack.exe /log:merge.log /t:library /xmldocs /targetplatform:v4 /lib:""C:\Program Files (x86)\Reference Assemblies\Microsoft\WindowsPowerShell\3.0"" /out:ClrPlus.dll ClrPlus.CommandLine.dll ClrPlus.Console.dll ClrPlus.Core.dll  ClrPlus.Crypto.dll ClrPlus.Networking.dll ClrPlus.Platform.dll ClrPlus.Powershell.Core.dll ClrPlus.Powershell.Provider.dll ClrPlus.Powershell.Rest.dll ClrPlus.Remoting.dll ClrPlus.Scripting.dll ClrPlus.Scripting.MsBuild.dll ClrPlus.Windows.Api.dll ClrPlus.Powershell.Azure.dll ClrPlus.Windows.Debugging.dll ClrPlus.Windows.PeBinary.dll Microsoft.Cci.MetadataHelper.dll Microsoft.Cci.MetadataModel.dll Microsoft.Cci.MutableMetadataModel.dll Microsoft.Cci.PeReader.dll Microsoft.Cci.PeWriter.dll Microsoft.Cci.SourceModel.dll Microsoft.Data.Edm.dll Microsoft.Data.OData.dll Microsoft.WindowsAzure.Storage.dll ServiceStack.Common.dll ServiceStack.dll ServiceStack.Interfaces.dll ServiceStack.OrmLite.dll ServiceStack.ServiceInterface.dll ServiceStack.Text.dll System.Spatial.dll || goto failed
+        popd
+    ";
+}
+
+
+publish-nuget-packages { 
+    compiler:vc11;
+    build-command: @"
+        nuget push  ClrPlus.Core.${version}.nupkg
+        nuget push  ClrPlus.Windows.Api.${version}.nupkg
+        nuget push  ClrPlus.Platform.${version}.nupkG        
+        nuget push  ClrPlus.CommandLine.${version}.nupkg
+        nuget push  ClrPlus.Console.${version}.nupkg
+        nuget push  ClrPlus.Crypto.${version}.nupkg
+        nuget push  ClrPlus.Networking.${version}.nupkg
+        nuget push  ClrPlus.Remoting.${version}.nupkg
+        nuget push  ClrPlus.Scripting.${version}.nupkg
+        nuget push  ClrPlus.Scripting.MsBuild.${version}.nupkg
+        nuget push  ClrPlus.Windows.Debugging.${version}.nupkg
+        nuget push  ClrPlus.Windows.PeBinary.${version}.nupkg
+        nuget push  ClrPlus.Powershell.Core.${version}.nupkg
+        nuget push  ClrPlus.Powershell.Rest.${version}.nupkg
+        nuget push  ClrPlus.Powershell.Provider.${version}.nupkg
+        nuget push  ClrPlus.Powershell.Azure.${version}.nupkg
+        nuget push  ClrPlus.Powershell.${version}.nupkg
+        nuget push  ClrPlus.${version}.nupkg
+    ";
+}
+
+make-nuget-packages {
+    compiler:vc11;
+    build-command: @"
+        nuget pack  Core\Core.nuspec
+        nuget pack  Windows.Api\Windows.Api.nuspec
+        nuget pack  Platform\Platform.nuspec
+        nuget pack  CommandLine\CommandLine.nuspec
+        nuget pack  Console\Console.nuspec
+        nuget pack  Crypto\Crypto.nuspec
+        nuget pack  Networking\Networking.nuspec
+        nuget pack  Remoting\Remoting.nuspec
+        nuget pack  Scripting\Scripting.nuspec
+        nuget pack  Scripting.MsBuild\Scripting.MsBuild.nuspec
+        nuget pack  Windows.Debugging\Windows.Debugging.nuspec
+        nuget pack  Windows.PeBinary\Windows.PeBinary.nuspec        
+        nuget pack  Powershell.Core\Powershell.Core.nuspec        
+        nuget pack  Powershell.Rest\Powershell.Rest.nuspec        
+        nuget pack  Powershell.Provider\Powershell.Provider.nuspec        
+        nuget pack  Powershell.Azure\Powershell.Azure.nuspec        
+        nuget pack  ClrPlus.Powershell.nuspec   
+        nuget pack  ClrPlus.nuspec  
+    ";
+}
+
+default {
+    default:true;
+    compiler:vc11;
+    
+    clean-command: @"
+        rmdir /s /q output
+        rmdir /s /q intermediate
+        for /d %%v in (*) do (for /d %%z in (%%v\obj*) do rmdir /s /q %%z )
+    ";
+}

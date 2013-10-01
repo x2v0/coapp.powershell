@@ -11,25 +11,69 @@
 //-----------------------------------------------------------------------
 
 namespace CoApp.Powershell.Commands {
+    using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using System.IO;
     using System.IO.Packaging;
     using System.Linq;
     using System.Management.Automation;
     using System.Management.Automation.Runspaces;
+    using System.Reflection;
+    using System.Text.RegularExpressions;
+    using System.Threading;
+    using System.Threading.Tasks;
     using ClrPlus.Core.Exceptions;
     using ClrPlus.Core.Extensions;
     using ClrPlus.Core.Tasks;
+    using ClrPlus.Core.Utility;
+    using ClrPlus.Platform;
+    using ClrPlus.Platform.Process;
     using ClrPlus.Powershell.Core;
     using ClrPlus.Powershell.Rest.Commands;
+    using Microsoft.Build.Tasks;
+    using Microsoft.SqlServer.Server;
+    using Error = ClrPlus.Core.Tasks.Error;
+    using Warning = ClrPlus.Core.Tasks.Warning;
+    using Message = ClrPlus.Core.Tasks.Message;
 
+    internal static class CmdletUtility {
+        internal static string EtcPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "etc");
+
+        static CmdletUtility() {
+            try {
+                var asmDir = Path.GetDirectoryName(typeof (WriteNuGetPackage).Assembly.Location);
+                if (!string.IsNullOrEmpty(asmDir)) {
+                    var path = Environment.GetEnvironmentVariable("path");
+
+                    if (string.IsNullOrEmpty(path) || !path.Contains(asmDir)) {
+                        Environment.SetEnvironmentVariable("path", path + ";" + asmDir + ";" + asmDir + "\\etc");
+                    }
+                }
+            } catch (Exception e) {
+                Console.WriteLine("EXC: {0}/{1}", e.Message, e.StackTrace);
+            }
+
+            AssemblyResolver.Initialize();
+        }
+    }
+    
     [Cmdlet(AllVerbs.Publish, "NuGetPackage")]
     public class PublishNuGetPackage : RestableCmdlet<PublishNuGetPackage> {
+
+        static PublishNuGetPackage() {
+            // ensure that the etc folder is added to the path.
+            var x = CmdletUtility.EtcPath;
+        }
+
+        private Executable _nugetExe;
+
+        private static Regex rx = new Regex(@"(?<name>.*?)(?<variant>\.redist-.*?)?(?<version>[\.\d]+).nupkg");
 
         [Parameter(HelpMessage = "Package files to publish",Mandatory = true, Position = 0)]
         public string[] Packages { get; set;}
 
-        [Parameter(HelpMessage = "The API key for the server.")]
+        [Parameter(HelpMessage = "The API key for the server.", Mandatory = false, Position = 1)]
         public string ApiKey { get; set; }
 
         [Parameter(HelpMessage = @"The NuGet configuration file. If not specified, file %AppData%\NuGet\NuGet.config is used as configuration file.")]
@@ -38,23 +82,64 @@ namespace CoApp.Powershell.Commands {
         [Parameter(HelpMessage = "Specifies the timeout for pushing to a server in seconds. Defaults to 300 seconds (5 minutes).")]
         public int? Timeout { get; set; }
 
-        [Parameter(HelpMessage = "Specifies the server URL. If not specified, https://nuget.gw.symbolsource.org/Public/NuGet is used.")]
-        public string SymbolRepository { get; set; }
+        [Parameter(HelpMessage = "Specifies the server URL. If not specified, nuget.org is used unless DefaultPushSource config value is set in the NuGet config file.")]
+        public string Source { get; set; }
 
-        [Parameter(HelpMessage = "Specifies the symbol server URL. If not specified, nuget.org is used unless DefaultPushSource config value is set in the NuGet config file")]
-        public string Repository { get; set; }
+        [Parameter(HelpMessage = "Display this amount of details in the output: normal, quiet, detailed.")]
+        public string Verbosity { get; set; }
 
-        [Parameter(HelpMessage = "Doesn't automatically upload .redist .nupkg files")]
+        [Parameter(HelpMessage = "Doesn't automatically upload .redist- .nupkg files")]
         public SwitchParameter IgnoreRedist { get; set; }
 
-        [Parameter(HelpMessage = "Doesn't automatically upload .symbols .nupkg files to symbolsource.org")]
-        public SwitchParameter IgnoreSymbols { get; set; }
+        [Parameter(HelpMessage = "Doesn't automatically unlist .redist- .nupkg files")]
+        public SwitchParameter DontUnlistRedist { get; set; }
+
+        [Parameter(HelpMessage = "Don't parallelize the uploads")]
+        public SwitchParameter Slow {get; set;}
+
+        internal class PackageIdentity {
+            internal PackageIdentity(string path) {
+                FullPath = path.GetFullPath();
+                Folder = Path.GetDirectoryName(FullPath);
+                Filename = Path.GetFileName(FullPath);
+                var peices = rx.Match(Filename);
+                ValidName = peices.Success;
+                if (ValidName) {
+                    BaseName = peices.GetValue("name");
+                    Variant = peices.GetValue("variant");
+                    Version = peices.GetValue("version");
+                }
+                Name = IsRedist ? "{0}{1}".format(BaseName, Variant) : BaseName;
+            }
+
+            public string FullPath {get; set;}
+            public string Folder {get; set;}
+            public string Filename { get; set; }
+            public string Name {get; set;}
+            public string BaseName {get; set;}
+            public string Version { get; set; }
+            public string Variant { get; set; }
+            public bool ValidName {get; set;}
+            public bool IsRedist { get {
+                return Variant.Is();
+            }}
+
+            public IEnumerable<PackageIdentity> RedistPackages {
+                get {
+                    return Directory.EnumerateFiles(Folder, "{0}.redist-*{1}.nupkg".format(BaseName, Version), SearchOption.TopDirectoryOnly).Select(redistFile => new PackageIdentity(redistFile));
+                }
+            }
+        }
 
         protected override void ProcessRecord() {
             if (Remote) {
                 ProcessRecordViaRest();
                 return;
             }
+
+            System.Environment.CurrentDirectory = (SessionState.PSVariable.GetValue("pwd") ?? "").ToString();
+            _nugetExe = new Executable("nuget.exe");
+
             using (var local = LocalEventSource) {
                 var pkgPaths = new List<string>();
                 foreach (var pkg in Packages) {
@@ -68,110 +153,155 @@ namespace CoApp.Powershell.Commands {
                     }
                 }
 
+                var tasks = new Dictionary<Task<IEnumerable<string>>,PackageIdentity>();
+
                 foreach (var file in pkgPaths) {
                     var extension = Path.GetExtension(file) ?? "";
                     if (extension.ToLower() != ".nupkg") {
                         Event<Warning>.Raise("PublishNuGetPackage", "Skipping unknown file ('{0}') with unrecognized extension ('{1}')", file, extension);
                         continue;
                     }
+                    var pid = new PackageIdentity(file);
 
-                    var folder = Path.GetDirectoryName(file);
-                    var name = Path.GetFileName(file);
-                    var justname = Path.GetFileNameWithoutExtension(file);
-                    string redist = null;
-                    string symbols = null;
-
-
-                    var bits = name.Split('.');
-                    for (int i = 1; i < bits.Length; i++) {
-                        if (!IgnoreRedist) {
-                            var fname = string.Format("{0}.redist.{1}", bits.Take(i).Aggregate((c, e) => c + "." + e), i < (bits.Length) ? bits.Skip(i).Aggregate((c, e) => c + "." + e) : "");
-                            var fullPath = Path.Combine(folder, fname);
-                            if (File.Exists(fullPath)) {
-                                redist = fullPath;
-                            }
-                        }
-
-                        if (!IgnoreRedist) {
-                            var fname = string.Format("{0}.symbols.{1}", bits.Take(i).Aggregate((c, e) => c + "." + e), i < (bits.Length) ? bits.Skip(i).Aggregate((c, e) => c + "." + e) : "");
-                            var fullPath = Path.Combine(folder, fname);
-                            if (File.Exists(fullPath)) {
-                                symbols = fullPath;
-                            }
-                        }
+                    if (!pid.ValidName) {
+                        Event<Error>.Raise("PublishNuGetPackage", "Unable to parse nuget package name '{0}'.", pid.Filename);
+                        continue;
                     }
 
-                    if (!IgnoreRedist && redist == null) {
-                        Event<Warning>.Raise("PublishNuGetPackage", "No redist package found for ('{0}').", file);
-                    }
-
-                    if(!IgnoreSymbols&& symbols == null) {
-                        Event<Warning>.Raise("PublishNuGetPackage", "No symbols package found for ('{0}').", file);
+                    if (!pid.IsRedist && !IgnoreRedist) {
+                        // check for redist packages for this package 
+                        foreach (var redist in pid.RedistPackages) {
+                            var redistPkg = redist;
+                            Event<Verbose>.Raise("PublishNuGetPackage", "Pushing redist file {0}.", redist.Name );
+                            tasks.Add(NuPush(redistPkg), redistPkg);
+                        }
                     }
 
                     Event<Verbose>.Raise("PublishNuGetPackage", "Pushing package file {0}.", file);
-                    NuPush(file, Repository);
+                    tasks.Add(NuPush(pid), pid);
+                }
 
-                    if (!IgnoreRedist && redist != null) {
-                        Event<Verbose>.Raise("PublishNuGetPackage", "Pushing redist file {0}.", redist);
-                        NuPush(redist, Repository);
+                float total = tasks.Count;
+                float n = 1;
+
+                WriteProgress(new ProgressRecord(1, "Uploading {0} packages to server ".format(total), "Starting") { PercentComplete = 0 });
+
+
+                while (tasks.Any()) {
+                    var tsks = tasks.Keys.ToArray();
+                    Task.WaitAny(tsks);
+                    foreach (var t in tsks) {
+                        if (t.IsCompleted) {
+                            var pid = tasks[t];
+                            foreach (var r in t.Result.ToArray()) {
+                                Host.UI.WriteLine(" > " + r);
+                            }
+                            tasks.Remove(t);
+                            
+                            WriteProgress(new ProgressRecord(1, "Uploading {0} packages to server ".format(total), "Completed package '{0}' [{1}/{2}]".format( pid.Name,n,total )) { PercentComplete =(int) ((n/total) * 100) });
+                            n++;
+                        }
                     }
+                }
 
-                    if (!IgnoreSymbols && symbols != null ) {
-                        Event<Verbose>.Raise("PublishNuGetPackage", "Pushing symbols file {0}.", symbols);
-                        NuPush(symbols, SymbolRepository.Is() ? SymbolRepository : "https://nuget.gw.symbolsource.org/Public/NuGet");
+                 WriteProgress(new ProgressRecord(1, "Uploaded {0} packages to server ".format(total), "Complete") { PercentComplete = 100 });
+            }
+        }
+
+        private static Mutex mut = new Mutex();
+
+        internal Task<IEnumerable<string>>  NuPush(PackageIdentity package) {
+            return Task<IEnumerable<string>>.Factory.StartNew(() => {
+                if (Slow) {
+                    mut.WaitOne();
+                }
+                var results = NuPushImpl(package.FullPath);
+                if (!DontUnlistRedist && package.IsRedist) {
+                    results = results.Concat(NuUnlistImpl(package.Name, package.Version.Trim('.')));
+                }
+                results = results.ToArray();
+                if (Slow) {
+                    mut.ReleaseMutex();
+                }
+                return results;
+            }, TaskCreationOptions.LongRunning);
+           
+        }
+
+        public IEnumerable<string> NuPushImpl(string path) {
+            var cmdline = "";
+            if (!string.IsNullOrEmpty(Source)) {
+                cmdline = cmdline + @" -Source ""{0}""".format(Source);
+            }
+
+            if (!string.IsNullOrEmpty(ApiKey)) {
+                cmdline = cmdline + @" -ApiKey ""{0}""".format(ApiKey);
+            }
+
+            if (Timeout != null && Timeout != 0) {
+                cmdline = cmdline + @" -Timeout {0}".format(Timeout);
+            }
+
+            if (!string.IsNullOrEmpty(ConfigFile)) {
+                cmdline = cmdline + @" -ConfigFile ""{0}""".format(ConfigFile);
+            }
+
+            if (!string.IsNullOrEmpty(Verbosity)) {
+                cmdline = cmdline + @" -Verbosity {0}".format(ConfigFile);
+            }
+
+            cmdline = @"push ""{0}"" ".format(path) + cmdline;
+
+            var process = _nugetExe.Exec( cmdline );
+
+            foreach (var txt in process.StandardOutput) {
+                if (!string.IsNullOrEmpty(txt)) {
+                    yield return txt;
+                }
+            }
+
+            if (process.ExitCode != 0) {
+                foreach (var txt in process.StandardError) {
+                    if (!string.IsNullOrEmpty(txt)) {
+                        yield return txt;
                     }
                 }
             }
         }
 
-        public void NuPush(string path, string repository) {
-            using (dynamic ps = Runspace.DefaultRunspace.Dynamic()) {
-                var cmdline = "";
-                if (!string.IsNullOrEmpty(repository)) {
-                    cmdline = cmdline + @" -Source '{0}'".format(repository);
-                }
+        public IEnumerable<string> NuUnlistImpl(string name, string version) {
+            var cmdline = "";
+            if (!string.IsNullOrEmpty(Source)) {
+                cmdline = cmdline + @" -Source ""{0}""".format(Source);
+            }
 
-                if (!string.IsNullOrEmpty(ApiKey)) {
-                    cmdline = cmdline + @" -ApiKey '{0}'".format(ApiKey);
-                }
+            if (!string.IsNullOrEmpty(ApiKey)) {
+                cmdline = cmdline + @" -ApiKey ""{0}""".format(ApiKey);
+            }
 
-                if (Timeout != null && Timeout != 0) {
-                    cmdline = cmdline + @" -Timeout '{0}'".format(Timeout);
-                }
+            if (!string.IsNullOrEmpty(ConfigFile)) {
+                cmdline = cmdline + @" -ConfigFile ""{0}""".format(ConfigFile);
+            }
 
-                if (!string.IsNullOrEmpty(ConfigFile)) {
-                    cmdline = cmdline + @" -ConfigFile '{0}'".format(ConfigFile);
-                }
+            if (!string.IsNullOrEmpty(Verbosity)) {
+                cmdline = cmdline + @" -Verbosity {0}".format(ConfigFile);
+            }
 
-                var results = ps.InvokeExpression(@"nuget.exe push '{0}' {1} 2>&1".format(path, cmdline));
-                bool lastIsBlank = false;
-                foreach (var r in results) {
-                    string s = r.ToString();
-                    if (string.IsNullOrWhiteSpace(s)) {
-                        if (lastIsBlank) {
-                            continue;
-                        }
-                        lastIsBlank = true;
-                    } else {
-                        /*
-                        if (s.IndexOf("Issue: Assembly outside lib folder") > -1) {
-                            continue;
-                        }
-                        if(s.IndexOf("folder and hence it won't be added as reference when the package is installed into a project") > -1) {
-                            continue;
-                        }
-                        if (s.IndexOf("Solution: Move it into the 'lib' folder if it should be referenced") > -1) {
-                            continue;
-                        }
-                        if(s.IndexOf("issue(s) found with package") > -1) {
-                            continue;
-                        }
-                        */
-                        lastIsBlank = false;
+            cmdline = @"delete ""{0}"" {1} -NonInteractive ".format(name,version) + cmdline;
+
+            var process = _nugetExe.Exec(cmdline);
+
+            foreach (var txt in process.StandardOutput) {
+                if (!string.IsNullOrEmpty(txt)) {
+                    yield return txt;
+                }
+            }
+
+            if (process.ExitCode != 0) {
+                foreach (var txt in process.StandardError) {
+                    if (!string.IsNullOrEmpty(txt)) {
+                        yield return txt;
                     }
-
-                    Event<Message>.Raise(" >", "{0}", s);
                 }
             }
         }

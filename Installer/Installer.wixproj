@@ -23,28 +23,20 @@
   </ItemGroup>
   <Import Project="$(WixTargetsPath)" />
   <PropertyGroup>
-    <PostBuildEvent Condition=" '$(Configuration)' != 'Debug' ">cd $(TargetDir)
-
-"C:\Program Files (x86)\Windows Kits\8.0\bin\x86\signtool.exe" sign /a /t http://timestamp.verisign.com/scripts/timstamp.dll $(TargetDir)\coapp.tools.powershell.msi 
-cd \
-
-powershell set-executionpolicy unrestricted
-
-powershell  " ipmo %27C:\Program Files (x86)\Outercurve Foundation\Modules\CoApp\CoApp.psd1%27 %3b copy-itemex -force $(TargetDir)\CoApp.Tools.Powershell.msi coapp:files\Latest.CoApp.Tools.Powershell.msi"
-
-copy $(TargetDir)\CoApp.Tools.Powershell.msi c:\root\v2\builds\Latest.CoApp.Tools.Powershell.msi
-
-pskill powershell
-msiexec /i $(TargetDir)\CoApp.Tools.Powershell.msi</PostBuildEvent>
-  </PropertyGroup>
-  <PropertyGroup>
     <SuppressValidation>False</SuppressValidation>
     <SuppressIces>ICE80</SuppressIces>
   </PropertyGroup>
   <PropertyGroup>
-    <PostBuildEvent>cd $(TargetDir)
+    <PostBuildEvent>%40echo on
+%40setlocal 
+
+if %27$(Configuration)%27 == %27Debug%27 goto FIN
+
+echo signing installer 
+cd $(TargetDir)
 
 "C:\Program Files (x86)\Windows Kits\8.0\bin\x86\signtool.exe" sign /a /t http://timestamp.verisign.com/scripts/timstamp.dll $(TargetDir)\coapp.tools.powershell.msi 
+
 cd \
 
 powershell set-executionpolicy unrestricted
@@ -54,7 +46,9 @@ powershell  " ipmo %27C:\Program Files (x86)\Outercurve Foundation\Modules\CoApp
 copy $(TargetDir)\CoApp.Tools.Powershell.msi c:\root\v2\builds\Development.CoApp.Tools.Powershell.msi
 
 pskill powershell
-msiexec /i $(TargetDir)\CoApp.Tools.Powershell.msi</PostBuildEvent>
+msiexec /i $(TargetDir)\CoApp.Tools.Powershell.msi
+
+:FIN</PostBuildEvent>
   </PropertyGroup>
   <!--
 	To modify your build process, add your task inside one of the targets below and uncomment it.

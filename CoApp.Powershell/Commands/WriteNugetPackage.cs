@@ -12,10 +12,13 @@
 
 namespace CoApp.Powershell.Commands {
     using System;
+    using System.Collections;
+    using System.Collections.Generic;
     using System.IO;
     using System.Linq;  
     using System.Management.Automation;
     using ClrPlus.Core.Extensions;
+    using ClrPlus.Core.Utility;
     using ClrPlus.Platform;
     using ClrPlus.Powershell.Core;
     using ClrPlus.Powershell.Rest.Commands;
@@ -25,20 +28,12 @@ namespace CoApp.Powershell.Commands {
 
     [Cmdlet(AllVerbs.Write, "NuGetPackage")]
     public class WriteNuGetPackage : RestableCmdlet<WriteNuGetPackage> {
+        
         static WriteNuGetPackage() {
-            try {
-                var asmDir = Path.GetDirectoryName(typeof (WriteNuGetPackage).Assembly.Location);
-                if (!string.IsNullOrEmpty(asmDir)) {
-                    var path = Environment.GetEnvironmentVariable("path");
-
-                    if (string.IsNullOrEmpty(path) || !path.Contains(asmDir)) {
-                        Environment.SetEnvironmentVariable("path", path + ";" + asmDir + ";" + asmDir + "\\etc");
-                    }
-                }
-            } catch (Exception e) {
-                Console.WriteLine("EXC: {0}/{1}", e.Message, e.StackTrace);
-            }
+            // ensure that the etc folder is added to the path.
+            var x = CmdletUtility.EtcPath;
         }
+
 
         [Parameter(HelpMessage = "Autopackage script file (.autopkg)", Mandatory = true, Position = 0)]
         public string Package {get; set;}
@@ -48,6 +43,10 @@ namespace CoApp.Powershell.Commands {
 
         [Parameter(HelpMessage = "Directory where dependent packages are found ")]
         public string PackageDirectory {get; set;}
+
+        [Parameter(HelpMessage = "Size (in megabytes) after which pivot combinations split into satellite packages. Defaults to 10")]
+        public int SplitThreshold { get; set; }
+
 
         [Parameter]
         public string[] Define {
@@ -59,6 +58,10 @@ namespace CoApp.Powershell.Commands {
         public string[] Defines {
             get;
             set;
+        }
+
+        public WriteNuGetPackage() {
+            SplitThreshold = 10;
         }
 
         protected override void ProcessRecord() {
@@ -90,6 +93,8 @@ namespace CoApp.Powershell.Commands {
                 });
 
                 using (var script = new PackageScript(pkgPath.FirstOrDefault())) {
+                    script.SplitThreshold = SplitThreshold * 1024 * 1024;
+
                     if (PackageDirectory.Is()) {
                         script.AddNuGetPackageDirectory(PackageDirectory.GetFullPath());
                     }
@@ -109,7 +114,8 @@ namespace CoApp.Powershell.Commands {
                             script.AddMacro(k, v);
                         }
                     }
-                    script.Save(PackageTypes.NuGet, !NoClean);
+                    IEnumerable<string> overlayPackages;
+                    var pkgFile = script.Save(PackageTypes.NuGet, !NoClean, out overlayPackages);
                 }
             }
         }

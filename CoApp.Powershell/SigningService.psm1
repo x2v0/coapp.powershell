@@ -5,8 +5,16 @@ using System;
 using System.Text;
 using System.Collections.Generic;
 using System.IO;
+using System.Reflection;
 
 namespace CoAppUtils {
+
+//  public static class ModuleInitializer {
+//        public static void Initialize() {
+//            CoApp.Powershell.AssemblyResolver.Initialize();
+//        }
+//    }
+
     public static class PathUtil {
         public static string RelativePathTo(this string currentDirectory, string pathToMakeRelative) {
             if (string.IsNullOrEmpty(currentDirectory)) {
@@ -52,7 +60,12 @@ namespace CoAppUtils {
  }
 "@
 
-Add-Type -ReferencedAssemblies $Assem -TypeDefinition $Source -Language CSharp  
+##  -ReferencedAssemblies CoApp.Powershell.Tools 
+
+Add-Type -TypeDefinition $Source -Language CSharp  
+
+## [CoAppUtils.ModuleInitializer]::Initialize( )
+
 
 function Set-SignatureViaService
 {

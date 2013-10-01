@@ -8,7 +8,7 @@
 # RootModule = ''
 
 # Version number of this module.
-ModuleVersion ='1.23.1.0'
+ModuleVersion ='2.4.119.0'
 
 # ID used to uniquely identify this module
 GUID = 'C0AAa993-f2cd-4d12-aee7-7484d48eAA0C'
@@ -26,7 +26,7 @@ Copyright = '(c) 2013 CoApp Project, Outercurve Foundation.'
 # Description = ''
 
 # Minimum version of the Windows PowerShell engine required by this module
-# PowerShellVersion = '3.0'
+PowerShellVersion = '3.0'
 
 # Name of the Windows PowerShell host required by this module
 # PowerShellHostName = ''
@@ -47,7 +47,7 @@ DotNetFrameworkVersion = '4.0.0.0'
 # RequiredModules = @()
 
 # Assemblies that must be loaded prior to importing this module
-# RequiredAssemblies = @()
+RequiredAssemblies = @('CoApp.Powershell.Tools.dll')
 
 # Script files (.ps1) that are run in the caller's environment prior to importing this module.
 # ScriptsToProcess = @()
@@ -59,7 +59,7 @@ DotNetFrameworkVersion = '4.0.0.0'
 # FormatsToProcess = @()
 
 # Modules to import as nested modules of the module specified in RootModule/ModuleToProcess
-NestedModules = @('CoApp.Powershell.Tools.dll', 'SigningService.psm1')
+NestedModules = @( 'SigningService.psm1', 'CoApp.Powershell.Tools.dll')
 
 # Functions to export from this module
 FunctionsToExport = '*'

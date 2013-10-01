@@ -1,0 +1,13 @@
+// Implicity loaded template script for Autopackage
+
+nuget := {
+    targets {
+        [Debug,static] {
+            ExpectedRuntimeLibrary = MultiThreadedDebug;
+        }
+
+        [Release,static] {
+            ExpectedRuntimeLibrary = MultiThreaded;
+        }	
+    }
+}
