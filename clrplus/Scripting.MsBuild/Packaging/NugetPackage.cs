@@ -37,7 +37,6 @@ namespace ClrPlus.Scripting.MsBuild.Packaging {
     internal enum PackageRole {
         @default,
         redist,
-        symbols
     }
 
     internal class NugetPackage : IProjectOwner {
@@ -198,7 +197,7 @@ namespace ClrPlus.Scripting.MsBuild.Packaging {
             
                 
                     // map the dependencies node into generating 
-            yield return "dependencies.packages".MapTo(new CustomPropertyList((list) => {
+            yield return "dependencies.packages".MapTo(new ListWithOnChanged<string>(list => {
                 // when the list changes, set the value of the correct xml elements
                 _nuSpec.metadata.dependencies = null;
                 _nuSpec.metadata.Add("dependencies");
@@ -233,7 +232,7 @@ namespace ClrPlus.Scripting.MsBuild.Packaging {
 
                     _nuSpec.metadata.requireLicenseAcceptance = "false";
                     _nuSpec.metadata.title = "{0} Redist".format((string)basePackage._nuSpec.metadata.title);
-                    _nuSpec.metadata.summary = "Redistributable components for for package '{0}'".format(basePackage._pkgName);
+                    _nuSpec.metadata.summary = "Redistributable components for package '{0}'".format(basePackage._pkgName);
                     _nuSpec.metadata.id = _pkgName;
                     _nuSpec.metadata.description = "Redistributable components for package '{0}'. This package should only be installed as a dependency. \r\n(This is not the package you are looking for).".format(basePackage._pkgName);
                     _nuSpec.metadata.dependencies = null;
@@ -248,18 +247,6 @@ namespace ClrPlus.Scripting.MsBuild.Packaging {
                     _nuSpec.metadata.releaseNotes = (string)basePackage._nuSpec.metadata.releaseNotes;
                     _nuSpec.metadata.copyright = (string)basePackage._nuSpec.metadata.copyright;
 
-                    break;
-
-                case PackageRole.symbols:
-                    basePackage = _packageScript.NugetPackage;
-                    _nuSpec = new DynamicNode(new XElement(basePackage._nuSpec.Element));
-
-                    _nuSpec.metadata.title = "{0} Symbols".format((string)basePackage._nuSpec.metadata.title);
-                    _nuSpec.metadata.requireLicenseAcceptance = "false";
-                    _nuSpec.metadata.summary = "Symbols for for package '{0}'".format(basePackage._pkgName);
-                    _nuSpec.metadata.id = _pkgName;
-                    _nuSpec.metadata.description = "Symbols for package '{0}'. This package should not likely be installed. \r\n(This is not the package you are looking for).".format(basePackage._pkgName);
-                    _nuSpec.metadata.dependencies = null;
                     break;
 
                 default:

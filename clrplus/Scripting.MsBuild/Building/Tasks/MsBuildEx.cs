@@ -129,12 +129,6 @@ namespace ClrPlus.Scripting.MsBuild.Building.Tasks {
             }
         }
 
-        protected string MSBuildExecutable {
-            get {
-                return @"{0}\MSBuild.exe".format(EnvironmentUtility.DotNetFrameworkFolder);
-            }
-        }
-
         private static void ReleaseScheduler() {
             lock (typeof (MsBuildEx)) {
                 if (_scheduler != null && !_scheduler.IsRunning) {
@@ -307,7 +301,7 @@ namespace ClrPlus.Scripting.MsBuild.Building.Tasks {
                             }
 
                             var proc = AsyncProcess.Start(
-                                new ProcessStartInfo(MSBuildExecutable, parameters) {
+                                new ProcessStartInfo(MSBuildUtility.MsbuildExe.Path, parameters) {
                                     WindowStyle = ProcessWindowStyle.Normal
                                     ,
                                 }, _environment);

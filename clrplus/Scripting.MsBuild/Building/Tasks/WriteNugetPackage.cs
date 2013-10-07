@@ -34,9 +34,6 @@ namespace ClrPlus.Scripting.MsBuild.Building.Tasks {
         public ITaskItem[] RedistPackages {get; set;}
 
         [Output]
-        public ITaskItem[] SymbolsPackages {get; set;}
-
-        [Output]
         public bool NuGetSuccess {get; set;}
 
         public TaskItem[] Defines {get; set;}

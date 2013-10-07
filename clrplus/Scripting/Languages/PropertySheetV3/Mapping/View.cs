@@ -16,6 +16,7 @@ namespace ClrPlus.Scripting.Languages.PropertySheetV3.Mapping {
     using System.Diagnostics;
     using System.Dynamic;
     using System.Linq;
+    using System.Runtime.InteropServices;
     using System.Text.RegularExpressions;
     using Core.Collections;
     using Core.Extensions;
@@ -502,15 +503,25 @@ namespace ClrPlus.Scripting.Languages.PropertySheetV3.Mapping {
             }
         }
 
-        public View GetProperty(string propertyName, bool createImplicitly = true) {
+        public View GetProperty(string propertyName, bool createImplicitly = true, Func<string, string> lastMinuteReplacementFunction = null) {
+            if (lastMinuteReplacementFunction != null) {
+                propertyName = lastMinuteReplacementFunction(propertyName);
+            }
             // this falls back to case insensitive matches if th property didn't exist.
             if (propertyName.Contains('.')) {
-                return GetChild(propertyName, createImplicitly); // let that unroll the path.to.property
+                return GetChild(propertyName, createImplicitly, lastMinuteReplacementFunction); // let that unroll the path.to.property
             }
 
             propertyName = ResolveAlias(propertyName);
+
+            // if we got a new name from an alias, we'd better check again.
+            if (propertyName.Contains('.')) {
+                return GetChild(propertyName, createImplicitly, lastMinuteReplacementFunction); // let that unroll the path.to.property
+            }
+
+            
             if (propertyName.StartsWith("::")) {
-                return RootView.GetChild(propertyName.Trim(':'), createImplicitly);
+                return RootView.GetChild(propertyName.Trim(':'), createImplicitly, lastMinuteReplacementFunction);
             }
 
             if (map.ContainsKey(propertyName)) {
@@ -529,7 +540,7 @@ namespace ClrPlus.Scripting.Languages.PropertySheetV3.Mapping {
         }
 
 
-        internal View GetChild(Selector selector, bool createImplicity=true) {
+        internal View GetChild(Selector selector, bool createImplicity=true, Func<string,string> lastMinuteReplacementFunction = null ) {
             if(selector == null || selector.IsEmpty ) {
                 return this;
             }
@@ -541,36 +552,52 @@ namespace ClrPlus.Scripting.Languages.PropertySheetV3.Mapping {
             selector = ResolveAlias(selector);
 
             if(selector.IsGlobal) {
-                return RootView.GetChild(selector.DeGlobaled, createImplicity);
+                return RootView.GetChild(selector.DeGlobaled, createImplicity, lastMinuteReplacementFunction);
             }
             
             if (selector.AfterTheParameter.Is()) {
-                return GetChild(selector.WithoutAfterTheParameter, createImplicity).GetChild(selector.AfterSelector, createImplicity);
+                return GetChild(selector.WithoutAfterTheParameter, createImplicity, lastMinuteReplacementFunction).GetChild(selector.AfterSelector, createImplicity, lastMinuteReplacementFunction);
             }
 
             if(selector.IsCompound) {
                 var name = selector.Prefix.Name;
-                return HasChild(name) ? GetProperty(name, createImplicity).GetChild(selector.Suffix, createImplicity) : (createImplicity ? CreatePlaceholderView(name).GetChild(selector.Suffix, createImplicity) : null);
+
+                var resolved = ResolveAlias(name);
+                if (resolved != name && resolved.IndexOfAny(new char[] {'.', '[', ']',':' }) > -1) {
+                    var result = GetProperty(resolved, createImplicity, lastMinuteReplacementFunction);
+                    if (result != null) {
+                        return result.GetChild(selector.Suffix, createImplicity, lastMinuteReplacementFunction);
+                    }
+                    return null;
+                }
+
+                return HasChild(name) ? GetProperty(name, createImplicity, lastMinuteReplacementFunction).GetChild(selector.Suffix, createImplicity, lastMinuteReplacementFunction) : (createImplicity ? CreatePlaceholderView(name).GetChild(selector.Suffix, createImplicity, lastMinuteReplacementFunction) : null);
             }
 
             if (selector.IsSpecialCase) {
                 // this ensures a special case where a selector is resolving, but it has an empty auto-condition in it.
                 // this should make sure that '*[].foo' is the same thing as 'foo' 
-                return GetChild(selector.AfterSelector, createImplicity);
+                return GetChild(selector.AfterSelector, createImplicity, lastMinuteReplacementFunction);
             }
 
             if (selector.HasParameter) {
-                return HasChild(selector.Name) ? GetProperty(selector.Name, createImplicity).GetElement(selector.Parameter) : (createImplicity ? CreatePlaceholderView(selector.Name).GetElement(selector.Parameter) : null);
+                return HasChild(selector.Name) ? GetProperty(selector.Name, createImplicity, lastMinuteReplacementFunction).GetElement(selector.Parameter, lastMinuteReplacementFunction) : (createImplicity ? CreatePlaceholderView(selector.Name).GetElement(selector.Parameter, lastMinuteReplacementFunction) : null);
             }
 
-            return GetProperty(selector.Name, createImplicity);
+            return GetProperty(selector.Name, createImplicity, lastMinuteReplacementFunction);
         }
 
         private View CreatePlaceholderView(string placeholderName) {
-            return map.GetOrAdd(placeholderName, () => new View(new PlaceholderMap(placeholderName, Enumerable.Empty<ToRoute>())));
+            var result = new View(new PlaceholderMap(placeholderName, Enumerable.Empty<ToRoute>()));
+            map.MergeChild( this,  result);
+            return map[placeholderName];
         }
 
-        public View GetElement(string elementName) {
+        public View GetElement(string elementName, Func<string,string> lastMinuteReplacementFunction = null ) {
+            if (lastMinuteReplacementFunction != null) {
+                elementName = lastMinuteReplacementFunction(elementName);
+            }
+            
             var child = map as IElements;
             if (child != null /* && child.ElementDictionary.ContainsKey(elementName) */) {
                 return child.ElementDictionary[elementName];
@@ -596,6 +623,15 @@ namespace ClrPlus.Scripting.Languages.PropertySheetV3.Mapping {
                 else {
                     AggregatePropertyNode.SetCollection(new Collection(null, value.Select( each => new Scalar(null, each))));
                 }
+            }
+        }
+
+        public void AddValue(string value) {
+            if (_map is ICanSetBackingValues) {
+                (_map as ICanSetBackingValues).AddValue(value);
+            }
+            else {
+                Values = Values.ConcatSingleItem(value);
             }
         }
 

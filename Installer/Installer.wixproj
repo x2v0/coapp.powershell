@@ -43,7 +43,7 @@ powershell set-executionpolicy unrestricted
 
 powershell  " ipmo %27C:\Program Files (x86)\Outercurve Foundation\Modules\CoApp\CoApp.psd1%27 %3b copy-itemex -force $(TargetDir)\CoApp.Tools.Powershell.msi coapp:files\Development.CoApp.Tools.Powershell.msi"
 
-copy $(TargetDir)\CoApp.Tools.Powershell.msi c:\root\v2\builds\Development.CoApp.Tools.Powershell.msi
+copy $(TargetDir)\CoApp.Tools.Powershell.msi c:\root\builds\Development.CoApp.Tools.Powershell.msi
 
 pskill powershell
 msiexec /i $(TargetDir)\CoApp.Tools.Powershell.msi

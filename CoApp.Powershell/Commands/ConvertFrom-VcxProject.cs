@@ -94,10 +94,8 @@ namespace CoApp.Powershell.Commands {
 
                     File.WriteAllText(tmpFile, text);
 
-                    var msbuild = Path.Combine(EnvironmentUtility.DotNetFrameworkFolder, "msbuild.exe");
-
                     var proc = AsyncProcess.Start(
-                        new ProcessStartInfo(msbuild, "/pp /p:Configuration=Debug;Platform=Win32 {0}".format(tmpFile)) {
+                        new ProcessStartInfo(MSBuildUtility.MsbuildExe.Path, "/pp /p:Configuration=Debug;Platform=Win32 {0}".format(tmpFile)) {
                             WindowStyle = ProcessWindowStyle.Normal,
                         });
                     proc.WaitForExit();

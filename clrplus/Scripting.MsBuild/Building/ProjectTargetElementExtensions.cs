@@ -17,11 +17,11 @@ namespace ClrPlus.Scripting.MsBuild.Building {
     using Utility;
 
     internal static class ProjectTargetElementExtensions {
-        internal static CustomPropertyList EnvironmentList(this ProjectTargetElement target) {
+        internal static ListWithOnChanged<string> EnvironmentList(this ProjectTargetElement target) {
             return null;
         }
 
-        internal static CustomPropertyList Uses(this ProjectTargetElement target) {
+        internal static ListWithOnChanged<string> Uses(this ProjectTargetElement target) {
             return null;
         }
 
@@ -45,20 +45,21 @@ namespace ClrPlus.Scripting.MsBuild.Building {
             return null;
         }
 
-        internal static CustomPropertyList ProducesTargets(this ProjectTargetElement target) {
+        internal static ListWithOnChanged<string> ProducesTargets(this ProjectTargetElement target) {
             return null;
         }
 
-        internal static CustomPropertyList GenerateFiles(this ProjectTargetElement target) {
+        internal static ListWithOnChanged<string> GenerateFiles(this ProjectTargetElement target) {
             return null;
         }
 
-        internal static CustomPropertyList RequiresPackages(this ProjectTargetElement target) {
+        internal static ListWithOnChanged<string> RequiresPackages(this ProjectTargetElement target) {
             return null;
         }
 
         internal static Accessor Condition(this ProjectTargetElement target) {
             return null;
         }
+
     }
 }

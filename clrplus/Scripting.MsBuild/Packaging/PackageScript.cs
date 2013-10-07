@@ -17,6 +17,7 @@ namespace ClrPlus.Scripting.MsBuild.Packaging {
     using System.Linq;
     using System.Management.Automation.Runspaces;
     using System.Reflection;
+    using System.Text.RegularExpressions;
     using System.Xml.Linq;
     using Building.Tasks;
     using Core.Collections;
@@ -28,8 +29,11 @@ namespace ClrPlus.Scripting.MsBuild.Packaging {
     using Languages.PropertySheetV3;
     using Languages.PropertySheetV3.Mapping;
     using Microsoft.Build.Evaluation;
+    using Microsoft.Build.Tasks;
+    using Mono.CSharp;
     using Platform;
     using Powershell.Core;
+    using Warning = Core.Tasks.Warning;
 
     public class PackageScript : IDisposable {
         private static readonly string _requiredTemplate = File.ReadAllText(Path.Combine(NugetPackage.etcPath, "PackageScriptTemplate.autopkg"));
@@ -55,6 +59,8 @@ namespace ClrPlus.Scripting.MsBuild.Packaging {
         private dynamic _nugetfiles;
         private readonly List<string> _dependentNuGetPackageDirectories = new List<string>();
         private IDictionary<string, string> _macros = new Dictionary<string, string>();
+
+        private List<string> _tempFiles = new List<string>();
 
         public long SplitThreshold {get; set;}
 
@@ -254,14 +260,26 @@ namespace ClrPlus.Scripting.MsBuild.Packaging {
             NugetPackage.SplitThreshold = SplitThreshold;
 
             
-            return NugetPackage.Save(cleanIntermediateFiles, out overlayPackages);
+            var result =  NugetPackage.Save(cleanIntermediateFiles, out overlayPackages);
+
+            // clean up our temporary files when we're done.
+            foreach (var f in _tempFiles) {
+                f.TryHardToDelete();
+            }
+
+            _tempFiles.Clear();
+
+            // and clean out the renamed files folder when we're done too.
+            Path.Combine(FilesystemExtensions.TempPath,"renamedFiles").TryHardToDelete();
+
+            return result;
 
         }
 
         private void ProcessNugetFiles(View filesView, string srcFilesRoot, string currentCondition) {
             currentCondition = Pivots.NormalizeExpression(currentCondition ?? "");
 
-            foreach (var containerName in filesView.GetChildPropertyNames()) {
+            foreach (var containerName in filesView.GetChildPropertyNames().ToArray()) {
                 View container = filesView.GetProperty(containerName);
                 if (containerName == "condition" || containerName == "*") {
                     foreach (var condition in container.GetChildPropertyNames()) {
@@ -289,9 +307,18 @@ namespace ClrPlus.Scripting.MsBuild.Packaging {
                     }
                 }
                 var optionExcludes = container.GetMetadataValues("exclude", container, false).Union(container.GetMetadataValues("excludes", container, false)).ToArray();
+                var optionRenames = container.GetMetadataValues("rename", container, false).Union(container.GetMetadataValues("renames", container, false)).Select(each => {
+                    var s = each.Split('/','\\');
+                    if (s.Length == 2) {
+                        return new {
+                            search = new Regex(s[0]),
+                            replace = s[1]
+                        };
+                    }
+                    return null;
+                }).Where( each => each != null).ToArray();
              
               
-                // var targets = package.GetTargetsProject(optionFramework); 
 
                 // determine the destination location in the target package
                 var optionDestination = container.GetMetadataValueHarder("destination", currentCondition);
@@ -299,47 +326,92 @@ namespace ClrPlus.Scripting.MsBuild.Packaging {
 
                 var optionFlatten = container.GetMetadataValueHarder("flatten", currentCondition).IsPositive();
                 var optionNoOverlay  = container.GetMetadataValueHarder("overlay", currentCondition).IsNegative();
-
               
                 var addEachFiles = container.GetMetadataValuesHarder("add-each-file", currentCondition).ToArray();
                 var addFolders = container.GetMetadataValuesHarder("add-folder", currentCondition).ToArray();
+                var addAllFiles = container.GetMetadataValuesHarder("add-all-files", currentCondition).ToArray();
 
+
+                // add the folder to an Collection somewhere else in the PropertySheet
                 if (addFolders.Length > 0 && relativePaths.Any() ) {
                     foreach (var addFolder in addFolders) {
-                        var folderView = filesView.GetProperty(addFolder.Replace("${condition}", currentCondition));
+                        var folderView = filesView.GetProperty(addFolder, lastMinuteReplacementFunction: s => s.Replace("${condition}", currentCondition));
                         if (folderView != null) {
-                            var values = folderView.Values.ToList();
-                            values.Add((filesView.GetSingleMacroValue("pkg_root") + destinationFolder).Replace("\\\\", "\\"));
-                            folderView.Values = values;
+                            folderView.AddValue((filesView.GetSingleMacroValue("pkg_root") + destinationFolder).Replace("\\\\", "\\"));
                         }
                     }
                 }
 
-                foreach (var src in relativePaths.Keys) {
+                // add the folder+/** to an Collection somewhere else in the PropertySheet (useful for making <ItemGroup>s)
+                if (addAllFiles.Length > 0 && relativePaths.Any()) {
+                    foreach (var addAllFile in addAllFiles) {
+                        var folderView = filesView.GetProperty(addAllFile, lastMinuteReplacementFunction: s => s.Replace("${condition}", currentCondition));
+
+                        if (folderView != null) {
+                            // add the /** suffix on the path
+                            // so it can be used in an ItemGroup
+                            folderView.AddValue(((filesView.GetSingleMacroValue("pkg_root") + destinationFolder).Replace("\\\\", "\\") + "/**").Replace("//","/"));
+                        }
+                    }
+                }
+
+                foreach (var srcf in relativePaths.Keys) {
+                    var src = srcf;
+
                     if (optionExcludes.HasWildcardMatch(src)) {
                         continue;
                     }
 
                     Event<Verbose>.Raise("ProcessNugetFiles (adding file)", "'{0}' + '{1}'", destinationFolder, relativePaths[src]);
                     string target = Path.Combine(destinationFolder, optionFlatten ? Path.GetFileName(relativePaths[src]) : relativePaths[src]).Replace("${condition}", currentCondition).Replace("\\\\", "\\");
+
+                    if (optionRenames.Length > 0) {
+                        // process rename commands
+                        var dir = Path.GetDirectoryName(target);
+                        var filename = Path.GetFileName(target);
                         
+                        foreach (var rename in optionRenames) {
+                            var newFilename = rename.search.Replace(filename, rename.replace);
+                            
+                            if (newFilename != filename) {
+
+                                // generate the new location for the renamed file
+                                var tmpFile = Path.Combine(FilesystemExtensions.TempPath,"renamedFiles",Guid.NewGuid().ToString(), newFilename);
+
+                                // derp. gotta create the target dir first. *sigh*
+                                Directory.CreateDirectory(Path.GetDirectoryName(tmpFile));
+
+                                //copy the src file to the tmpFile location
+                                File.Copy(src, tmpFile);
+                                
+                                // remove it when we're done packaging
+                                _tempFiles.Add(tmpFile);
+
+                                // switch the src to use the temp file
+                                src = tmpFile;
+
+                                // and just use the dir as the target (instead of the whole path)
+                                target = dir;
+                                break;
+                            }
+                        }
+                        
+                    }
+
                     // add the file under the configuration (unless it's marked for no overlay, in which case just put it in the base.)
                     NugetPackage.AddFile(src, target, optionNoOverlay ? string.Empty : currentCondition);
 
                     if (addEachFiles.Length > 0) {
                         foreach (var addEachFile in addEachFiles) {
-                            var fileListView = filesView.GetProperty(addEachFile.Replace("${condition}", currentCondition));
+                            var fileListView = filesView.GetProperty(addEachFile, lastMinuteReplacementFunction: s=> s.Replace("${condition}", currentCondition));
                             if (fileListView != null) {
-                                var values = fileListView.Values.ToList();
-                                values.Add((filesView.GetSingleMacroValue("pkg_root") + target).Replace("${condition}", currentCondition).Replace("\\\\", "\\"));
-                                fileListView.Values = values;
+                                fileListView.AddValue((filesView.GetSingleMacroValue("pkg_root") + target).Replace("${condition}", currentCondition).Replace("\\\\", "\\"));
                             }
                         }
                     }
                 }
             }
         }
-
 
         public IEnumerable<string> AllPackages {
             get {

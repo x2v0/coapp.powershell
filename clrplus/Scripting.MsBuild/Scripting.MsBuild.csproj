@@ -111,8 +111,8 @@
     <Compile Include="Packaging\AnswerCache.cs" />
     <Compile Include="Packaging\ComparableHashSet.cs" />
     <Compile Include="Packaging\PivotsExpression.cs" />
-    <Compile Include="Utility\CustomPropertyList.cs" />
-    <Compile Include="Utility\FileCopyList.cs" />
+    <Compile Include="Utility\ListWithOnChanged.cs" />
+    <Compile Include="Utility\ListWithAction.cs" />
     <Compile Include="Utility\MsBuildMap.cs" />
     <Compile Include="Packaging\IProjectOwner.cs" />
     <Compile Include="Packaging\NugetPackage.cs" />

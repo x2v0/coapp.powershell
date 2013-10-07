@@ -29,7 +29,20 @@ namespace ClrPlus.Scripting.MsBuild.Building {
     using MsBuild.Utility;
     using Packaging;
     using Platform;
+    using Platform.Process;
     using ServiceStack.Text;
+
+    public static class MSBuildUtility {
+        public static Executable MsbuildExe = new Executable("msbuild.exe", Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86));
+
+        static MSBuildUtility() {
+            // Ensure that the same path for the MSBuildEXE is in the path
+            EnvironmentUtility.EnvironmentPath = EnvironmentUtility.EnvironmentPath.Append(Path.GetDirectoryName(MsbuildExe.Path));
+
+            // as is the .NET framework folder
+            EnvironmentUtility.EnvironmentPath = EnvironmentUtility.EnvironmentPath.Append(EnvironmentUtility.DotNetFrameworkFolder);
+        }
+    }
 
     public class BuildScript : IDisposable, IProjectOwner {
         private static string[] filterMessages = new[] {
@@ -71,21 +84,6 @@ namespace ClrPlus.Scripting.MsBuild.Building {
 
         private static IEnumerable<ToRoute> PtkRoutes {
             get {
-                /*
-                yield return "set".MapTo<ProjectTargetElement>(tgt => tgt.EnvironmentList());
-                yield return "uses".MapTo<ProjectTargetElement>(tgt => tgt.Uses());
-                yield return "use".MapTo<ProjectTargetElement>(tgt => tgt.Uses());
-                yield return "default".MapTo<ProjectTargetElement>(tgt => tgt.DefaultFlag());
-                yield return "build-command".MapTo<ProjectTargetElement>(tgt => tgt.BuildCommand());
-                yield return "clean-command".MapTo<ProjectTargetElement>(tgt => tgt.CleanCommand());
-                yield return "platform".MapTo<ProjectTargetElement>(tgt => tgt.Platform());
-                yield return "compiler".MapTo<ProjectTargetElement>(tgt => tgt.UsesTool());
-                yield return "sdk".MapTo<ProjectTargetElement>(tgt => tgt.UsesTool());
-                yield return "targets".MapTo<ProjectTargetElement>(tgt => tgt.ProducesTargets());
-                yield return "generate".MapTo<ProjectTargetElement>(tgt => tgt.GenerateFiles());
-                yield return "requires".MapTo<ProjectTargetElement>(tgt => tgt.RequiresPackages());
-                */
-
                 yield return "condition".MapTo<ProjectTargetElement>(tgt => tgt.Condition());
                 yield return "*".MapTo<ProjectTargetElement>(tgt => tgt.Condition());
 
@@ -158,6 +156,7 @@ namespace ClrPlus.Scripting.MsBuild.Building {
 
         private Queue<BuildMessage> messages = new Queue<BuildMessage>();
 
+        
         public bool Execute(string[] targets = null) {
             _sheet.CopyToModel();
 
@@ -182,9 +181,7 @@ namespace ClrPlus.Scripting.MsBuild.Building {
                 Environment.SetEnvironmentVariable("BuildingInsideVisualStudio", null);
                 Environment.SetEnvironmentVariable("UsePTKFromVisualStudio", null);
 
-                EnvironmentUtility.EnvironmentPath = EnvironmentUtility.EnvironmentPath.Append(EnvironmentUtility.DotNetFrameworkFolder);
-
-                var proc = Process.Start(new ProcessStartInfo(@"{0}\MSBuild.exe".format(EnvironmentUtility.DotNetFrameworkFolder),
+                var proc = Process.Start(new ProcessStartInfo(MSBuildUtility.MsbuildExe.Path,
                     @" /nologo /noconsolelogger ""/logger:ClrPlus.Scripting.MsBuild.Building.Logger,{0};{1};{2}"" /m:{6} /p:MaxThreads={6} ""/p:CoAppEtcDirectory={3}"" {4} ""{5}""".format(Assembly.GetExecutingAssembly().Location, pipeName, iid, etcPath, targs,
                         path, MaxThreads > 0 ? MaxThreads : Environment.ProcessorCount)) {
                             RedirectStandardError = true,
@@ -212,46 +209,6 @@ namespace ClrPlus.Scripting.MsBuild.Building {
                                 }
                             }
                             
-                            /* switch (obj.EventType) {
-                                case "BuildWarning":
-                                    Event<SourceWarning>.Raise(obj.Code,  new SourceLocation{ Column = obj.ColumnNumber, Row = obj.LineNumber , SourceFile = obj.File}.SingleItemAsEnumerable(), obj.Message);
-                                    break;
-
-                                case "BuildError":
-                                    Event<SourceError>.Raise(obj.Code, new SourceLocation {
-                                        Column = obj.ColumnNumber,
-                                        Row = obj.LineNumber,
-                                        SourceFile = obj.File
-                                    }.SingleItemAsEnumerable(), obj.Message);
-                                    result = false;
-                                    break;
-
-                                case "ProjectStarted":
-                                case "ProjectFinished":
-                                case "TaskStarted":
-                                case "TaskFinished":
-                                case "TargetStarted":
-                                case "TargetFinished":
-                                case "BuildStarted":
-                                case "BuildFinished":
-                                    Event<Verbose>.Raise(obj.EventType, obj.Message);
-                                    break;
-
-                                case "BuildMessage":
-                                    if (filterMessages.Any(each => obj.Message.IndexOf(each) > -1)) {
-                                        Event<Verbose>.Raise("", obj.Message);
-                                    }
-                                    else {
-                                        Event<Message>.Raise("", obj.Message);
-                                    }
-
-                                    break;
-
-                                default:
-                                    Event<Message>.Raise(obj.EventType, obj.Message);
-                                    break;
-                            } */
-
                         }
                     }
                 }

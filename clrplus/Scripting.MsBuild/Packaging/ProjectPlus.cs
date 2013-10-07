@@ -12,6 +12,7 @@
 
 namespace ClrPlus.Scripting.MsBuild.Packaging {
     using System;
+    using System.Collections;
     using System.Collections.Generic;
     using System.Diagnostics;
     using System.IO;
@@ -28,16 +29,13 @@ namespace ClrPlus.Scripting.MsBuild.Packaging {
 
     public class ProjectPlus : Project, IDisposable {
         private readonly IProjectOwner _owner;
-        // internal Action BeforeSave;
         internal List<string> Conditions = new List<string>();
-        // internal IDictionary<string, string> Conditions2;
-        // internal View ConfigurationsView;
 
         internal StringPropertyList InitialTargets;
-        private Dictionary<ProjectTargetElement, FileCopyList> _copyToTargets;
-        private Dictionary<ProjectTargetElement, FileCopyList> _rlCheck;
-        private Dictionary<ProjectItemGroupElement, FileCopyList> _embedOutputs;
-        private Dictionary<string, FileCopyList> _buildTimePaths;
+        private Dictionary<ProjectTargetElement, ListWithAction<string>> _copyToTargets;
+        private Dictionary<ProjectTargetElement, ListWithAction<string>> _rlCheck;
+        private Dictionary<ProjectItemGroupElement, ListWithAction<string>> _embedOutputs;
+        private Dictionary<string, ListWithAction<string>> _buildTimePaths;
         private HashSet<string> _copyToTargetsDuplicateCheck = new HashSet<string>();
 
         public Core.Utility.Lazy<ProjectTargetElement> EarlyInitTarget;
@@ -101,9 +99,9 @@ namespace ClrPlus.Scripting.MsBuild.Packaging {
                 yield return "InitialTargets".MapTo(InitialTargets);
 
                 yield return "ItemDefinitionGroup".MapTo(() => LookupItemDefinitionGroup(""), ItemDefinitionGroupChildren);
-                yield return "CopyToOutput".MapTo(() => CopyToOutput(""));
+                // yield return "CopyToOutput".MapTo(() => CopyToOutput(""));
                 yield return "ExpectedRuntimeLibrary".MapTo(() => CheckRuntimeLibrary(""));
-                yield return "EmbedInOutput".MapTo(() => EmbedInOutput(""));
+                // yield return "EmbedInOutput".MapTo(() => EmbedInOutput(""));
                 yield return "ImportGroup".MapTo(() => LookupImportGroup(""), ImportGroupChildren);
                 yield return "ItemGroup".MapTo(() => LookupItemGroup(""), ItemGroupChildren);
                 yield return "PropertyGroup".MapTo(() => LookupPropertyGroup(""), PropertyGroupChildren);
@@ -143,9 +141,9 @@ namespace ClrPlus.Scripting.MsBuild.Packaging {
 
         internal IEnumerable<ToRoute> ConditionRoutes() {
             yield return "ItemDefinitionGroup".MapTo<string>(condition => LookupItemDefinitionGroup(condition), ItemDefinitionGroupChildren);
-            yield return "CopyToOutput".MapTo<string>(condition => CopyToOutput(condition));
+            // yield return "CopyToOutput".MapTo<string>(condition => CopyToOutput(condition));
             yield return "ExpectedRuntimeLibrary".MapTo<string>(condition => CheckRuntimeLibrary(condition));
-            yield return "EmbedInOutput".MapTo<string>(condition => EmbedInOutput(condition));
+            // yield return "EmbedInOutput".MapTo<string>(condition => EmbedInOutput(condition));
             yield return "BuildTimePath".MapTo<string>(condition => BuildTimePath(condition));
             yield return "ImportGroup".MapTo<string>(condition => LookupImportGroup(condition), ImportGroupChildren);
             yield return "ItemGroup".MapTo<string>(condition => LookupItemGroup(condition), ItemGroupChildren);
@@ -182,14 +180,20 @@ namespace ClrPlus.Scripting.MsBuild.Packaging {
 
         private IEnumerable<ToRoute> ItemGroupChildren {
             get {
-                yield return "".MapTo<ProjectItemGroupElement>((parent, view) => {
-                    var prop = LookupItem(parent, view.MemberName);
-                    return new Accessor(() => {
-                        return prop.Include;
-                    }, v => {
-                        prop.Include = v.ToString();
+                // treat DC's as "<None ><DeploymentContent>true</DeploymentContent></None>"
+                yield return "DeploymentContent".MapTo<ProjectItemGroupElement>((parent, view) => {
+                    return new ListWithAction<string>(s => {
+                        // when an item is added
+                        var item = parent.AddItem("None", s);
+                        item.AddMetadata("DeploymentContent", "true");
                     });
+                });
 
+                yield return "".MapTo<ProjectItemGroupElement>((parent, view) => {
+                    return  new ListWithAction<string>(s => {
+                        // when an item is added
+                        parent.AddItem(view.MemberName, s);
+                    });
                 });
             }
         }
@@ -513,13 +517,13 @@ namespace ClrPlus.Scripting.MsBuild.Packaging {
 
         private string _rt_or_phone_check_hack_;
 
-        internal FileCopyList CheckRuntimeLibrary(string condition) {
+        internal ListWithAction<string> CheckRuntimeLibrary(string condition) {
             if (_rlCheck == null) {
-                _rlCheck = new Dictionary<ProjectTargetElement, FileCopyList>();
+                _rlCheck = new Dictionary<ProjectTargetElement, ListWithAction<string>>();
             }
 
             var target = LookupTarget("BeforeLink", condition, true);
-            return _rlCheck.GetOrAdd(target, () => new FileCopyList(s => {
+            return _rlCheck.GetOrAdd(target, () => new ListWithAction<string>(s => {
                 // check to see if the file is here already
                 /*
                 var key = (condition + "+" + s).ToLower();
@@ -539,16 +543,19 @@ namespace ClrPlus.Scripting.MsBuild.Packaging {
             }));
         }
 
-        internal FileCopyList CopyToOutput(string condition) {
+        internal ListWithAction<string> CopyToOutput(string condition) {
             if(_copyToTargets == null) {
-                _copyToTargets = new Dictionary<ProjectTargetElement, FileCopyList>();
+                _copyToTargets = new Dictionary<ProjectTargetElement, ListWithAction<string>>();
             }
-
-            
 
             var itemGroup = LookupItemGroup(condition);
             var target = LookupTarget("AfterBuild", condition, true);
-            return _copyToTargets.GetOrAdd(target, () => new FileCopyList(s => {
+
+
+            // new: add the file into an item group in the target, and only have 
+            //    : one copy command in the target, using the item group.
+
+            return _copyToTargets.GetOrAdd(target, () => new ListWithAction<string>(s => {
                 // check to see if the file is here already
                 var key = (condition + "+" + s).ToLower();
 
@@ -557,12 +564,24 @@ namespace ClrPlus.Scripting.MsBuild.Packaging {
                 }
                 _copyToTargetsDuplicateCheck.Add(key);
 
+                var cig = target.ItemGroups.FirstOrDefault() ?? target.AddItemGroup();
+
+                // add the path to the list of items
+                // if it is a folder, add the recursive ** to the end
+                cig.AddItem("ItemsToCopyToOutputFolder", s.EndsWith("/") ? s + @"**" : s);
+                
                 // copy it using a task
-                var tsk = target.AddTask("Copy");   
-                tsk.SetParameter("SourceFiles", s);
-                tsk.SetParameter("DestinationFolder", "$(TargetDir)");
-                tsk.SetParameter("SkipUnchangedFiles", "true");
-                tsk.SetParameter("UseHardlinksIfPossible", "true");
+                // get the first Copy task that has the same DestinationFolder as we need.
+                var tsk = target.Tasks.FirstOrDefault( t  => t.Name =="Copy" && t.Parameters.ContainsKey("DestinationFolder") && t.Parameters["DestinationFolder"] == "$(TargetDir)" );
+                if (tsk == null) {
+                    // only create the task if there isn't one here.
+                    tsk = target.AddTask("Copy");
+                    tsk.SetParameter("SourceFiles", "@(ItemsToCopyToOutputFolder)");
+                    tsk.SetParameter("DestinationFolder", "$(TargetDir)");
+                    tsk.SetParameter("SkipUnchangedFiles", "true");
+                    tsk.SetParameter("UseHardlinksIfPossible", "true");
+                }
+                
 
                 // and if it's a win8 or phone8 app, make an item for it too.
                 var item = itemGroup.AddItem("None", s);
@@ -579,14 +598,14 @@ namespace ClrPlus.Scripting.MsBuild.Packaging {
             }));
         }
 
-        internal FileCopyList EmbedInOutput(string condition) {
+        internal ListWithAction<string> EmbedInOutput(string condition) {
             if(_embedOutputs == null) {
-                _embedOutputs = new Dictionary<ProjectItemGroupElement, FileCopyList>();
+                _embedOutputs = new Dictionary<ProjectItemGroupElement, ListWithAction<string>>();
             }
 
             var itemGroup = LookupItemGroup(condition);
 
-            return _embedOutputs.GetOrAdd(itemGroup, () => new FileCopyList(s => {
+            return _embedOutputs.GetOrAdd(itemGroup, () => new ListWithAction<string>(s => {
                 var key = (condition + "+" + s).ToLower();
 
                 if(_copyToTargetsDuplicateCheck.Contains(key)) {
@@ -594,19 +613,18 @@ namespace ClrPlus.Scripting.MsBuild.Packaging {
                 }
                 _copyToTargetsDuplicateCheck.Add(key);
 
-
                 var item = itemGroup.AddItem("None", s);
                 item.AddMetadata("DeploymentContent", "true");
             }));
         }
 
-        internal FileCopyList BuildTimePath(string condition) {
+        internal ListWithAction<string> BuildTimePath(string condition) {
             // put a <setenv> task in the init target to add this directory to the 
             if(_buildTimePaths == null) {
-                _buildTimePaths = new Dictionary<string, FileCopyList>();
+                _buildTimePaths = new Dictionary<string, ListWithAction<string>>();
             }
-            
-            return _buildTimePaths.GetOrAdd(condition, () => new FileCopyList(path => {
+
+            return _buildTimePaths.GetOrAdd(condition, () => new ListWithAction<string>(path => {
                 
                 var tsk = ((ProjectTargetElement)SecondInitTarget).AddTask("SetEnv");
                 tsk.Condition = Pivots.GetMSBuildCondition(Name, condition);

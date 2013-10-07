@@ -26,170 +26,24 @@ namespace ClrPlus.Platform.Process {
     using System.Linq;
     using Core.Extensions;
 
-#if BAD_IDEA
-    public class ProcessStartInfo {
-        internal readonly System.Diagnostics.ProcessStartInfo _processStartInfo = new System.Diagnostics.ProcessStartInfo();
-        private XDictionary<string, string> _environmentVariables;
-
-        internal ProcessStartInfo(System.Diagnostics.ProcessStartInfo psi) {
-            _processStartInfo = psi;
-            _environmentVariables = new XDictionary<string, string>();
-            foreach (var i in psi.EnvironmentVariables.Keys) {
-                _environmentVariables.Add(i.ToString(), psi.EnvironmentVariables[(string)i]);
-            }
-            _processStartInfo.RedirectStandardError = true;
-            _processStartInfo.RedirectStandardOutput = true;
-            SyncEnvironment();
-        }
-        /// <summary>
-        /// Initializes a new instance of the <see cref="T:System.Diagnostics.ProcessStartInfo"/> class without specifying a file name with which to start the process.
-        /// 
-        /// </summary>
-        public ProcessStartInfo() {
-            _processStartInfo.UseShellExecute = false;
-            _processStartInfo.RedirectStandardError = true;
-            _processStartInfo.RedirectStandardOutput = true;
-            SyncEnvironment();
-        }
-
-        private void SyncEnvironment() {
-            _processStartInfo.EnvironmentVariables.Clear();
-            foreach(var key in EnvironmentVariables.Keys) {
-                _processStartInfo.EnvironmentVariables.Add(key, EnvironmentVariables[key]);
-            }
-        }
-        /// <summary>
-        /// Initializes a new instance of the <see cref="T:System.Diagnostics.ProcessStartInfo"/> class and specifies a file name such as an application or document with which to start the process.
-        /// 
-        /// </summary>
-        /// <param name="fileName">An application or document with which to start a process.
-        ///                 </param>
-        public ProcessStartInfo(string fileName) : this() {
-            FileName = fileName;
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="T:System.Diagnostics.ProcessStartInfo"/> class, specifies an application file name with which to start the process, and specifies a set of command-line arguments to pass to the application.
-        /// 
-        /// </summary>
-        /// <param name="fileName">An application with which to start a process.
-        ///                 </param><param name="arguments">Command-line arguments to pass to the application when the process starts.
-        ///                 </param>
-        public ProcessStartInfo(string fileName, string arguments)
-            : this() {
-            FileName = fileName;
-            Arguments = arguments;
-        }
-
-        public string Arguments {
-            get {
-                return _processStartInfo.Arguments;
-            }
-            set {
-                _processStartInfo.Arguments = value;
-            }
-        }
-        public string FileName {
-            get {
-                return _processStartInfo.FileName;
-            }
-            set {
-                _processStartInfo.FileName = value;
-            }
-        }
-        public string WorkingDirectory {
-            get {
-                return _processStartInfo.WorkingDirectory;
-            }
-            set {
-                _processStartInfo.WorkingDirectory = value;
-            }
-        }
-
-        public bool CreateNoWindow {
-            get {
-                return _processStartInfo.CreateNoWindow;
-            }
-            set {
-                _processStartInfo.CreateNoWindow = value;
-            }
-        }
-
-        public ProcessWindowStyle WindowStyle {
-            get {
-                return _processStartInfo.WindowStyle;
-            }
-            set {
-                _processStartInfo.WindowStyle = value;
-            }
-        }
-        public bool ErrorDialog {
-            get {
-                return _processStartInfo.ErrorDialog;
-            }
-            set {
-                _processStartInfo.ErrorDialog = value;
-            }
-        }
-        public IntPtr ErrorDialogParentHandle {
-            get {
-                return _processStartInfo.ErrorDialogParentHandle;
-            }
-            set {
-                _processStartInfo.ErrorDialogParentHandle = value;
-            }
-        }
-        public bool RedirectStandardInput {
-            get {
-                return _processStartInfo.RedirectStandardInput;
-            }
-            set {
-                _processStartInfo.RedirectStandardInput = value;
-            }
-        }
-        public string UserName {
-            get {
-                return _processStartInfo.UserName;
-            }
-            set {
-                _processStartInfo.UserName = value;
-            }
-        }
-        public SecureString Password{
-            get {
-                return _processStartInfo.Password;
-            }
-            set {
-                _processStartInfo.Password = value;
-            }
-        }
-        
-        public IDictionary<string,string> EnvironmentVariables {
-            get {
-                if (_environmentVariables == null) {
-                    _environmentVariables = Environment.GetEnvironmentVariables().Cast<DictionaryEntry>().ToXDictionary(dictionaryEntry => (string)dictionaryEntry.Key, dictionaryEntry => (string)dictionaryEntry.Value);
-                    _environmentVariables.Changed += source => SyncEnvironment();
-                }
-                return _environmentVariables;
-            } set {
-                _environmentVariables = value != null ? value.Keys.ToXDictionary(each => each, each => value[each]) : new XDictionary<string, string>();
-                _environmentVariables.Changed += source => SyncEnvironment();
-            }
-        }
-    }
-#endif
-
     public class Executable {
 
-        public Executable(string filename, string basePath = null) {
-            basePath = basePath ?? Environment.CurrentDirectory;
-            _path = FindHighestBinary(filename, basePath, true, true);
-            if (string.IsNullOrEmpty(_path)) {
+        public Executable(string filename, params string[] basePath) {
+            
+            // check for it in the current directory somewhere first, as well as in the PATH.
+            Path = FindHighestBinary(filename, Environment.CurrentDirectory, true, true);
+
+            // then check all the places they could have said it might be.
+            foreach (var bp in basePath) {
+                Path = FindHighestBinary(filename, bp, true, false,Path);
+            }
+            
+            if (string.IsNullOrEmpty(Path)) {
                 throw new Exception("Unable to find executable '{0}'".format(filename));
             }
         }
 
-        private string _path;
+        public string Path;
 
         private static char[] _delimiter = new[] {
             ';'
@@ -224,7 +78,7 @@ namespace ClrPlus.Platform.Process {
                 }
 
                 if (Directory.Exists(baseFolder)) {
-                    var fullpath = Path.Combine(baseFolder, binaryName);
+                    var fullpath = System.IO.Path.Combine(baseFolder, binaryName);
                     if (FileVersion(currentLeader) < FileVersion(fullpath)) {
                         currentLeader = fullpath;
                     }
@@ -241,31 +95,31 @@ namespace ClrPlus.Platform.Process {
         }
 
         public AsyncProcess Exec() {
-            return AsyncProcess.Start(_path);
+            return AsyncProcess.Start(Path);
         }
 
         public AsyncProcess Exec(string cmdline) {
-            return AsyncProcess.Start(_path, cmdline);
+            return AsyncProcess.Start(Path, cmdline);
         }
 
         public AsyncProcess Exec(IDictionary environment) {
-            return AsyncProcess.Start(_path, environment);
+            return AsyncProcess.Start(Path, environment);
         }
 
         public AsyncProcess Exec(string cmdline, IDictionary environment) {
-            return AsyncProcess.Start(_path, cmdline, environment);
+            return AsyncProcess.Start(Path, cmdline, environment);
         }
 
         public AsyncProcess Exec(string cmdline, string workingDirectory, IDictionary environment) {
             return AsyncProcess.Start(new ProcessStartInfo {
-                FileName = _path,
+                FileName = Path,
                 WorkingDirectory = workingDirectory,
             },environment);
         }
 
         public AsyncProcess Exec(string cmdline, string workingDirectory) {
             return AsyncProcess.Start(new ProcessStartInfo {
-                FileName = _path,
+                FileName = Path,
                 WorkingDirectory = workingDirectory,
             });
         }
