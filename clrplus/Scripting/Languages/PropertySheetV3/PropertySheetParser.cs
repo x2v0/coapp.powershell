@@ -379,7 +379,11 @@ namespace ClrPlus.Scripting.Languages.PropertySheetV3 {
                     var identifier = Data;
                     switch (NextAfter(WhiteSpaceOrComments)) {
                         case TokenType.Equal:
-                            context.Aliases.Value.Add(identifier, ParseSelector(Semicolon));
+                            var sel = ParseSelector(Semicolon);
+                            if (sel.Name.EndsWith(identifier)) {
+                                Event<Warning>.Raise("PSP99", "@alias target '{0}' contains name of alias source '{1}', may cause infinite loop .", sel.ToString(), identifier);
+                            }
+                            context.Aliases.Value.Add(identifier, sel);
                             return Continue;
                     }
                     throw Fail(ErrorCode.TokenNotExpected, "Expected '=' in alias declaration, found {0}");

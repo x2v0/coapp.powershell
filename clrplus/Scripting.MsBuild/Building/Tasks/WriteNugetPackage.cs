@@ -31,7 +31,7 @@ namespace ClrPlus.Scripting.MsBuild.Building.Tasks {
         public ITaskItem[] MainPackages {get; set;}
 
         [Output]
-        public ITaskItem[] RedistPackages {get; set;}
+        public ITaskItem[] OverlayPackages {get; set;}
 
         [Output]
         public bool NuGetSuccess {get; set;}
@@ -61,22 +61,22 @@ namespace ClrPlus.Scripting.MsBuild.Building.Tasks {
                     IEnumerable<string> overlayFiles;
                     var pkg = script.Save(PackageTypes.NuGet, true, out overlayFiles);
 
-                    RedistPackages = overlayFiles.Select(each => (ITaskItem)new TaskItem(each)).ToArray();
+                    OverlayPackages = overlayFiles.Select(each => (ITaskItem)new TaskItem(each)).ToArray();
                     MainPackages = new ITaskItem[] { new TaskItem(pkg) };
-                    RedistPackages = new ITaskItem[0];
+                    OverlayPackages = new ITaskItem[0];
 
                     /*
                     AllPackages = script.AllPackages.Select(each => (ITaskItem)new TaskItem(each)).ToArray();
 
                     // AllPackages = script.Packages.Select(each => (ITaskItem)new TaskItem(each)).ToArray();
 
-                    RedistPackages = AllPackages.Where(each => each.ItemSpec.ToLower().IndexOf("redist") > -1).ToArray();
+                    OverlayPackages = AllPackages.Where(each => each.ItemSpec.ToLower().IndexOf("overlay") > -1).ToArray();
                     SymbolsPackages = AllPackages.Where(each => each.ItemSpec.ToLower().IndexOf("symbols") > -1).ToArray();
-                    MainPackages = AllPackages.Where(each => each.ItemSpec.ToLower().IndexOf("redist") == -1 && each.ItemSpec.ToLower().IndexOf("symbols") == -1).ToArray();
+                    MainPackages = AllPackages.Where(each => each.ItemSpec.ToLower().IndexOf("overlay") == -1 && each.ItemSpec.ToLower().IndexOf("symbols") == -1).ToArray();
 
-                    foreach (var p in RedistPackages) {
+                    foreach (var p in OverlayPackages) {
                         var n = Path.GetFileNameWithoutExtension(p.ItemSpec);
-                        var o = n.IndexOf(".redist.");
+                        var o = n.IndexOf(".overlay.");
 
                         p.SetMetadata("pkgIdentity", "{0} {1}".format(n.Substring(0, o + 7), n.Substring(o + 8)));
                     }

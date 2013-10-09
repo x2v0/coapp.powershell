@@ -374,22 +374,23 @@ namespace CoApp.NuGetNativeMSBuildTasks {
         }
 
         private bool NuGetOverlay(string package, string version, string packageDirectory) {
-            var process = AsyncProcess.Start(_nugetExe, string.Format("overlay {0} -Version {1} -OverlayPackageDirectory {2}", package,version , packageDirectory));
+            var process = AsyncProcess.Start(_nugetExe, string.Format(@"overlay ""{0}"" -Version {1} -OverlayPackageDirectory ""{2}""", package,version , packageDirectory));
             foreach (var txt in process.StandardOutput) {
                 if (!string.IsNullOrEmpty(txt)) {
                     Log.LogMessage("NuGet:{0}",txt);
                 }
             }
 
-            if (process.ExitCode != 0) {
-                foreach (var txt in process.StandardError) {
-                    if (!string.IsNullOrEmpty(txt)) {
-                        Log.LogError("NuGet:{0}", txt);
+            foreach (var txt in process.StandardError) {
+                if (!string.IsNullOrEmpty(txt)) {
+                    if (process.ExitCode != 0) {
+                        Log.LogError("NuGet Error:{0}", txt);
+                    } else {
+                        Log.LogWarning("NuGet Error:{0}", txt);
                     }
                 }
-                return false;
             }
-            return true;
+            return (process.ExitCode == 0);
         }
     }
 }

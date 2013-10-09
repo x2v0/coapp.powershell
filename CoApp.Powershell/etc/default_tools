@@ -37,10 +37,10 @@ publish {
     .Message.Text = "Pushing NuGet Packages to server using stored credentials.";
     
     .NuGet.Push = "%(MainPackages.Identity)";
-    .NuGet.Push = "%(RedistPackages.Identity)";
+    .NuGet.Push = "%(OverlayPackages.Identity)";
     
-    .Message.Text = "Hiding Redist Packages ...";
-    .NuGet.Delete = "%(RedistPackages.pkgIdentity)";
+    .Message.Text = "Hiding Overlay Packages ...";
+    .NuGet.Delete = "%(OverlayPackages.pkgIdentity)";
 
     .Message.Text = "Completed publishing.";
 };

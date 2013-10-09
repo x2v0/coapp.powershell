@@ -68,7 +68,7 @@ namespace CoApp.Powershell.Commands {
 
         private Executable _nugetExe;
 
-        private static Regex rx = new Regex(@"(?<name>.*?)(?<variant>\.redist-.*?)?(?<version>[\.\d]+).nupkg");
+        private static Regex rx = new Regex(@"(?<name>.*?)(?<variant>\.overlay-.*?)?(?<version>[\.\d]+).nupkg");
 
         [Parameter(HelpMessage = "Package files to publish",Mandatory = true, Position = 0)]
         public string[] Packages { get; set;}
@@ -88,11 +88,11 @@ namespace CoApp.Powershell.Commands {
         [Parameter(HelpMessage = "Display this amount of details in the output: normal, quiet, detailed.")]
         public string Verbosity { get; set; }
 
-        [Parameter(HelpMessage = "Doesn't automatically upload .redist- .nupkg files")]
-        public SwitchParameter IgnoreRedist { get; set; }
+        [Parameter(HelpMessage = "Doesn't automatically upload .overlay- .nupkg files")]
+        public SwitchParameter IgnoreOverlay { get; set; }
 
-        [Parameter(HelpMessage = "Doesn't automatically unlist .redist- .nupkg files")]
-        public SwitchParameter DontUnlistRedist { get; set; }
+        [Parameter(HelpMessage = "Doesn't automatically unlist .overlay- .nupkg files")]
+        public SwitchParameter DontUnlistOverlay { get; set; }
 
         [Parameter(HelpMessage = "Don't parallelize the uploads")]
         public SwitchParameter Slow {get; set;}
@@ -109,7 +109,7 @@ namespace CoApp.Powershell.Commands {
                     Variant = peices.GetValue("variant");
                     Version = peices.GetValue("version");
                 }
-                Name = IsRedist ? "{0}{1}".format(BaseName, Variant) : BaseName;
+                Name = IsOverlay ? "{0}{1}".format(BaseName, Variant) : BaseName;
             }
 
             public string FullPath {get; set;}
@@ -120,13 +120,13 @@ namespace CoApp.Powershell.Commands {
             public string Version { get; set; }
             public string Variant { get; set; }
             public bool ValidName {get; set;}
-            public bool IsRedist { get {
+            public bool IsOverlay { get {
                 return Variant.Is();
             }}
 
-            public IEnumerable<PackageIdentity> RedistPackages {
+            public IEnumerable<PackageIdentity> OverlayPackages {
                 get {
-                    return Directory.EnumerateFiles(Folder, "{0}.redist-*{1}.nupkg".format(BaseName, Version), SearchOption.TopDirectoryOnly).Select(redistFile => new PackageIdentity(redistFile));
+                    return Directory.EnumerateFiles(Folder, "{0}.overlay-*{1}.nupkg".format(BaseName, Version), SearchOption.TopDirectoryOnly).Select(overlayFile => new PackageIdentity(overlayFile));
                 }
             }
         }
@@ -168,12 +168,12 @@ namespace CoApp.Powershell.Commands {
                         continue;
                     }
 
-                    if (!pid.IsRedist && !IgnoreRedist) {
-                        // check for redist packages for this package 
-                        foreach (var redist in pid.RedistPackages) {
-                            var redistPkg = redist;
-                            Event<Verbose>.Raise("PublishNuGetPackage", "Pushing redist file {0}.", redist.Name );
-                            tasks.Add(NuPush(redistPkg), redistPkg);
+                    if (!pid.IsOverlay && !IgnoreOverlay) {
+                        // check for overlay packages for this package 
+                        foreach (var overlay in pid.OverlayPackages) {
+                            var overlayPkg = overlay;
+                            Event<Verbose>.Raise("PublishNuGetPackage", "Pushing overlay file {0}.", overlay.Name );
+                            tasks.Add(NuPush(overlayPkg), overlayPkg);
                         }
                     }
 
@@ -216,7 +216,7 @@ namespace CoApp.Powershell.Commands {
                     mut.WaitOne();
                 }
                 var results = NuPushImpl(package.FullPath);
-                if (!DontUnlistRedist && package.IsRedist) {
+                if (!DontUnlistOverlay && package.IsOverlay) {
                     results = results.Concat(NuUnlistImpl(package.Name, package.Version.Trim('.')));
                 }
                 results = results.ToArray();

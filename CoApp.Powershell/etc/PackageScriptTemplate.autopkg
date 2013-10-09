@@ -61,11 +61,6 @@ configurations {
         clrcall.restricted-to = "Win32";
     };
 
-	CharacterSet { 
-		key : "CharacterSet"; 
-		choices: {  MultiByte, Unicode };
-	};
-
     /* 
         Since the MSBuild  property for identifying if a project is compiling a Win8 Store App
         is a boolean, and we don't want to actually key off that, we're going to generate 
@@ -137,25 +132,17 @@ nuget := {
     };
 
     files {
-        @alias _targets = ::nuget.targets.[ ${condition} ];
-        @alias Items = _targets.ItemGroup;
-
-
         #output {
             package = default;
         };
 
         bin += {  
-            #add-each-file : { 
-                Items.CopyToOutput;
-                Items.DeploymentContent;
-            };
+            #add-each-file : ::nuget.targets.[${condition}].CopyToOutput;
             
-            #add-folder: ::nuget.targets.[${condition}].BuildTimePath;
+            #add-folder : ::nuget.targets.[${condition}].BuildTimePath;
 
             #destination : ${d_bin};  
         };
-
 
         redist += {  
             #add-each-file : ::nuget.targets.[${condition}].CopyToOutput;
@@ -219,33 +206,26 @@ nuget := {
     
     targets {
         @alias Includes = ItemDefinitionGroup.ClCompile.AdditionalIncludeDirectories;
-        @alias LibraryFolders = ItemDefinitionGroup.Link.AdditionalLibraryDirectories;
+		@alias LibraryFolders = ItemDefinitionGroup.Link.AdditionalLibraryDirectories;
         @alias RcIncludes = ItemDefinitionGroup.ResourceCompile.AdditionalIncludeDirectories;
         @alias Defines = ItemDefinitionGroup.ClCompile.PreprocessorDefinitions;
         @alias Libraries = ItemDefinitionGroup.Link.AdditionalDependencies;
         @alias LibLibraries = ItemDefinitionGroup.Lib.AdditionalDependencies;
-        @alias ForcedIncludeFiles = ItemDefinitionGroup.ClCompile.ForcedIncludeFiles;
-        
-        ExpectedRuntimeLibrary = none;
-        
-        AfterBuild {
-            .Copy {
-                   SourceFiles = @(CopyToOutput);
-                   DestinationFolder = $(TargetDir);
-                   SkipUnchangedFiles = true;
-                   UseHardlinksIfPossible = true;
-            }
-        };
-    };
+        @alias ForcedIncludes = ItemDefinitionGroup.ClCompile.ForcedIncludeFiles;
 
+        ExpectedRuntimeLibrary = none;
+		
+		
+    }
+    
     props {
         @alias Includes = ItemDefinitionGroup.ClCompile.AdditionalIncludeDirectories;
-        @alias LibraryFolders = ItemDefinitionGroup.Link.AdditionalLibraryDirectories;
+		@alias LibraryFolders = ItemDefinitionGroup.Link.AdditionalLibraryDirectories;
         @alias RcIncludes = ItemDefinitionGroup.ResourceCompile.AdditionalIncludeDirectories;
         @alias Libraries = ItemDefinitionGroup.Link.AdditionalDependencies;
         @alias Defines = ItemDefinitionGroup.ClCompile.PreprocessorDefinitions;
         @alias LibLibraries = ItemDefinitionGroup.Lib.AdditionalDependencies;
-        @alias ForcedIncludeFiles = ItemDefinitionGroup.ClCompile.ForcedIncludeFiles;
+		@alias ForcedIncludes = ItemDefinitionGroup.ClCompile.ForcedIncludeFiles;
 
-    };
-};
+    }
+}

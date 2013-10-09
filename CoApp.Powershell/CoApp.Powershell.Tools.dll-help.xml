@@ -1485,7 +1485,7 @@ See RestableCmdlet documentation.</maml:para>
 	</command:details>
 	<maml:description>
 	<!--This is the Description section-->
-		<maml:para>Uploads NuGet packages to the NuGet repository. Symbols packages are automatically routed to the symbols repository.  </maml:para>
+		<maml:para>Uploads NuGet packages to the NuGet repository. </maml:para>
 	</maml:description>
 	<command:syntax>
 		<command:syntaxItem>
@@ -1493,7 +1493,7 @@ See RestableCmdlet documentation.</maml:para>
 			<command:parameter required="true" variableLength="true" globbing="false" pipelineInput="false" position="0">
 				<maml:name>Packages</maml:name>
 				<maml:description>
-					<maml:para>Package files to publish. Only specify the base package, the .redist and .symbols packages will be found automatically.</maml:para>
+					<maml:para>Package files to publish. Only specify the base package, the .overlay packages will be found automatically.</maml:para>
 				</maml:description>
 				<command:parameterValue required="true" variableLength="true">String[]</command:parameterValue>
 			</command:parameter>
@@ -1551,9 +1551,9 @@ See RestableCmdlet documentation.</maml:para>
 		<command:syntaxItem>
 			<maml:name>Publish-NuGetPackage</maml:name>
 			<command:parameter required="false" variableLength="false" globbing="false" pipelineInput="false" position="named">
-				<maml:name>IgnoreRedist</maml:name>
+				<maml:name>IgnoreOverlay</maml:name>
 				<maml:description>
-					<maml:para>Doesn&apos;t automatically upload .redist .nupkg files</maml:para>
+					<maml:para>Doesn&apos;t automatically upload .overlay .nupkg files</maml:para>
 				</maml:description>
 				<command:parameterValue required="false" variableLength="false">SwitchParameter</command:parameterValue>
 			</command:parameter>
@@ -1635,7 +1635,7 @@ See RestableCmdlet documentation.</maml:para>
 		<command:parameter required="true" variableLength="true" globbing="false" pipelineInput="false" position="0">
 			<maml:name>Packages</maml:name>
 			<maml:description>
-				<maml:para>Package files to publish. Only specify the base package, the .redist and .symbols packages will be found automatically.</maml:para>
+				<maml:para>Package files to publish. Only specify the base package, the .overlay  packages will be found automatically.</maml:para>
 			</maml:description>
 			<command:parameterValue required="true" variableLength="true">String[]</command:parameterValue>
 			<dev:type>
@@ -1705,9 +1705,9 @@ See RestableCmdlet documentation.</maml:para>
 			<dev:defaultValue></dev:defaultValue>
 		</command:parameter>
 		<command:parameter required="false" variableLength="false" globbing="false" pipelineInput="false" position="named">
-			<maml:name>IgnoreRedist</maml:name>
+			<maml:name>IgnoreOverlay</maml:name>
 			<maml:description>
-				<maml:para>Doesn&apos;t automatically upload .redist .nupkg files</maml:para>
+				<maml:para>Doesn&apos;t automatically upload .overlay .nupkg files</maml:para>
 			</maml:description>
 			<command:parameterValue required="false" variableLength="false">SwitchParameter</command:parameterValue>
 			<dev:type>
@@ -3505,13 +3505,13 @@ See RestableCmdlet documentation.</maml:para>
 	<!--This is the Description section-->
 		<maml:para>NuGet packages are built from a single .autopkg file that contains information about all the different files and combinations on how those files are to be consumed by the end-developer.
 
-Each .autopkg script can create one or more packages that are related to each other. Typically, for a given library &apos;foolib&apos;, the &apos;foolib.autopkg&apos; file would contain the information and instructions to generate &apos;foolib.nupkg&apos;, &apos;foolib.redist.nupkg&apos; and &apos;foolib.symbols.nupkg&apos;. 
+Each .autopkg script can create one or more packages that are related to each other. Typically, for a given library &apos;foolib&apos;, the &apos;foolib.autopkg&apos; file would contain the information and instructions to generate &apos;foolib.nupkg&apos;, &apos;foolib.overlay.nupkg&apos; and &apos;foolib.symbols.nupkg&apos;. 
 
-The base package (ie, &apos;foolib.nupkg&apos;) contains the instructions and files required to build an application using the package (also called &apos;consuming&apos; the package) and has a dependency on the &apos;foolib.redist.nupkg&apos;)  Typically, the base package contains the documentation, header files, .lib files, and anything else a developer would need.
+The base package (ie, &apos;foolib.nupkg&apos;) contains the instructions and files required to build an application using the package (also called &apos;consuming&apos; the package) and has a dependency on the &apos;foolib.overlay.nupkg&apos;)  Typically, the base package contains the documentation, header files, .lib files, and anything else a developer would need.
 
-The &apos;redist&apos; package (ie, &apos;foolib.redist.nupkg&apos;) contains the binary files that are required only to run applications linked with the package. Typically, this means the .DLL files, along with any other content that the application will require at runtime.  This is separated to make it possible that an intermediate library can link against a package (ie, &apos;barlib&apos; uses functions from &apos;foolib&apos;, but the consumer of &apos;barlib&apos; doesn&apos;t need to explicitly link against &apos;foolib&apos;, or reference its header files.)
+The &apos;overlay&apos; package (ie, &apos;foolib.overlay.nupkg&apos;) contains the binary files that are required only to run applications linked with the package. Typically, this means the .DLL files, along with any other content that the application will require at runtime.  This is separated to make it possible that an intermediate library can link against a package (ie, &apos;barlib&apos; uses functions from &apos;foolib&apos;, but the consumer of &apos;barlib&apos; doesn&apos;t need to explicitly link against &apos;foolib&apos;, or reference its header files.)
 
-The &apos;symbols&apos; package (ie, &apos;foolib.symbols.nupkg&apos; contains the debug symbols (.pdb files) for the binaries found in the &apos;redist&apos; package. The &apos;symbols&apos; package can be uploaded to a symbol server (like symbolsource.org) where developers can access them as required. &apos;Symbols&apos; packages can also contain the original source tree, so that end-developers can actually step thru the source code for libraries that they are linking to. For more detail, see more about symbols packages at http://docs.nuget.org/docs/creating-packages/creating-and-publishing-a-symbol-package .</maml:para>
+The &apos;symbols&apos; package (ie, &apos;foolib.symbols.nupkg&apos; contains the debug symbols (.pdb files) for the binaries found in the &apos;overlay&apos; package. The &apos;symbols&apos; package can be uploaded to a symbol server (like symbolsource.org) where developers can access them as required. &apos;Symbols&apos; packages can also contain the original source tree, so that end-developers can actually step thru the source code for libraries that they are linking to. For more detail, see more about symbols packages at http://docs.nuget.org/docs/creating-packages/creating-and-publishing-a-symbol-package .</maml:para>
 	</maml:description>
 	<command:syntax>
 		<command:syntaxItem>
@@ -3762,7 +3762,7 @@ See RestableCmdlet documentation.</maml:para>
 			<dev:remarks>
 				<maml:para>Building a simple C++ package. 
 
-The .autopackage script contains the required files to generate the base, redist and symbols packages.
+The .autopackage script contains the required files to generate the base and overlay packages.
 
 This example&apos;s .autopkg and other files can be found at http://downloads.coapp.org/files/CPP_Rest_SDK_Example.zip</maml:para>
 			</dev:remarks>
@@ -3770,8 +3770,8 @@ This example&apos;s .autopkg and other files can be found at http://downloads.co
 				<command:commandLine>
 					<command:commandText> &gt;:Attempting to build package from &apos;cpprestsdk.nuspec&apos;.
  &gt;:Successfully created package &apos;C:\project\cpprestsdk.0.6.0.12.nupkg&apos;.
- &gt;:Attempting to build package from &apos;cpprestsdk.redist.nuspec&apos;.
- &gt;:Successfully created package &apos;C:\project\cpprestsdk.redist.0.6.0.12.nupkg&apos;.
+ &gt;:Attempting to build package from &apos;cpprestsdk.overlay.nuspec&apos;.
+ &gt;:Successfully created package &apos;C:\project\cpprestsdk.overlay.0.6.0.12.nupkg&apos;.
  &gt;:
  &gt;:Attempting to build package from &apos;cpprestsdk.symbols.nuspec&apos;.
  &gt;:Successfully created package &apos;C:\project\cpprestsdk.symbols.0.6.0.12.nupkg&apos;.</command:commandText>

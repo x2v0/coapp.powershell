@@ -36,7 +36,7 @@ namespace ClrPlus.Scripting.MsBuild.Packaging {
 
     internal enum PackageRole {
         @default,
-        redist,
+        overlay,
     }
 
     internal class NugetPackage : IProjectOwner {
@@ -61,8 +61,8 @@ namespace ClrPlus.Scripting.MsBuild.Packaging {
         // private readonly Dictionary<string, string> _files = new Dictionary<string, string>();
         private readonly Dictionary<string, Dictionary<string,string>> _fileSets = new Dictionary<string, Dictionary<string, string>>();
         private readonly PackageScript _packageScript;
-        private readonly string _pkgName;  // whole name of the package (ie 'zlib' or 'zlib.redist')
-        internal readonly PackageRole PkgRole;  // role of the package (ie 'default' or 'redist')
+        private readonly string _pkgName;  // whole name of the package (ie 'zlib' or 'zlib.overlay')
+        internal readonly PackageRole PkgRole;  // role of the package (ie 'default' or 'overlay')
 
         internal long SplitThreshold;
 
@@ -166,7 +166,7 @@ namespace ClrPlus.Scripting.MsBuild.Packaging {
                     // only the default package gets to map to the propertysheet directly.
                     results = results.Concat(MapNugetNode());
                     break;
-                case PackageRole.redist:
+                case PackageRole.overlay:
                     break;
                 default:
                     break;
@@ -225,16 +225,16 @@ namespace ClrPlus.Scripting.MsBuild.Packaging {
                 case PackageRole.@default:
                     break;
 
-                case PackageRole.redist:
+                case PackageRole.overlay:
                     //copy the nuspec fields from the default project (and change what's needed)
                     var basePackage = _packageScript.NugetPackage;
                     _nuSpec = new DynamicNode(new XElement(basePackage._nuSpec.Element));
 
                     _nuSpec.metadata.requireLicenseAcceptance = "false";
-                    _nuSpec.metadata.title = "{0} Redist".format((string)basePackage._nuSpec.metadata.title);
-                    _nuSpec.metadata.summary = "Redistributable components for package '{0}'".format(basePackage._pkgName);
+                    _nuSpec.metadata.title = "{0} Overlay".format((string)basePackage._nuSpec.metadata.title);
+                    _nuSpec.metadata.summary = "Additional components for package '{0}'".format(basePackage._pkgName);
                     _nuSpec.metadata.id = _pkgName;
-                    _nuSpec.metadata.description = "Redistributable components for package '{0}'. This package should only be installed as a dependency. \r\n(This is not the package you are looking for).".format(basePackage._pkgName);
+                    _nuSpec.metadata.description = "Additional components for package '{0}'. This package should only be installed as a dependency. \r\n(This is not the package you are looking for).".format(basePackage._pkgName);
                     _nuSpec.metadata.dependencies = null;
                     _nuSpec.metadata.tags = null;
 
@@ -414,10 +414,10 @@ namespace ClrPlus.Scripting.MsBuild.Packaging {
                     } else {
                         overlays = overlays ?? new List<string>();
 
-                        var overlayPackageName = "{0}.redist-{1}".format(_pkgName, Pivots.GetExpressionFilename("", set));
+                        var overlayPackageName = "{0}.overlay-{1}".format(_pkgName, Pivots.GetExpressionFilename("", set));
 
                         // create a seperate package file
-                        using (var pkg = new NugetPackage(_packageScript, PackageRole.redist, overlayPackageName)) {
+                        using (var pkg = new NugetPackage(_packageScript, PackageRole.overlay, overlayPackageName)) {
                             pkg._fileSets.Add(string.Empty, _fileSets[set]);
                             pkg.Process();
 
