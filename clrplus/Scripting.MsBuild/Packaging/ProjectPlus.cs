@@ -41,6 +41,7 @@ namespace ClrPlus.Scripting.MsBuild.Packaging {
         public Core.Utility.Lazy<ProjectTargetElement> EarlyInitTarget;
         public Core.Utility.Lazy<ProjectTargetElement> FirstInitTarget;
         public Core.Utility.Lazy<ProjectTargetElement> SecondInitTarget;
+        public Core.Utility.Lazy<ProjectTargetElement> ItemGroupInitTarget;
 
        
         public ProjectPlus(IProjectOwner owner, string filename) {
@@ -59,6 +60,15 @@ namespace ClrPlus.Scripting.MsBuild.Packaging {
                 var x = FirstInitTarget.Value;
 
                 var tgt = LookupTarget("{0}_init_{1}_2".format(SafeName, Path.GetExtension(Filename).Trim('.')), null, true);
+                InitialTargets.Add(tgt.Name);
+                return tgt;
+            });
+
+            ItemGroupInitTarget = new Core.Utility.Lazy<ProjectTargetElement>(() => {
+                // ensure the first one is created.
+                var x = SecondInitTarget.Value;
+
+                var tgt = LookupTarget("{0}_ItemGroupInit_{1}_3".format(SafeName, Path.GetExtension(Filename).Trim('.')), null, true);
                 InitialTargets.Add(tgt.Name);
                 return tgt;
             });
@@ -103,6 +113,7 @@ namespace ClrPlus.Scripting.MsBuild.Packaging {
                 yield return "ExpectedRuntimeLibrary".MapTo(() => CheckRuntimeLibrary(""));
                 // yield return "EmbedInOutput".MapTo(() => EmbedInOutput(""));
                 yield return "ImportGroup".MapTo(() => LookupImportGroup(""), ImportGroupChildren);
+
                 yield return "ItemGroup".MapTo(() => LookupItemGroup(""), ItemGroupChildren);
                 yield return "PropertyGroup".MapTo(() => LookupPropertyGroup(""), PropertyGroupChildren);
 
@@ -909,23 +920,25 @@ namespace ClrPlus.Scripting.MsBuild.Packaging {
         }
 
         internal ProjectItemGroupElement LookupItemGroup(string condition) {
+            
+
             // look it up or create it.
             var label = Pivots.GetExpressionLabel(condition);
             ProjectItemGroupElement itemGroup;
             if(string.IsNullOrEmpty(condition)) {
-                itemGroup = Xml.ItemGroups.FirstOrDefault(each => string.IsNullOrEmpty(each.Label));
+                itemGroup = ItemGroupInitTarget.Value.ItemGroups.FirstOrDefault(each => string.IsNullOrEmpty(each.Label));
                 if(itemGroup != null) {
                     return itemGroup;
                 }
             }
             else {
-                itemGroup = Xml.ItemGroups.FirstOrDefault(each => label == each.Label);
+                itemGroup = ItemGroupInitTarget.Value.ItemGroups.FirstOrDefault(each => label == each.Label);
                 if(itemGroup != null) {
                     return itemGroup;
                 }
             }
 
-            itemGroup = Xml.AddItemGroup();
+            itemGroup = ItemGroupInitTarget.Value.AddItemGroup();
             if(!string.IsNullOrEmpty(condition)) {
                 itemGroup.Label = label;
                 itemGroup.Condition = Pivots.GetMSBuildCondition(Name, condition);
@@ -957,6 +970,8 @@ namespace ClrPlus.Scripting.MsBuild.Packaging {
             }
             return importGroup;
         }
+
+
 
         internal ProjectItemDefinitionGroupElement LookupItemDefinitionGroup(string condition) {
             // look it up or create it.

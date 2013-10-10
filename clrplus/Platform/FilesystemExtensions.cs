@@ -113,6 +113,8 @@ namespace ClrPlus.Platform {
             '\\', '/', ':'
         };
 
+        private static readonly Regex Slashes = new Regex(@"[\x2f|\x5c]+");
+
         public static string SystemTempFolder {
             get {
                 return Environment.GetEnvironmentVariable("temp", EnvironmentVariableTarget.Machine);
@@ -669,16 +671,37 @@ namespace ClrPlus.Platform {
         }
 
 
+        public static IEnumerable<string> xFindFilesSmarterComplex(this string pathMask, string pathPrefix = null, string[] excludeMasks = null) {
+            //pathMask safety
+            if (String.IsNullOrEmpty(pathMask)) {
+                pathMask = pathPrefix;
+                pathPrefix = Directory.GetCurrentDirectory();
+            }
+
+            pathPrefix = String.IsNullOrEmpty(pathPrefix) ? Directory.GetCurrentDirectory() : pathPrefix;
+
+            if (excludeMasks.IsNullOrEmpty()) {
+                foreach (var r in FindFilesSmarterComplex(pathMask, pathPrefix)) {
+                    yield return r;
+                }
+            } else {
+                foreach (var r in FindFilesSmarterComplex(pathMask, pathPrefix)) {
+                    yield return r;
+                }
+            }
+        }
+
         /// <summary>
         ///     always call IsWildcardMatch with a prefix!!!!
         /// </summary>
         /// <param name="pathMask"> </param>
         /// <param name="pathPrefix"> </param>
         /// <returns> </returns>
-        public static IEnumerable<string> FindFilesSmarterComplex(this string pathMask, string pathPrefix = null) {
+        public static IEnumerable<string> FindFilesSmarterComplex(this string pathMask, string pathPrefix = null, string[] excludeMasks = null) {
             //pathMask safety
             if (String.IsNullOrEmpty(pathMask)) {
-                return FindFilesSmarterComplex(pathPrefix);
+                pathMask = pathPrefix;
+                pathPrefix = Directory.GetCurrentDirectory();
             }
 
             if (InvalidDoubleWcRx.IsMatch(pathMask)) {
@@ -691,7 +714,46 @@ namespace ClrPlus.Platform {
 
             pathPrefix = String.IsNullOrEmpty(pathPrefix) ? Directory.GetCurrentDirectory() : pathPrefix;
 
-            pathMask = pathMask.Replace("/", "\\");
+            pathMask = pathMask.FixBackSlashes();
+
+            if (excludeMasks.IsNullOrEmpty()) {
+                return FindFilesSmarterComplexImpl(pathMask, pathPrefix);
+            }
+
+            return FindFilesSmarterComplexImpl(pathMask, pathPrefix,excludeMasks.Select( each => each.FixBackSlashes()).ToArray());
+        }
+
+        private static IEnumerable<string> FindFilesSmarterComplexImpl(string pathMask, string pathPrefix, string[] excludeMasks) {
+            var ppSize = pathPrefix.Length;
+            foreach (var r in FindFilesSmarterComplexImpl(pathMask, pathPrefix)) {
+                string filename = null;
+                string resultSubPath = null;
+                var keepResult = true;
+
+                foreach (var exclude in excludeMasks) {
+                    if (exclude.IndexOf('\\') > -1) {
+                        resultSubPath = resultSubPath ?? r.Substring(ppSize).Trim('\\');
+                        // exclude based on a potential subdirectory match
+                        if (resultSubPath.NewIsWildcardMatch(exclude)) {
+                            keepResult = false;
+                            break;
+                        }
+                    } else {
+                        filename = filename ?? Path.GetFileName(r);
+                        if (filename.NewIsWildcardMatch(exclude)) {
+                            keepResult = false;
+                            break;
+                        }
+                    }
+                }
+                if (keepResult) {
+                    yield return r;
+                }
+            }
+        }
+
+        private static IEnumerable<string> FindFilesSmarterComplexImpl(string pathMask, string pathPrefix) {
+
             var nextPart = pathMask.GetNextPart();
             var onLastPart = nextPart.Item2 == "";
 
@@ -746,9 +808,10 @@ namespace ClrPlus.Platform {
                 : Enumerable.Empty<string>();
         }
 
-        public static IEnumerable<string> FindFilesSmarterComplex(this IEnumerable<string> pathMasks, string pathPrefix = null) {
-            return pathMasks.Aggregate(Enumerable.Empty<string>(), (current, p) => current.Union(p.FindFilesSmarterComplex(pathPrefix)));
+        public static IEnumerable<string> FindFilesSmarterComplex(this IEnumerable<string> pathMasks, string pathPrefix = null, string[] excludePaths = null) {
+            return pathMasks.Aggregate(Enumerable.Empty<string>(), (current, p) => current.Union(p.FindFilesSmarterComplex(pathPrefix, excludePaths)));
         }
+
 
 
         /// <summary>
@@ -1122,7 +1185,7 @@ namespace ClrPlus.Platform {
         /// <remarks>
         /// </remarks>
         public static bool IsSimpleSubPath(this string path) {
-            var temp = path.FixFilepathSlashes();
+            var temp = path.FixBackSlashes();
             if (temp.Contains(":") || temp.Contains("*")) {
                 return false;
             }
@@ -1201,6 +1264,19 @@ namespace ClrPlus.Platform {
                 }).ToDictionary(each => each.orig, each => each.path);
             }
             return allPaths.ToDictionary(each => each ,Path.GetFileName);
+        }
+
+        public static string FixSlashes(this string path) {
+            if (path.Is()) {
+                return Slashes.Replace(path, "/");
+            }
+            return path;
+        }
+        public static string FixBackSlashes(this string path) {
+            if (path.Is()) {
+                return Slashes.Replace(path, @"\");
+            }
+            return path;
         }
     }
 }

@@ -276,6 +276,8 @@ namespace ClrPlus.Scripting.MsBuild.Packaging {
 
         }
 
+        
+
         private void ProcessNugetFiles(View filesView, string srcFilesRoot, string currentCondition) {
             currentCondition = Pivots.NormalizeExpression(currentCondition ?? "");
 
@@ -292,11 +294,13 @@ namespace ClrPlus.Scripting.MsBuild.Packaging {
                 var filemasks = container.Values.Distinct().ToArray();
                 var relativePaths = new Dictionary<string, string>();
 
+                var optionExcludes = container.GetMetadataValues("exclude", container, false).Union(container.GetMetadataValues("excludes", container, false)).ToArray();
+
                 foreach (var mask in filemasks) {
                     if (string.IsNullOrEmpty(mask)) {
                         continue;
                     }
-                    var fileset = mask.FindFilesSmarterComplex(srcFilesRoot).GetMinimalPathsToDictionary();
+                    var fileset = mask.FindFilesSmarterComplex(srcFilesRoot, optionExcludes).GetMinimalPathsToDictionary();
 
                     if (!fileset.Any()) {
                         Event<Warning>.Raise("ProcessNugetFiles","WARNING: file selection '{0}' failed to find any files ", mask);
@@ -306,7 +310,7 @@ namespace ClrPlus.Scripting.MsBuild.Packaging {
                         relativePaths.Add(key, fileset[key]);
                     }
                 }
-                var optionExcludes = container.GetMetadataValues("exclude", container, false).Union(container.GetMetadataValues("excludes", container, false)).ToArray();
+                
                 var optionRenames = container.GetMetadataValues("rename", container, false).Union(container.GetMetadataValues("renames", container, false)).Select(each => {
                     var s = each.Split('/','\\');
                     if (s.Length == 2) {
@@ -318,8 +322,6 @@ namespace ClrPlus.Scripting.MsBuild.Packaging {
                     return null;
                 }).Where( each => each != null).ToArray();
              
-              
-
                 // determine the destination location in the target package
                 var optionDestination = container.GetMetadataValueHarder("destination", currentCondition);
                 var destinationFolder = string.IsNullOrEmpty(optionDestination) ? (filesView.GetSingleMacroValue("d_" + containerName) ?? "\\") : optionDestination;
@@ -337,7 +339,7 @@ namespace ClrPlus.Scripting.MsBuild.Packaging {
                     foreach (var addFolder in addFolders) {
                         var folderView = filesView.GetProperty(addFolder, lastMinuteReplacementFunction: s => s.Replace("${condition}", currentCondition));
                         if (folderView != null) {
-                            folderView.AddValue((filesView.GetSingleMacroValue("pkg_root") + destinationFolder).Replace("\\\\", "\\"));
+                            folderView.AddValue((filesView.GetSingleMacroValue("pkg_root") + destinationFolder).FixSlashes());
                         }
                     }
                 }
@@ -350,7 +352,7 @@ namespace ClrPlus.Scripting.MsBuild.Packaging {
                         if (folderView != null) {
                             // add the /** suffix on the path
                             // so it can be used in an ItemGroup
-                            folderView.AddValue(((filesView.GetSingleMacroValue("pkg_root") + destinationFolder).Replace("\\\\", "\\") + "/**").Replace("//","/"));
+                            folderView.AddValue(((filesView.GetSingleMacroValue("pkg_root") + destinationFolder) + "/**").FixSlashes());
                         }
                     }
                 }
@@ -363,7 +365,7 @@ namespace ClrPlus.Scripting.MsBuild.Packaging {
                     }
 
                     Event<Verbose>.Raise("ProcessNugetFiles (adding file)", "'{0}' + '{1}'", destinationFolder, relativePaths[src]);
-                    string target = Path.Combine(destinationFolder, optionFlatten ? Path.GetFileName(relativePaths[src]) : relativePaths[src]).Replace("${condition}", currentCondition).Replace("\\\\", "\\");
+                    string target = Path.Combine(destinationFolder, optionFlatten ? Path.GetFileName(relativePaths[src]) : relativePaths[src]).Replace("${condition}", currentCondition).FixSlashes();
 
                     if (optionRenames.Length > 0) {
                         // process rename commands
@@ -405,7 +407,7 @@ namespace ClrPlus.Scripting.MsBuild.Packaging {
                         foreach (var addEachFile in addEachFiles) {
                             var fileListView = filesView.GetProperty(addEachFile, lastMinuteReplacementFunction: s=> s.Replace("${condition}", currentCondition));
                             if (fileListView != null) {
-                                fileListView.AddValue((filesView.GetSingleMacroValue("pkg_root") + target).Replace("${condition}", currentCondition).Replace("\\\\", "\\"));
+                                fileListView.AddValue((filesView.GetSingleMacroValue("pkg_root") + target).Replace("${condition}", currentCondition).FixSlashes());
                             }
                         }
                     }

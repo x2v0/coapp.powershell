@@ -143,6 +143,7 @@ namespace ClrPlus.Scripting.MsBuild.Packaging {
         }
 
         public void AddFile(string sourcePath, string destinationPath, string currentCondition) {
+            destinationPath = destinationPath.FixSlashes();
             var fileCollection = _fileSets.GetOrAdd( currentCondition.Is() ? currentCondition : string.Empty, () => new Dictionary<string, string>());
 
             if (fileCollection.ContainsKey(destinationPath)) {
@@ -556,7 +557,7 @@ namespace ClrPlus.Scripting.MsBuild.Packaging {
         private void AddFileToNuSpec(string src, string dest) {
             var file = _nuSpec.files.Add("file");
             file.Attributes.src = src.GetFullPath().Replace("\\\\", "\\");
-            file.Attributes.target = dest;
+            file.Attributes.target = dest.FixSlashes();
         }
 
         /*
