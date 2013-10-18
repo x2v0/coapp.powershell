@@ -402,7 +402,7 @@ namespace CoApp.Powershell.Commands {
         }
 
         public static void ProcessProperty(this IEnumerable<Configuration> configurations, Project project, string conditionToApply, ProjectPropertyGroupElement pgpe, string outputPropertyName, string inputCategory, string inputPropertyName) {
-            ProjectPropertyElement masterProperty = null;
+            // ProjectPropertyElement masterProperty = null;
 
             var value = configurations.GetCommonValue(inputCategory, inputPropertyName);
             if(value.Is()) {

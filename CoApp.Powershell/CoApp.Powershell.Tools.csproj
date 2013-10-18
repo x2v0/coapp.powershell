@@ -169,6 +169,7 @@
     <Compile Include="Signers\OPCSigner.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="app.config" />
     <None Include="etc\common-footer.vcxproj">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <SubType>Designer</SubType>
@@ -298,6 +299,16 @@ path = %25TOOLSDIR%25;%25NODE_PATH%25\node_modules\.bin;%25PATH%25
 
 cd $(TargetDir)
   
+
+if '$(ConfigurationName)' == 'Release'   goto RELEASE
+
+:DEBUG
+
+powershell Set-content coapp.psd1 ((Get-Content coapp.psd1).Replace('CoApp.Powershell.Tools.dll','coapp.powershell.dll') )
+
+goto common
+
+:RELEASE 
   $(SolutionDir)\tools\il-repack.exe   /targetplatform:v4 /lib:. /lib:"C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0" /lib:"C:\Program Files (x86)\Reference Assemblies\Microsoft\WindowsPowerShell\3.0" /parallel /union /out:CoApp.Powershell.Tools.dll CoApp.Powershell.dll ClrPlus.Core.dll ClrPlus.Platform.dll ClrPlus.Powershell.Azure.dll ClrPlus.Powershell.Core.dll ClrPlus.Powershell.Provider.dll ClrPlus.Powershell.Rest.dll ClrPlus.Scripting.dll ClrPlus.Scripting.MsBuild.dll ClrPlus.Windows.Api.dll ClrPlus.Windows.PeBinary.dll Microsoft.Cci.Analysis.ControlAndDataFlowGraph.dll Microsoft.Cci.AstsProjectedAsCodeModel.dll Microsoft.Cci.CodeModel.dll Microsoft.Cci.CodeModelToIL.dll Microsoft.Cci.ContractExtractor.dll Microsoft.Cci.CSharpSourceEmitter.dll Microsoft.Cci.ILGenerator.dll Microsoft.Cci.MetadataHelper.dll Microsoft.Cci.MetadataModel.dll Microsoft.Cci.MutableCodeModel.dll Microsoft.Cci.MutableMetadataModel.dll Microsoft.Cci.NewILToCodeModel.dll Microsoft.Cci.PdbReader.dll Microsoft.Cci.PdbWriter.dll Microsoft.Cci.PeReader.dll Microsoft.Cci.PeWriter.dll Microsoft.Cci.ReflectionEmitter.dll Microsoft.Cci.SourceEmitter.dll Microsoft.Cci.SourceModel.dll Microsoft.Threading.Tasks.dll Microsoft.Threading.Tasks.Extensions.dll Microsoft.Threading.Tasks.Extensions.Desktop.dll System.Runtime.dll System.Threading.Tasks.dll Microsoft.WindowsAzure.Configuration.dll Microsoft.WindowsAzure.Storage.dll ServiceStack.Common.dll ServiceStack.dll ServiceStack.Interfaces.dll ServiceStack.ServiceInterface.dll ServiceStack.Text.dll  ServiceStack.OrmLite.dll Microsoft.Deployment.WindowsInstaller.dll CSScriptLibrary.dll Mono.CSharp.dll Microsoft.Data.OData.dll Microsoft.Data.Edm.dll Ionic.Zip.dll MSBuild.ExtensionPack.dll MSBuild.ExtensionPack.Git.dll MSBuild.ExtensionPack.Loggers.dll MSBuild.ExtensionPack.TaskFactory.PowerShell.dll Sharpen.dll  ICSharpCode.SharpZipLib.dll NGit.dll NSch.dll CSharpTest.Net.RpcLibrary.dll Mono.Security.dll Interop.COMAdmin.dll Interop.IWshRuntimeLibrary.dll
 
 
@@ -306,6 +317,11 @@ REM EmbedAssemblyAsResource CoApp.Powershell.Tools.dll ClrPlus.Core.dll ClrPlus.
 "C:\Program Files (x86)\Windows Kits\8.0\bin\x86\signtool.exe" sign /a /t http://timestamp.verisign.com/scripts/timstamp.dll $(TargetDir)\CoApp.Powershell.Tools.dll
 "C:\Program Files (x86)\Windows Kits\8.0\bin\x86\signtool.exe" sign /a /t http://timestamp.verisign.com/scripts/timstamp.dll $(TargetDir)\CoApp.psd1
 "C:\Program Files (x86)\Windows Kits\8.0\bin\x86\signtool.exe" sign /a /t http://timestamp.verisign.com/scripts/timstamp.dll $(TargetDir)\SigningService.psm1
+  
+"C:\Program Files (x86)\Windows Kits\8.0\bin\x86\signtool.exe" sign /a /t http://timestamp.verisign.com/scripts/timstamp.dll $(TargetDir)\CoApp.NuGetNativeExtensions.dll
+"C:\Program Files (x86)\Windows Kits\8.0\bin\x86\signtool.exe" sign /a /t http://timestamp.verisign.com/scripts/timstamp.dll $(TargetDir)\CoApp.NuGetNativeMSBuildTasks.dll
+
+:common 
   
 copy /y $(TargetDir)\CoApp.NuGetNativeExtensions.* $(TargetDir)\etc
 copy /y $(TargetDir)\CoApp.NuGetNativeMSBuildTasks.* $(TargetDir)\etc

@@ -61,11 +61,12 @@ namespace ClrPlus.Scripting.MsBuild.Utility {
 
                 var assemblies = AppDomain.CurrentDomain.GetAssemblies();
                 foreach (var asm in assemblies) {
+                    try {
                     var tasks = asm.GetTypes().Where(each => each.GetInterfaces().Contains(typeof (ITask))).Where(each => each.IsPublic);
                     foreach (var t in tasks) {
                         var properties = t.GetProperties().Where(each => !_ignoreProperties.Contains(each.Name)).ToArray();
-                        if (!_taskClasses.Keys.Contains(t.Name)) {
-                            _taskClasses.Add(t.Name.ToLower(), new MSBuildTaskType {
+                        if (!_taskClasses.ContainsKey(t.Name)) {
+                                _taskClasses.AddOrSet(t.Name.ToLower(), new MSBuildTaskType {
                                 TaskClass = t,
                                 Outputs = properties.Where(each => each.GetCustomAttributes(true).Any(attr => attr.GetType().Name == "OutputAttribute")).Select(each => each.Name).ToArray(),
                                 RequiredInputs = properties.Where(each => each.GetCustomAttributes(true).Any(attr => attr.GetType().Name == "RequiredAttribute")).Select(each => each.Name).ToArray(),
@@ -73,6 +74,9 @@ namespace ClrPlus.Scripting.MsBuild.Utility {
                             });
                         }
                         
+                    }
+                    } catch (Exception) {
+                        // skip any troublesome assemblies.
                     }
                 }
                 return _taskClasses;

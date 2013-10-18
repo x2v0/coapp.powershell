@@ -84,31 +84,31 @@ namespace ClrPlus.Core.Utility {
         }
     }
 
-    public class Lazy<T> : System.Lazy<T> {
-        public Lazy() : base() {
+    public class LazyEx<T> : System.Lazy<T> {
+        public LazyEx() : base() {
             
         }
 
-        public Lazy(Func<T> valueFactory) : base(valueFactory) {
+        public LazyEx(Func<T> valueFactory) : base(valueFactory) {
             
         }
 
-        public Lazy(bool isThreadSafe)
+        public LazyEx(bool isThreadSafe)
             : base (isThreadSafe) {
         }
-        public Lazy(LazyThreadSafetyMode mode) : base (mode) {
+        public LazyEx(LazyThreadSafetyMode mode) : base (mode) {
             
         }
 
-        public Lazy(Func<T> valueFactory, bool isThreadSafe) : base (valueFactory, isThreadSafe) {
+        public LazyEx(Func<T> valueFactory, bool isThreadSafe) : base (valueFactory, isThreadSafe) {
             
         }
 
-        public Lazy(Func<T> valueFactory, LazyThreadSafetyMode mode) : base( valueFactory, mode) {
+        public LazyEx(Func<T> valueFactory, LazyThreadSafetyMode mode) : base( valueFactory, mode) {
 
         }
 
-        public static implicit operator T(Lazy<T> value) {
+        public static implicit operator T(LazyEx<T> value) {
             return value.Value;
         }
     }

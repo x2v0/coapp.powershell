@@ -499,7 +499,7 @@ namespace ClrPlus.Platform {
 
         public static implicit operator FourPartVersion(FileVersionInfo versionInfo) {
             return new FourPartVersion {
-                _version = ((ulong)versionInfo.FileMajorPart << 48) | ((ulong)versionInfo.FileMinorPart << 32) | ((ulong)versionInfo.FileBuildPart << 16) | (ulong)versionInfo.FilePrivatePart
+                _version = (ulong)((ulong)versionInfo.FileMajorPart << 48) | (ulong)((ulong)versionInfo.FileMinorPart << 32) | (ulong)((ulong)versionInfo.FileBuildPart << 16) | (ulong)((ulong)versionInfo.FilePrivatePart)
             };
         }
 

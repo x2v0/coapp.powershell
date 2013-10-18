@@ -65,7 +65,7 @@
             protected Dictionary<string, Func<View>> _dynamicViewInitializers;
             internal protected Action _resolveValue;
 
-            protected internal Queue<ToRoute> Initializers;
+            protected internal List<ToRoute> Initializers;
             internal GetMacroValueDelegate GetMacroValue;
             private string _memberName;
             protected internal bool _active;
@@ -120,7 +120,7 @@
                 if (childRoutes != null ) {
                     var cr = childRoutes.ToArray();
                     if (cr.Length > 0) {
-                        Initializers = new Queue<ToRoute>(cr);
+                        Initializers = new List<ToRoute>(cr);
                     }
                 }
             }
@@ -170,8 +170,15 @@
                     if (_childItems == null) {
                         return new string[0];
                     }
-                    return ChildItems.Keys;
+                    return _childItems.Keys;
                 }
+            }
+
+            public override bool ContainsKey(string key) {
+                if (_childItems == null) {
+                    return false;
+                }
+                return _childItems.ContainsKey(key);
             }
 
             public override bool Remove(string key) {
@@ -258,7 +265,7 @@
                 if (route != null) {
                     lock (this) {
                         if (Initializers == null) {
-                            Initializers = new Queue<ToRoute>();
+                            Initializers = new List<ToRoute>();
                         }
                         Initializers.Enqueue(route);
                     }
@@ -270,7 +277,7 @@
                 if (routes != null) {
                     lock (this) {
                         if (Initializers == null) {
-                            Initializers = new Queue<ToRoute>();
+                            Initializers = new List<ToRoute>();
                         }
                         foreach (var i in routes) {
                             if (i != null) {
@@ -302,7 +309,7 @@
 
                 //_thisView = thisView;
 
-                if (!ChildItems.Keys.Contains(name)) {
+                if (!ChildItems.ContainsKey(name)) {
                     // before adding this, let's check if it's a node map that has 
                     // 
                     if (childView._map is NodeMap) {
@@ -597,7 +604,7 @@
                     if(childInitializers != null) {
                         foreach(var i in childInitializers) {
                             if(value._map.Initializers == null) {
-                                value._map.Initializers = new Queue<ToRoute>();
+                                value._map.Initializers = new List<ToRoute>();
                             }
                             if(!value._map.Initializers.Contains(i)) {
                                 value._map.Initializers.Enqueue(i);

@@ -12,6 +12,7 @@
 
 namespace ClrPlus.Scripting.MsBuild.Building {
     using System;
+    using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.Diagnostics;
     using System.IO;
@@ -154,7 +155,7 @@ namespace ClrPlus.Scripting.MsBuild.Building {
 
         public event MSBuildMessage BuildMessage;
 
-        private Queue<BuildMessage> messages = new Queue<BuildMessage>();
+        private readonly ConcurrentQueue<BuildMessage> messages = new ConcurrentQueue<BuildMessage>();
 
         
         public bool Execute(string[] targets = null) {
@@ -194,10 +195,9 @@ namespace ClrPlus.Scripting.MsBuild.Building {
                     // Thanks powershell, I appreciate working like it's 1989 again. 
                     Thread.Sleep(20); // not so tight of loop. 
 
-                    lock (messages) {
                         while (messages.Any()) {
-                            var obj = messages.Dequeue();
-                            if (obj != null) {
+                        BuildMessage obj;
+                        if (messages.TryDequeue(out obj) && obj != null) {
                                 if (BuildMessage != null) {
                                     BuildMessage(obj);
                                 }
@@ -208,8 +208,6 @@ namespace ClrPlus.Scripting.MsBuild.Building {
                                     result = false;
                                 }
                             }
-                            
-                        }
                     }
                 }
                 while (!proc.WaitForExit(20)) {
@@ -240,9 +238,7 @@ namespace ClrPlus.Scripting.MsBuild.Building {
         }
 
         private byte[] ServerOnOnExecute(IRpcClientInfo client, byte[] input) {
-            lock (messages) {
                 messages.Enqueue(JsonSerializer.DeserializeFromString<BuildMessage>(input.ToUtf8String()));
-            }
             return new byte[0];
         }
 

@@ -54,7 +54,7 @@ namespace ClrPlus.Platform.Process {
             try {
                 if (!string.IsNullOrEmpty(fullPath) && File.Exists(fullPath)) {
                     var versionInfo = FileVersionInfo.GetVersionInfo(fullPath);
-                    return ((ulong)versionInfo.FileMajorPart << 48) | ((ulong)versionInfo.FileMinorPart << 32) | ((ulong)versionInfo.FileBuildPart << 16) | (ulong)versionInfo.FilePrivatePart;
+                    return (ulong)((ulong)versionInfo.FileMajorPart << 48) | (ulong)((ulong)versionInfo.FileMinorPart << 32) | (ulong)((ulong)versionInfo.FileBuildPart << 16) | (ulong)((ulong)versionInfo.FilePrivatePart);
                 }
             }
             catch {

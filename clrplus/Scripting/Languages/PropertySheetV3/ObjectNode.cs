@@ -48,7 +48,9 @@ namespace ClrPlus.Scripting.Languages.PropertySheetV3 {
                     var r = new PropertyNode();
                     this.AddOrSet(index, r);
                     return r;
-                });
+                },
+                containsKey:(s) => this.ContainsKey(s) && this[s] is PropertyNode
+                );
 
             Children = new DelegateDictionary<Selector, ObjectNode>(
                 clear: Clear,
@@ -66,7 +68,8 @@ namespace ClrPlus.Scripting.Languages.PropertySheetV3 {
                     var r = new ObjectNode(this, index);
                     this.AddOrSet(index, r);
                     return r;
-                });
+                },
+                containsKey: (s) => this.ContainsKey(s) && this[s] is ObjectNode);
         }
 
         protected ObjectNode(RootPropertySheet root) : this() {
@@ -114,15 +117,15 @@ namespace ClrPlus.Scripting.Languages.PropertySheetV3 {
             return (_currentIndex = _indexValue++);
         }}
 
-        public string ResolveMacrosInContext(string value, object[] items = null, bool itemsOnly = false) {
+        public string ResolveMacrosInContext(string value, Permutation items = null, bool itemsOnly = false) {
             return CurrentView.ResolveMacrosInContext(value, items);
         }
 
-        public IEnumerable<string> GetMacroValues(string macro, object[] items = null) {
+        public IEnumerable<string> GetMacroValues(string macro, Permutation items = null) {
             return CurrentView.GetMacroValues(macro, items);
         }
 
-        public string GetSingleMacroValue(string macro, object[] items = null) {
+        public string GetSingleMacroValue(string macro, Permutation items = null) {
             return CurrentView.GetSingleMacroValue(macro, items);
         }
 

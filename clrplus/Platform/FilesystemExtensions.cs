@@ -696,6 +696,7 @@ namespace ClrPlus.Platform {
         /// </summary>
         /// <param name="pathMask"> </param>
         /// <param name="pathPrefix"> </param>
+        /// <param name="excludeMasks"></param>
         /// <returns> </returns>
         public static IEnumerable<string> FindFilesSmarterComplex(this string pathMask, string pathPrefix = null, string[] excludeMasks = null) {
             //pathMask safety

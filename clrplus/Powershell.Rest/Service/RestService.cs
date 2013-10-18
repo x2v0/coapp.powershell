@@ -414,7 +414,9 @@ namespace ClrPlus.Powershell.Core.Service {
                         response.StatusCode = 401;
                         response.AddHeader("WWW-Authenticate", "Basic realm=\"rest-service\"");
                         response.StatusDescription = "Unauthorized";
+#pragma warning disable 618
                         response.EndServiceStackRequest(false);
+#pragma warning restore 618
                         return;
                     }
 
@@ -426,7 +428,9 @@ namespace ClrPlus.Powershell.Core.Service {
                         response.StatusCode = 401;
                         response.AddHeader("WWW-Authenticate", "Basic realm=\"rest-service\"");
                         response.StatusDescription = "Unauthorized";
+#pragma warning disable 618
                         response.EndServiceStackRequest(false);
+#pragma warning restore 618
                         return;
                     }
 
@@ -435,7 +439,9 @@ namespace ClrPlus.Powershell.Core.Service {
                         response.StatusCode = 403;
                         
                         response.StatusDescription = "Forbidden";
+#pragma warning disable 618
                         response.EndServiceStackRequest(false);
+#pragma warning restore 618
                     }
 
                     var req = (requestDto as IHasSession);

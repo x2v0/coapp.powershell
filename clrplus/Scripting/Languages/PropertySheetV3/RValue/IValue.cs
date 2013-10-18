@@ -23,10 +23,10 @@ namespace ClrPlus.Scripting.Languages.PropertySheetV3.RValue {
     }
 
     public interface IValueContext {
-        IEnumerable<string> GetMacroValues(string macro, object[] items);
-        string GetSingleMacroValue(string macro, object[] items);
+        IEnumerable<string> GetMacroValues(string macro, Permutation items);
+        string GetSingleMacroValue(string macro, Permutation items);
 
-        string ResolveMacrosInContext(string value, object[] items, bool itemsOnly);
+        string ResolveMacrosInContext(string value, Permutation items, bool itemsOnly);
         // IEnumerable<string> TryGetRValueInContext(string property);
     }
 }

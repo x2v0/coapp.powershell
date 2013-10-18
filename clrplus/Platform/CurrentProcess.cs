@@ -42,7 +42,6 @@ namespace ClrPlus.Platform {
 
             if (Marshal.GetLastWin32Error() != 87) {
             Kernel32.FreeConsole();
-                var rc = 0;
                 var process = new System.Diagnostics.Process {
                     StartInfo = {
                         UseShellExecute = false,

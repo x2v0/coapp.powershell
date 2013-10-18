@@ -99,6 +99,7 @@
     <Compile Include="Provider\AzureProviderInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="app.config" />
     <None Include="packages.config" />
     <EmbeddedResource Include="Provider\Azure.format.ps1xml">
       <LogicalName>Azure.format.ps1xml</LogicalName>

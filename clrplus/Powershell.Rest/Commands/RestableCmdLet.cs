@@ -33,7 +33,9 @@ namespace ClrPlus.Powershell.Rest.Commands {
         IAuthSession Session {get;set;}
     }
 
+#pragma warning disable 618
     public class RestableCmdlet<T> : RestableCmdlet, IHasSession , IService<T> where T : RestableCmdlet<T> {
+#pragma warning restore 618
         private PersistablePropertyInformation[] _persistableElements = typeof(T).GetPersistableElements().Where(p => p.Name == "Session" || !JsConfig<T>.ExcludePropertyNames.Contains(p.Name)).ToArray();
         private string _serviceUrl;
         private PSCredential _credential;

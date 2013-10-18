@@ -103,6 +103,7 @@ namespace ClrPlus.Core.Collections {
         private readonly Func<ICollection<TKey>> _keys;
         private readonly Func<TKey, bool> _remove;
         private readonly Action _clear;
+        private readonly Func<TKey, bool> _containsKey;
 
         public DelegateDictionary(Func<ICollection<TKey>> keys, Func<TKey, TVal> get, Action<TKey, TVal> set, Func<TKey, bool> remove) {
             _keys = keys;
@@ -110,6 +111,7 @@ namespace ClrPlus.Core.Collections {
             _set = set;
             _remove = remove;
             _clear = null;
+            _containsKey = null;
         }
 
         public DelegateDictionary(Func<ICollection<TKey>> keys, Func<TKey, TVal> get, Action<TKey, TVal> set, Func<TKey, bool> remove, Action clear) {
@@ -118,6 +120,24 @@ namespace ClrPlus.Core.Collections {
             _set = set;
             _remove = remove;
             _clear = clear;
+            _containsKey = null;
+        }
+        public DelegateDictionary(Func<ICollection<TKey>> keys, Func<TKey, TVal> get, Action<TKey, TVal> set, Func<TKey, bool> remove, Func<TKey, bool> containsKey ) {
+            _keys = keys;
+            _get = get;
+            _set = set;
+            _remove = remove;
+            _clear = null;
+            _containsKey = containsKey;
+        }
+
+        public DelegateDictionary(Func<ICollection<TKey>> keys, Func<TKey, TVal> get, Action<TKey, TVal> set, Func<TKey, bool> remove, Action clear, Func<TKey,bool> containsKey ) {
+            _keys = keys;
+            _get = get;
+            _set = set;
+            _remove = remove;
+            _clear = clear;
+            _containsKey = containsKey;
         }
 
         public override bool Remove(TKey key) {
@@ -145,6 +165,13 @@ namespace ClrPlus.Core.Collections {
                 return;
             }
             _clear();
+        }
+
+        public override bool ContainsKey(TKey key) {
+            if (_containsKey == null) {
+                return base.ContainsKey(key);
+            }
+            return _containsKey(key);
         }
     }
 

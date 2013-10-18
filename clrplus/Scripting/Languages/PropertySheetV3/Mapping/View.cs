@@ -181,7 +181,7 @@ namespace ClrPlus.Scripting.Languages.PropertySheetV3.Mapping {
         }
 
 
-        public string GetSingleMacroValue(string innerMacro, object[] items = null) {
+        public string GetSingleMacroValue(string innerMacro, Permutation items = null) {
             var v = LookupMacroValue(innerMacro, this);
             if ( v != null ) {
                 var a = v.ToArray();
@@ -192,12 +192,12 @@ namespace ClrPlus.Scripting.Languages.PropertySheetV3.Mapping {
             return null;
         }
 
-        public IEnumerable<string> GetMacroValues(string innerMacro, object[] items = null) {
+        public IEnumerable<string> GetMacroValues(string innerMacro, Permutation items = null) {
             var vals = LookupMacroValue(innerMacro, this);
             return vals == null? null: vals.Select(each => ResolveMacrosInContext(each, items));
         }
 
-        public string ResolveMacrosInContext(string value, object[] eachItems = null, bool itemsOnly = false) {
+        public string ResolveMacrosInContext(string value, Permutation eachItems = null, bool itemsOnly = false) {
             bool keepGoing;
 
             if(string.IsNullOrEmpty(value)) {
@@ -215,7 +215,7 @@ namespace ClrPlus.Scripting.Languages.PropertySheetV3.Mapping {
 
                     string replacement = null;
 
-                    var ndx = GetIndex(innerMacro);
+                    var ndx = GetIndex(innerMacro, eachItems);
                     if(!itemsOnly && ndx < 0) {
                         // get the first responder.
                         var indexOfDot = innerMacro.IndexOf('.');
@@ -240,25 +240,30 @@ namespace ClrPlus.Scripting.Languages.PropertySheetV3.Mapping {
                     }
 
                     if(!eachItems.IsNullOrEmpty()) {
+                        // hardcoded to produce permutation string map.
+                        if (innerMacro.Equals("Permutation", StringComparison.CurrentCultureIgnoreCase)) {
+                            replacement = eachItems.Names.Zip(eachItems.Values, (a, b) => "{0}={1}".format(a, b.ToString())).Aggregate((each, current) => each + ";" + current);
+                        }
+
                         // try resolving it as an ${each.property} style.
                         // the element at the front is the 'this' value
                         // just trim off whatever is at the front up to and including the first dot.
                         try {
                             if(ndx >= 0) {
-                                if(ndx < eachItems.Length) {
-                                    value = value.Replace(outerMacro, eachItems[ndx].ToString());
+                                if(ndx < eachItems.Values.Length) {
+                                    value = value.Replace(outerMacro, eachItems.Values[ndx].ToString());
                                     keepGoing = true;
                                 }
                             }
                             else {
                                 if(innerMacro.Contains(".")) {
                                     var indexOfDot = innerMacro.IndexOf('.');
-                                    ndx = GetIndex(innerMacro.Substring(0, indexOfDot));
+                                    ndx = GetIndex(innerMacro.Substring(0, indexOfDot), eachItems);
                                     if(ndx >= 0) {
-                                        if(ndx < eachItems.Length) {
+                                        if(ndx < eachItems.Values.Length) {
                                             innerMacro = innerMacro.Substring(indexOfDot + 1).Trim();
 
-                                            var v = eachItems[ndx].SimpleEval2(innerMacro);
+                                            var v = eachItems.Values[ndx].SimpleEval2(innerMacro);
                                             if(v != null) {
                                                 var r = v.ToString();
                                                 value = value.Replace(outerMacro, r);
@@ -486,11 +491,13 @@ namespace ClrPlus.Scripting.Languages.PropertySheetV3.Mapping {
 
 
         public bool HasChild(string propertyName) {
-            return map.ContainsKey(propertyName) || (map.Keys.Where(each => each.Equals(propertyName, StringComparison.InvariantCultureIgnoreCase)).Select(i => map[i])).Any();
+            _map.OnAccess(this);
+            return _map.ContainsKey(propertyName) || (_map.Keys.Where(each => each.Equals(propertyName, StringComparison.InvariantCultureIgnoreCase)).Select(i => _map[i])).Any();
         }
 
         public bool HasChildren { get {
-            return map.ChildItems.Keys.Any(each => !each.StartsWith("$$"));
+            _map.OnAccess(this);
+            return _map.ChildItems.Keys.Any(each => !each.StartsWith("$$"));
         }}
 
         public bool IsPlaceholder() {
@@ -529,10 +536,10 @@ namespace ClrPlus.Scripting.Languages.PropertySheetV3.Mapping {
             }
 
             // cheat: let's see if there is a case insensitive version:
-            var result = (map.Keys.Where(each => each.Equals(propertyName, StringComparison.InvariantCultureIgnoreCase)).Select(i => map[i])).FirstOrDefault();
-            if (result != null) {
-                return result;
-            }
+            // var result = (map.Keys.Where(each => each.Equals(propertyName, StringComparison.InvariantCultureIgnoreCase)).Select(i => map[i])).FirstOrDefault();
+            // if (result != null) {
+            //     return result;
+            // }
 
             // let's add a placeholder node for it then. 
             
@@ -741,7 +748,17 @@ namespace ClrPlus.Scripting.Languages.PropertySheetV3.Mapping {
             }
         }
 
-        private int GetIndex(string innerMacro) {
+        private int GetIndex(string innerMacro, Permutation eachItems) {
+            if (eachItems.IsNullOrEmpty()) {
+                return -1;
+            }
+
+            for (int i = 0; i < eachItems.Names.Length; i++) {
+                if (eachItems.Names[i] == innerMacro) {
+                    return i;
+                }
+            }
+
             int ndx;
             if (!Int32.TryParse(innerMacro, out ndx)) {
                 return innerMacro.Equals("each", StringComparison.CurrentCultureIgnoreCase) ? 0 : -1;

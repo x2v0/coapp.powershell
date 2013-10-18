@@ -1,27 +1,20 @@
-﻿@import vc11.toolinfo;
-@import vc12.toolinfo;
-@import vc10.toolinfo;
+﻿@import "Pivots.Properties";
 
-PlatformToolsets : {
-    V110, V100, V120
-};
+// These aliases point to the different default pivots that are supported
+// the alias name corresponds to the property name that gets set on the msbuild 
+// line when used with the MsBuildEx Task.
 
-Architectures : {
-    Win32, x64
-};
-
-ReleaseOrDebug : {
-    Release, Debug
-};
-
-Linkage : {
-    Dynamic, Static, ltcg
-};
-
+@alias PlatformToolset = ::configurations.Toolset.choices;
+@alias Architecture  = ::configurations.Platform.choices;
+@alias ReleaseOrDebug  = ::configurations.Configuration.choices;
+@alias Linkage = ::configurations.Linkage.choices;
+@alias CallingConvention = ::configurations.CallingConvention.choices;
+@alias CharacterSet = ::configurations.CharacterSet.choices;
+@alias TargetApplicationType = ::configurations.TargetApplicationType.choices;
 
 default {
     // this simply forces the default task to exist even if it isn't declared.
-    CoAppToolsVersion = 1.8;
+    CoAppToolsVersion = 2.4;
 };
 
 package {

@@ -2,101 +2,106 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <BuildPath Condition="'$(BuildPath)' == ''">$(MSBuildProjectDirectory)</BuildPath>
-    <ExtensionTasksPath >$(MSBuildThisFileDirectory)\..\</ExtensionTasksPath>
+    <ExtensionTasksPath >$(MSBuildThisFileDirectory)/../</ExtensionTasksPath>
     <CoAppEtcDirectory >$(MSBuildThisFileDirectory)</CoAppEtcDirectory>
+    <MSBuildExtensionPackDll>$(ExtensionTasksPath)CoApp.Powershell.Tools.dll</MSBuildExtensionPackDll>
+    <MSBuildExtensionPackDll Condition="Exists($(ExtensionTasksPath)/MSBuild.ExtensionPack.dll)">$(ExtensionTasksPath)/MSBuild.ExtensionPack.dll</MSBuildExtensionPackDll>
+    <MSBuildExtensionPackGitDll>$(ExtensionTasksPath)CoApp.Powershell.Tools.dll</MSBuildExtensionPackGitDll>
+    <MSBuildExtensionPackGitDll Condition="Exists($(ExtensionTasksPath)/MSBuild.ExtensionPack.Git.dll)">$(ExtensionTasksPath)/MSBuild.ExtensionPack.Git.dll</MSBuildExtensionPackGitDll>
+    <CoAppExtensionPackDll>$(ExtensionTasksPath)CoApp.Powershell.Tools.dll</CoAppExtensionPackDll>
+    <CoAppExtensionPackDll>Condition="Exists($(ExtensionTasksPath)/CoApp.Powershell.dll)">$(ExtensionTasksPath)/CoApp.Powershell.dll</CoAppExtensionPackDll>
   </PropertyGroup>
 
+  
   <!-- ============== Framework ============== -->
-  <UsingTask AssemblyFile="$(ExtensionTasksPath)CoApp.Powershell.Tools.dll" TaskName="MSBuild.ExtensionPack.CodeQuality.FxCop"/>
-  <UsingTask AssemblyFile="$(ExtensionTasksPath)CoApp.Powershell.Tools.dll" TaskName="MSBuild.ExtensionPack.CodeQuality.NUnit"/>
-  <UsingTask AssemblyFile="$(ExtensionTasksPath)CoApp.Powershell.Tools.dll" TaskName="MSBuild.ExtensionPack.Communication.Email"/>
-  <UsingTask AssemblyFile="$(ExtensionTasksPath)CoApp.Powershell.Tools.dll" TaskName="MSBuild.ExtensionPack.Communication.Ftp"/>
-  <UsingTask AssemblyFile="$(ExtensionTasksPath)CoApp.Powershell.Tools.dll" TaskName="MSBuild.ExtensionPack.Communication.MSMQ"/>
-  <UsingTask AssemblyFile="$(ExtensionTasksPath)CoApp.Powershell.Tools.dll" TaskName="MSBuild.ExtensionPack.Compression.Cab"/>
-  <UsingTask AssemblyFile="$(ExtensionTasksPath)CoApp.Powershell.Tools.dll" TaskName="MSBuild.ExtensionPack.Compression.DNZip"/>
-  <UsingTask AssemblyFile="$(ExtensionTasksPath)CoApp.Powershell.Tools.dll" TaskName="MSBuild.ExtensionPack.Compression.Zip"/>
-  <UsingTask AssemblyFile="$(ExtensionTasksPath)CoApp.Powershell.Tools.dll" TaskName="MSBuild.ExtensionPack.Computer.ActiveDirectory"/>
-  <UsingTask AssemblyFile="$(ExtensionTasksPath)CoApp.Powershell.Tools.dll" TaskName="MSBuild.ExtensionPack.Computer.ComponentServices"/>
-  <UsingTask AssemblyFile="$(ExtensionTasksPath)CoApp.Powershell.Tools.dll" TaskName="MSBuild.ExtensionPack.Computer.EnvironmentVariable"/>
-  <UsingTask AssemblyFile="$(ExtensionTasksPath)CoApp.Powershell.Tools.dll" TaskName="MSBuild.ExtensionPack.Computer.EventLog"/>
-  <UsingTask AssemblyFile="$(ExtensionTasksPath)CoApp.Powershell.Tools.dll" TaskName="MSBuild.ExtensionPack.Computer.EventSource"/>
-  <UsingTask AssemblyFile="$(ExtensionTasksPath)CoApp.Powershell.Tools.dll" TaskName="MSBuild.ExtensionPack.Computer.HostsFile"/>
-  <UsingTask AssemblyFile="$(ExtensionTasksPath)CoApp.Powershell.Tools.dll" TaskName="MSBuild.ExtensionPack.Computer.Network"/>
-  <UsingTask AssemblyFile="$(ExtensionTasksPath)CoApp.Powershell.Tools.dll" TaskName="MSBuild.ExtensionPack.Computer.PerformanceCounters"/>
-  <UsingTask AssemblyFile="$(ExtensionTasksPath)CoApp.Powershell.Tools.dll" TaskName="MSBuild.ExtensionPack.Computer.Process"/>
-  <UsingTask AssemblyFile="$(ExtensionTasksPath)CoApp.Powershell.Tools.dll" TaskName="MSBuild.ExtensionPack.Computer.Registry"/>
-  <UsingTask AssemblyFile="$(ExtensionTasksPath)CoApp.Powershell.Tools.dll" TaskName="MSBuild.ExtensionPack.Computer.SystemDrive"/>
-  <UsingTask AssemblyFile="$(ExtensionTasksPath)CoApp.Powershell.Tools.dll" TaskName="MSBuild.ExtensionPack.Computer.WindowsService"/>
-  <UsingTask AssemblyFile="$(ExtensionTasksPath)CoApp.Powershell.Tools.dll" TaskName="MSBuild.ExtensionPack.Computer.WshShell"/>
-  <UsingTask AssemblyFile="$(ExtensionTasksPath)CoApp.Powershell.Tools.dll" TaskName="MSBuild.ExtensionPack.FileSystem.Detokenise"/>
-  <UsingTask AssemblyFile="$(ExtensionTasksPath)CoApp.Powershell.Tools.dll" TaskName="MSBuild.ExtensionPack.FileSystem.File"/>
-  <UsingTask AssemblyFile="$(ExtensionTasksPath)CoApp.Powershell.Tools.dll" TaskName="MSBuild.ExtensionPack.FileSystem.FileVersion"/>
-  <UsingTask AssemblyFile="$(ExtensionTasksPath)CoApp.Powershell.Tools.dll" TaskName="MSBuild.ExtensionPack.FileSystem.FindUnder"/>
-  <UsingTask AssemblyFile="$(ExtensionTasksPath)CoApp.Powershell.Tools.dll" TaskName="MSBuild.ExtensionPack.FileSystem.Folder"/>
-  <UsingTask AssemblyFile="$(ExtensionTasksPath)CoApp.Powershell.Tools.dll" TaskName="MSBuild.ExtensionPack.FileSystem.RoboCopy"/>
-  <UsingTask AssemblyFile="$(ExtensionTasksPath)CoApp.Powershell.Tools.dll" TaskName="MSBuild.ExtensionPack.FileSystem.Share"/>
-  <UsingTask AssemblyFile="$(ExtensionTasksPath)CoApp.Powershell.Tools.dll" TaskName="MSBuild.ExtensionPack.Framework.Assembly"/>
-  <UsingTask AssemblyFile="$(ExtensionTasksPath)CoApp.Powershell.Tools.dll" TaskName="MSBuild.ExtensionPack.Framework.AssemblyInfo"/>
-  <UsingTask AssemblyFile="$(ExtensionTasksPath)CoApp.Powershell.Tools.dll" TaskName="MSBuild.ExtensionPack.Framework.AsyncExec"/>
-  <UsingTask AssemblyFile="$(ExtensionTasksPath)CoApp.Powershell.Tools.dll" TaskName="MSBuild.ExtensionPack.Framework.CommandLine"/>
-  <UsingTask AssemblyFile="$(ExtensionTasksPath)CoApp.Powershell.Tools.dll" TaskName="MSBuild.ExtensionPack.Framework.ConfigManager"/>
-  <UsingTask AssemblyFile="$(ExtensionTasksPath)CoApp.Powershell.Tools.dll" TaskName="MSBuild.ExtensionPack.Framework.DateAndTime"/>
-  <UsingTask AssemblyFile="$(ExtensionTasksPath)CoApp.Powershell.Tools.dll" TaskName="MSBuild.ExtensionPack.Framework.DynamicExecute"/>
-  <UsingTask AssemblyFile="$(ExtensionTasksPath)CoApp.Powershell.Tools.dll" TaskName="MSBuild.ExtensionPack.Framework.Gac"/>
-  <UsingTask AssemblyFile="$(ExtensionTasksPath)CoApp.Powershell.Tools.dll" TaskName="MSBuild.ExtensionPack.Framework.GenericTool"/>
-  <UsingTask AssemblyFile="$(ExtensionTasksPath)CoApp.Powershell.Tools.dll" TaskName="MSBuild.ExtensionPack.Framework.Guid"/>
-  <UsingTask AssemblyFile="$(ExtensionTasksPath)CoApp.Powershell.Tools.dll" TaskName="MSBuild.ExtensionPack.Framework.ILMerge"/>
-  <UsingTask AssemblyFile="$(ExtensionTasksPath)CoApp.Powershell.Tools.dll" TaskName="MSBuild.ExtensionPack.Framework.Metadata"/>
-  <UsingTask AssemblyFile="$(ExtensionTasksPath)CoApp.Powershell.Tools.dll" TaskName="MSBuild.ExtensionPack.Framework.MSBuildHelper"/>
-  <UsingTask AssemblyFile="$(ExtensionTasksPath)CoApp.Powershell.Tools.dll" TaskName="MSBuild.ExtensionPack.Framework.Parallel"/>
-  <UsingTask AssemblyFile="$(ExtensionTasksPath)CoApp.Powershell.Tools.dll" TaskName="MSBuild.ExtensionPack.Framework.Path"/>
-  <UsingTask AssemblyFile="$(ExtensionTasksPath)CoApp.Powershell.Tools.dll" TaskName="MSBuild.ExtensionPack.Framework.UpdateMetadata"/>
-  <UsingTask AssemblyFile="$(ExtensionTasksPath)CoApp.Powershell.Tools.dll" TaskName="MSBuild.ExtensionPack.Framework.Signing"/>
-  <UsingTask AssemblyFile="$(ExtensionTasksPath)CoApp.Powershell.Tools.dll" TaskName="MSBuild.ExtensionPack.Framework.SmartExec"/>
-  <UsingTask AssemblyFile="$(ExtensionTasksPath)CoApp.Powershell.Tools.dll" TaskName="MSBuild.ExtensionPack.Framework.TextString"/>
-  <UsingTask AssemblyFile="$(ExtensionTasksPath)CoApp.Powershell.Tools.dll" TaskName="MSBuild.ExtensionPack.Framework.Thread"/>
-  <UsingTask AssemblyFile="$(ExtensionTasksPath)CoApp.Powershell.Tools.dll" TaskName="MSBuild.ExtensionPack.Framework.XProduct"/>
-  <UsingTask AssemblyFile="$(ExtensionTasksPath)CoApp.Powershell.Tools.dll" TaskName="MSBuild.ExtensionPack.Management.Wmi"/>
-  <UsingTask AssemblyFile="$(ExtensionTasksPath)CoApp.Powershell.Tools.dll" TaskName="MSBuild.ExtensionPack.Multimedia.Sound"/>
-  <UsingTask AssemblyFile="$(ExtensionTasksPath)CoApp.Powershell.Tools.dll" TaskName="MSBuild.ExtensionPack.Science.Maths"/>
-  <UsingTask AssemblyFile="$(ExtensionTasksPath)CoApp.Powershell.Tools.dll" TaskName="MSBuild.ExtensionPack.Security.Certificate"/>
-  <UsingTask AssemblyFile="$(ExtensionTasksPath)CoApp.Powershell.Tools.dll" TaskName="MSBuild.ExtensionPack.SqlServer.BuildDeploymentManifest"/>
-  <UsingTask AssemblyFile="$(ExtensionTasksPath)CoApp.Powershell.Tools.dll" TaskName="MSBuild.ExtensionPack.SqlServer.SqlCmd"/>
-  <UsingTask AssemblyFile="$(ExtensionTasksPath)CoApp.Powershell.Tools.dll" TaskName="MSBuild.ExtensionPack.SqlServer.SqlExecute"/>
-  <UsingTask AssemblyFile="$(ExtensionTasksPath)CoApp.Powershell.Tools.dll" TaskName="MSBuild.ExtensionPack.SqlServer.SqlVersion"/>
-  <UsingTask AssemblyFile="$(ExtensionTasksPath)CoApp.Powershell.Tools.dll" TaskName="MSBuild.ExtensionPack.Subversion.Svn"/>
-  <UsingTask AssemblyFile="$(ExtensionTasksPath)CoApp.Powershell.Tools.dll" TaskName="MSBuild.ExtensionPack.UI.Console"/>
-  <UsingTask AssemblyFile="$(ExtensionTasksPath)CoApp.Powershell.Tools.dll" TaskName="MSBuild.ExtensionPack.UI.Dialog"/>
-  <UsingTask AssemblyFile="$(ExtensionTasksPath)CoApp.Powershell.Tools.dll" TaskName="MSBuild.ExtensionPack.VisualStudio.SourceSafe"/>
-  <UsingTask AssemblyFile="$(ExtensionTasksPath)CoApp.Powershell.Tools.dll" TaskName="MSBuild.ExtensionPack.VisualStudio.TfsSource"/>
-  <UsingTask AssemblyFile="$(ExtensionTasksPath)CoApp.Powershell.Tools.dll" TaskName="MSBuild.ExtensionPack.VisualStudio.TfsSourceAdmin"/>
-  <UsingTask AssemblyFile="$(ExtensionTasksPath)CoApp.Powershell.Tools.dll" TaskName="MSBuild.ExtensionPack.VisualStudio.TfsVersion"/>
-  <UsingTask AssemblyFile="$(ExtensionTasksPath)CoApp.Powershell.Tools.dll" TaskName="MSBuild.ExtensionPack.VisualStudio.VB6"/>
-  <UsingTask AssemblyFile="$(ExtensionTasksPath)CoApp.Powershell.Tools.dll" TaskName="MSBuild.ExtensionPack.VisualStudio.VC6"/>
-  <UsingTask AssemblyFile="$(ExtensionTasksPath)CoApp.Powershell.Tools.dll" TaskName="MSBuild.ExtensionPack.VisualStudio.VSDevEnv"/>
-  <UsingTask AssemblyFile="$(ExtensionTasksPath)CoApp.Powershell.Tools.dll" TaskName="MSBuild.ExtensionPack.Web.HttpWebRequest"/>
-  <UsingTask AssemblyFile="$(ExtensionTasksPath)CoApp.Powershell.Tools.dll" TaskName="MSBuild.ExtensionPack.Web.Iis6AppPool"/>
-  <UsingTask AssemblyFile="$(ExtensionTasksPath)CoApp.Powershell.Tools.dll" TaskName="MSBuild.ExtensionPack.Web.Iis6ServiceExtensionFile"/>
-  <UsingTask AssemblyFile="$(ExtensionTasksPath)CoApp.Powershell.Tools.dll" TaskName="MSBuild.ExtensionPack.Web.Iis6VirtualDirectory"/>
-  <UsingTask AssemblyFile="$(ExtensionTasksPath)CoApp.Powershell.Tools.dll" TaskName="MSBuild.ExtensionPack.Web.Iis6Website"/>
-  <UsingTask AssemblyFile="$(ExtensionTasksPath)CoApp.Powershell.Tools.dll" TaskName="MSBuild.ExtensionPack.Web.WebClient"/>
-  <UsingTask AssemblyFile="$(ExtensionTasksPath)CoApp.Powershell.Tools.dll" TaskName="MSBuild.ExtensionPack.Xml.XmlFile"/>
-  <UsingTask AssemblyFile="$(ExtensionTasksPath)CoApp.Powershell.Tools.dll" TaskName="MSBuild.ExtensionPack.Xml.XmlTask"/>
-  <UsingTask AssemblyFile="$(ExtensionTasksPath)CoApp.Powershell.Tools.dll" TaskName="ClrPlus.Scripting.MsBuild.Building.Tasks.ExecEx"/>
-  <UsingTask AssemblyFile="$(ExtensionTasksPath)CoApp.Powershell.Tools.dll" TaskName="ClrPlus.Scripting.MsBuild.Building.Tasks.PushEnvironment"/>
-  <UsingTask AssemblyFile="$(ExtensionTasksPath)CoApp.Powershell.Tools.dll" TaskName="ClrPlus.Scripting.MsBuild.Building.Tasks.PopEnvironment"/>
-  <UsingTask AssemblyFile="$(ExtensionTasksPath)CoApp.Powershell.Tools.dll" TaskName="ClrPlus.Scripting.MsBuild.Building.Tasks.GetEnvironmentFromBatchFile"/>
-  <UsingTask AssemblyFile="$(ExtensionTasksPath)CoApp.Powershell.Tools.dll" TaskName="ClrPlus.Scripting.MsBuild.Building.Tasks.LoadSystemEnvironment"/>
-  <UsingTask AssemblyFile="$(ExtensionTasksPath)CoApp.Powershell.Tools.dll" TaskName="ClrPlus.Scripting.MsBuild.Building.Tasks.SetEnvironmentFromTarget"/>
-  <UsingTask AssemblyFile="$(ExtensionTasksPath)CoApp.Powershell.Tools.dll" TaskName="ClrPlus.Scripting.MsBuild.Building.Tasks.Script"/>
-  <UsingTask AssemblyFile="$(ExtensionTasksPath)CoApp.Powershell.Tools.dll" TaskName="ClrPlus.Scripting.MsBuild.Building.Tasks.WriteNugetPackage"/>
-  <UsingTask AssemblyFile="$(ExtensionTasksPath)CoApp.Powershell.Tools.dll" TaskName="ClrPlus.Scripting.MsBuild.Building.Tasks.NuGet"/>
-  <UsingTask AssemblyFile="$(ExtensionTasksPath)CoApp.Powershell.Tools.dll" TaskName="ClrPlus.Scripting.MsBuild.Building.Tasks.MsBuildEx"/>
-  <UsingTask AssemblyFile="$(ExtensionTasksPath)CoApp.Powershell.Tools.dll" TaskName="ClrPlus.Scripting.MsBuild.Building.Tasks.WaitForTasks"/>
-  <UsingTask AssemblyFile="$(ExtensionTasksPath)CoApp.Powershell.Tools.dll" TaskName="ClrPlus.Scripting.MsBuild.Building.Tasks.InvokeBuild"/>
-  <UsingTask AssemblyFile="$(ExtensionTasksPath)CoApp.Powershell.Tools.dll" TaskName="ClrPlus.Scripting.MsBuild.Building.Tasks.Remove"/>
+  <UsingTask AssemblyFile="$(MSBuildExtensionPackDll)" TaskName="MSBuild.ExtensionPack.CodeQuality.FxCop"/>
+  <UsingTask AssemblyFile="$(MSBuildExtensionPackDll)" TaskName="MSBuild.ExtensionPack.CodeQuality.NUnit"/>
+  <UsingTask AssemblyFile="$(MSBuildExtensionPackDll)" TaskName="MSBuild.ExtensionPack.Communication.Email"/>
+  <UsingTask AssemblyFile="$(MSBuildExtensionPackDll)" TaskName="MSBuild.ExtensionPack.Communication.Ftp"/>
+  <UsingTask AssemblyFile="$(MSBuildExtensionPackDll)" TaskName="MSBuild.ExtensionPack.Communication.MSMQ"/>
+  <UsingTask AssemblyFile="$(MSBuildExtensionPackDll)" TaskName="MSBuild.ExtensionPack.Compression.Cab"/>
+  <UsingTask AssemblyFile="$(MSBuildExtensionPackDll)" TaskName="MSBuild.ExtensionPack.Compression.DNZip"/>
+  <UsingTask AssemblyFile="$(MSBuildExtensionPackDll)" TaskName="MSBuild.ExtensionPack.Compression.Zip"/>
+  <UsingTask AssemblyFile="$(MSBuildExtensionPackDll)" TaskName="MSBuild.ExtensionPack.Computer.ActiveDirectory"/>
+  <UsingTask AssemblyFile="$(MSBuildExtensionPackDll)" TaskName="MSBuild.ExtensionPack.Computer.ComponentServices"/>
+  <UsingTask AssemblyFile="$(MSBuildExtensionPackDll)" TaskName="MSBuild.ExtensionPack.Computer.EnvironmentVariable"/>
+  <UsingTask AssemblyFile="$(MSBuildExtensionPackDll)" TaskName="MSBuild.ExtensionPack.Computer.EventLog"/>
+  <UsingTask AssemblyFile="$(MSBuildExtensionPackDll)" TaskName="MSBuild.ExtensionPack.Computer.EventSource"/>
+  <UsingTask AssemblyFile="$(MSBuildExtensionPackDll)" TaskName="MSBuild.ExtensionPack.Computer.HostsFile"/>
+  <UsingTask AssemblyFile="$(MSBuildExtensionPackDll)" TaskName="MSBuild.ExtensionPack.Computer.Network"/>
+  <UsingTask AssemblyFile="$(MSBuildExtensionPackDll)" TaskName="MSBuild.ExtensionPack.Computer.PerformanceCounters"/>
+  <UsingTask AssemblyFile="$(MSBuildExtensionPackDll)" TaskName="MSBuild.ExtensionPack.Computer.Process"/>
+  <UsingTask AssemblyFile="$(MSBuildExtensionPackDll)" TaskName="MSBuild.ExtensionPack.Computer.Registry"/>
+  <UsingTask AssemblyFile="$(MSBuildExtensionPackDll)" TaskName="MSBuild.ExtensionPack.Computer.SystemDrive"/>
+  <UsingTask AssemblyFile="$(MSBuildExtensionPackDll)" TaskName="MSBuild.ExtensionPack.Computer.WindowsService"/>
+  <UsingTask AssemblyFile="$(MSBuildExtensionPackDll)" TaskName="MSBuild.ExtensionPack.Computer.WshShell"/>
+  <UsingTask AssemblyFile="$(MSBuildExtensionPackDll)" TaskName="MSBuild.ExtensionPack.FileSystem.Detokenise"/>
+  <UsingTask AssemblyFile="$(MSBuildExtensionPackDll)" TaskName="MSBuild.ExtensionPack.FileSystem.File"/>
+  <UsingTask AssemblyFile="$(MSBuildExtensionPackDll)" TaskName="MSBuild.ExtensionPack.FileSystem.FileVersion"/>
+  <UsingTask AssemblyFile="$(MSBuildExtensionPackDll)" TaskName="MSBuild.ExtensionPack.FileSystem.FindUnder"/>
+  <UsingTask AssemblyFile="$(MSBuildExtensionPackDll)" TaskName="MSBuild.ExtensionPack.FileSystem.Folder"/>
+  <UsingTask AssemblyFile="$(MSBuildExtensionPackDll)" TaskName="MSBuild.ExtensionPack.FileSystem.RoboCopy"/>
+  <UsingTask AssemblyFile="$(MSBuildExtensionPackDll)" TaskName="MSBuild.ExtensionPack.FileSystem.Share"/>
+  <UsingTask AssemblyFile="$(MSBuildExtensionPackDll)" TaskName="MSBuild.ExtensionPack.Framework.Assembly"/>
+  <UsingTask AssemblyFile="$(MSBuildExtensionPackDll)" TaskName="MSBuild.ExtensionPack.Framework.AssemblyInfo"/>
+  <UsingTask AssemblyFile="$(MSBuildExtensionPackDll)" TaskName="MSBuild.ExtensionPack.Framework.AsyncExec"/>
+  <UsingTask AssemblyFile="$(MSBuildExtensionPackDll)" TaskName="MSBuild.ExtensionPack.Framework.CommandLine"/>
+  <UsingTask AssemblyFile="$(MSBuildExtensionPackDll)" TaskName="MSBuild.ExtensionPack.Framework.ConfigManager"/>
+  <UsingTask AssemblyFile="$(MSBuildExtensionPackDll)" TaskName="MSBuild.ExtensionPack.Framework.DateAndTime"/>
+  <UsingTask AssemblyFile="$(MSBuildExtensionPackDll)" TaskName="MSBuild.ExtensionPack.Framework.DynamicExecute"/>
+  <UsingTask AssemblyFile="$(MSBuildExtensionPackDll)" TaskName="MSBuild.ExtensionPack.Framework.Gac"/>
+  <UsingTask AssemblyFile="$(MSBuildExtensionPackDll)" TaskName="MSBuild.ExtensionPack.Framework.GenericTool"/>
+  <UsingTask AssemblyFile="$(MSBuildExtensionPackDll)" TaskName="MSBuild.ExtensionPack.Framework.Guid"/>
+  <UsingTask AssemblyFile="$(MSBuildExtensionPackDll)" TaskName="MSBuild.ExtensionPack.Framework.ILMerge"/>
+  <UsingTask AssemblyFile="$(MSBuildExtensionPackDll)" TaskName="MSBuild.ExtensionPack.Framework.Metadata"/>
+  <UsingTask AssemblyFile="$(MSBuildExtensionPackDll)" TaskName="MSBuild.ExtensionPack.Framework.MSBuildHelper"/>
+  <UsingTask AssemblyFile="$(MSBuildExtensionPackDll)" TaskName="MSBuild.ExtensionPack.Framework.Parallel"/>
+  <UsingTask AssemblyFile="$(MSBuildExtensionPackDll)" TaskName="MSBuild.ExtensionPack.Framework.Path"/>
+  <UsingTask AssemblyFile="$(MSBuildExtensionPackDll)" TaskName="MSBuild.ExtensionPack.Framework.UpdateMetadata"/>
+  <UsingTask AssemblyFile="$(MSBuildExtensionPackDll)" TaskName="MSBuild.ExtensionPack.Framework.Signing"/>
+  <UsingTask AssemblyFile="$(MSBuildExtensionPackDll)" TaskName="MSBuild.ExtensionPack.Framework.SmartExec"/>
+  <UsingTask AssemblyFile="$(MSBuildExtensionPackDll)" TaskName="MSBuild.ExtensionPack.Framework.TextString"/>
+  <UsingTask AssemblyFile="$(MSBuildExtensionPackDll)" TaskName="MSBuild.ExtensionPack.Framework.Thread"/>
+  <UsingTask AssemblyFile="$(MSBuildExtensionPackDll)" TaskName="MSBuild.ExtensionPack.Framework.XProduct"/>
+  <UsingTask AssemblyFile="$(MSBuildExtensionPackDll)" TaskName="MSBuild.ExtensionPack.Management.Wmi"/>
+  <UsingTask AssemblyFile="$(MSBuildExtensionPackDll)" TaskName="MSBuild.ExtensionPack.Multimedia.Sound"/>
+  <UsingTask AssemblyFile="$(MSBuildExtensionPackDll)" TaskName="MSBuild.ExtensionPack.Science.Maths"/>
+  <UsingTask AssemblyFile="$(MSBuildExtensionPackDll)" TaskName="MSBuild.ExtensionPack.Security.Certificate"/>
+  <UsingTask AssemblyFile="$(MSBuildExtensionPackDll)" TaskName="MSBuild.ExtensionPack.SqlServer.BuildDeploymentManifest"/>
+  <UsingTask AssemblyFile="$(MSBuildExtensionPackDll)" TaskName="MSBuild.ExtensionPack.SqlServer.SqlCmd"/>
+  <UsingTask AssemblyFile="$(MSBuildExtensionPackDll)" TaskName="MSBuild.ExtensionPack.SqlServer.SqlExecute"/>
+  <UsingTask AssemblyFile="$(MSBuildExtensionPackDll)" TaskName="MSBuild.ExtensionPack.SqlServer.SqlVersion"/>
+  <UsingTask AssemblyFile="$(MSBuildExtensionPackDll)" TaskName="MSBuild.ExtensionPack.Subversion.Svn"/>
+  <UsingTask AssemblyFile="$(MSBuildExtensionPackDll)" TaskName="MSBuild.ExtensionPack.UI.Console"/>
+  <UsingTask AssemblyFile="$(MSBuildExtensionPackDll)" TaskName="MSBuild.ExtensionPack.UI.Dialog"/>
+  <UsingTask AssemblyFile="$(MSBuildExtensionPackDll)" TaskName="MSBuild.ExtensionPack.VisualStudio.SourceSafe"/>
+  <UsingTask AssemblyFile="$(MSBuildExtensionPackDll)" TaskName="MSBuild.ExtensionPack.VisualStudio.VB6"/>
+  <UsingTask AssemblyFile="$(MSBuildExtensionPackDll)" TaskName="MSBuild.ExtensionPack.VisualStudio.VC6"/>
+  <UsingTask AssemblyFile="$(MSBuildExtensionPackDll)" TaskName="MSBuild.ExtensionPack.VisualStudio.VSDevEnv"/>
+  <UsingTask AssemblyFile="$(MSBuildExtensionPackDll)" TaskName="MSBuild.ExtensionPack.Web.HttpWebRequest"/>
+  <UsingTask AssemblyFile="$(MSBuildExtensionPackDll)" TaskName="MSBuild.ExtensionPack.Web.Iis6AppPool"/>
+  <UsingTask AssemblyFile="$(MSBuildExtensionPackDll)" TaskName="MSBuild.ExtensionPack.Web.Iis6ServiceExtensionFile"/>
+  <UsingTask AssemblyFile="$(MSBuildExtensionPackDll)" TaskName="MSBuild.ExtensionPack.Web.Iis6VirtualDirectory"/>
+  <UsingTask AssemblyFile="$(MSBuildExtensionPackDll)" TaskName="MSBuild.ExtensionPack.Web.Iis6Website"/>
+  <UsingTask AssemblyFile="$(MSBuildExtensionPackDll)" TaskName="MSBuild.ExtensionPack.Web.WebClient"/>
+  <UsingTask AssemblyFile="$(MSBuildExtensionPackDll)" TaskName="MSBuild.ExtensionPack.Xml.XmlFile"/>
+  <UsingTask AssemblyFile="$(MSBuildExtensionPackDll)" TaskName="MSBuild.ExtensionPack.Xml.XmlTask"/>
+  
+  <UsingTask AssemblyFile="$(CoAppExtensionPackDll)" TaskName="ClrPlus.Scripting.MsBuild.Building.Tasks.ExecEx"/>
+  <UsingTask AssemblyFile="$(CoAppExtensionPackDll)" TaskName="ClrPlus.Scripting.MsBuild.Building.Tasks.PushEnvironment"/>
+  <UsingTask AssemblyFile="$(CoAppExtensionPackDll)" TaskName="ClrPlus.Scripting.MsBuild.Building.Tasks.PopEnvironment"/>
+  <UsingTask AssemblyFile="$(CoAppExtensionPackDll)" TaskName="ClrPlus.Scripting.MsBuild.Building.Tasks.GetEnvironmentFromBatchFile"/>
+  <UsingTask AssemblyFile="$(CoAppExtensionPackDll)" TaskName="ClrPlus.Scripting.MsBuild.Building.Tasks.LoadSystemEnvironment"/>
+  <UsingTask AssemblyFile="$(CoAppExtensionPackDll)" TaskName="ClrPlus.Scripting.MsBuild.Building.Tasks.SetEnvironmentFromTarget"/>
+  <UsingTask AssemblyFile="$(CoAppExtensionPackDll)" TaskName="ClrPlus.Scripting.MsBuild.Building.Tasks.Script"/>
+  <UsingTask AssemblyFile="$(CoAppExtensionPackDll)" TaskName="ClrPlus.Scripting.MsBuild.Building.Tasks.WriteNugetPackage"/>
+  <UsingTask AssemblyFile="$(CoAppExtensionPackDll)" TaskName="ClrPlus.Scripting.MsBuild.Building.Tasks.NuGet"/>
+  <UsingTask AssemblyFile="$(CoAppExtensionPackDll)" TaskName="ClrPlus.Scripting.MsBuild.Building.Tasks.MsBuildEx"/>
+  <UsingTask AssemblyFile="$(CoAppExtensionPackDll)" TaskName="ClrPlus.Scripting.MsBuild.Building.Tasks.WaitForTasks"/>
+  <UsingTask AssemblyFile="$(CoAppExtensionPackDll)" TaskName="ClrPlus.Scripting.MsBuild.Building.Tasks.InvokeBuild"/>
+  <UsingTask AssemblyFile="$(CoAppExtensionPackDll)" TaskName="ClrPlus.Scripting.MsBuild.Building.Tasks.Remove"/>
 
   <!-- ============== Git ============== -->
-  <UsingTask AssemblyFile="$(ExtensionTasksPath)CoApp.Powershell.Tools.dll" TaskName="MSBuild.ExtensionPack.Git.Clone"/>
+  <UsingTask AssemblyFile="$(MSBuildExtensionPackGitDll)" TaskName="MSBuild.ExtensionPack.Git.Clone"/>
 
 </Project>

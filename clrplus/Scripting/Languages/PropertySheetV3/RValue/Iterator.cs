@@ -15,6 +15,7 @@ namespace ClrPlus.Scripting.Languages.PropertySheetV3.RValue {
     using System.Collections.Generic;
     using System.Linq;
     using System.Text;
+    using System.Text.RegularExpressions;
     using Core.Collections;
     using Core.Extensions;
     using Core.Tasks;
@@ -24,6 +25,29 @@ namespace ClrPlus.Scripting.Languages.PropertySheetV3.RValue {
     using Utility;
     using PropertySheet = PropertySheetV3.PropertySheet;
     using PropertySheetParser = PropertySheetV3.PropertySheetParser;
+
+    public class Permutation {
+        private static Regex _rx = new Regex(@"\W+");
+        internal string[] Names;
+        internal object[] Values;
+
+        public Permutation() {
+            Names = new string[0];
+            Values = new Object[0];
+        }
+
+        public Permutation(string[] names, Object[] values ) {
+            Names = names.Select( each => _rx.Replace( each.Trim(), "_")).ToArray();
+            Values = values;
+        }
+    }
+
+    public static class PermutationExtensions {
+        public static bool IsNullOrEmpty(this Permutation p) {
+            return p == null || p.Values == null || p.Values.Length == 0;
+        }
+   
+    }
 
     public class Iterator : List<IValue>, IValue {
         private readonly SourceLocation[] _sourceLocations = SourceLocation.Unknowns;
@@ -74,13 +98,14 @@ namespace ClrPlus.Scripting.Languages.PropertySheetV3.RValue {
             return rvalue.GetValues(rvalue.Context).ToArray();
         }
 
-        protected IEnumerable<object[]> Permutations {
+        protected IEnumerable<Permutation> Permutations {
             get {
                 if (this.IsNullOrEmpty()) {
-                    yield return new object[0];
+                    yield return new Permutation();
                     yield break;
                 }
                 var iterators = new IEnumerator<object>[Count];
+                
                 for (int i = 0; i < Count; i++) {
                     iterators[i] = ResolveParameter(this[i]).ToList().GetEnumerator();
                     if (i > 0) {
@@ -89,7 +114,7 @@ namespace ClrPlus.Scripting.Languages.PropertySheetV3.RValue {
                 }
 
                 while (RecursiveStep(0, iterators) < Count) {
-                    yield return iterators.Select(each => each.Current).ToArray();
+                    yield return new Permutation(this.Select( each => each.GetValue(Context)).ToArray(), iterators.Select(each => each.Current).ToArray());
                 }
             }
         }

@@ -38,10 +38,10 @@ namespace ClrPlus.Scripting.MsBuild.Packaging {
         private Dictionary<string, ListWithAction<string>> _buildTimePaths;
         private HashSet<string> _copyToTargetsDuplicateCheck = new HashSet<string>();
 
-        public Core.Utility.Lazy<ProjectTargetElement> EarlyInitTarget;
-        public Core.Utility.Lazy<ProjectTargetElement> FirstInitTarget;
-        public Core.Utility.Lazy<ProjectTargetElement> SecondInitTarget;
-        public Core.Utility.Lazy<ProjectTargetElement> ItemGroupInitTarget;
+        public Core.Utility.LazyEx<ProjectTargetElement> EarlyInitTarget;
+        public Core.Utility.LazyEx<ProjectTargetElement> FirstInitTarget;
+        public Core.Utility.LazyEx<ProjectTargetElement> SecondInitTarget;
+        public Core.Utility.LazyEx<ProjectTargetElement> ItemGroupInitTarget;
 
        
         public ProjectPlus(IProjectOwner owner, string filename) {
@@ -49,13 +49,13 @@ namespace ClrPlus.Scripting.MsBuild.Packaging {
             FullPath = Path.Combine(_owner.Directory, filename);
             InitialTargets = new StringPropertyList(() => Xml.InitialTargets, v => Xml.InitialTargets = v, target => LookupTarget(target, null), true);
 
-            FirstInitTarget = new Core.Utility.Lazy<ProjectTargetElement>(() => {
+            FirstInitTarget = new Core.Utility.LazyEx<ProjectTargetElement>(() => {
                 var tgt = LookupTarget("{0}_init_{1}_1".format(SafeName, Path.GetExtension(Filename).Trim('.')), null, true);
                 InitialTargets.Add(tgt.Name);
                 return tgt;
             });
 
-            SecondInitTarget = new Core.Utility.Lazy<ProjectTargetElement>(() => {
+            SecondInitTarget = new Core.Utility.LazyEx<ProjectTargetElement>(() => {
                 // ensure the first one is created.
                 var x = FirstInitTarget.Value;
 
@@ -64,7 +64,7 @@ namespace ClrPlus.Scripting.MsBuild.Packaging {
                 return tgt;
             });
 
-            ItemGroupInitTarget = new Core.Utility.Lazy<ProjectTargetElement>(() => {
+            ItemGroupInitTarget = new Core.Utility.LazyEx<ProjectTargetElement>(() => {
                 // ensure the first one is created.
                 var x = SecondInitTarget.Value;
 
@@ -73,7 +73,7 @@ namespace ClrPlus.Scripting.MsBuild.Packaging {
                 return tgt;
             });
 
-            EarlyInitTarget = new Core.Utility.Lazy<ProjectTargetElement>(() => {
+            EarlyInitTarget = new Core.Utility.LazyEx<ProjectTargetElement>(() => {
                 var tgt = LookupTarget("{0}_init_{1}_0".format(SafeName, Path.GetExtension(Filename).Trim('.')), null, true);
                 InitialTargets.Insert(0,tgt.Name);
                 return tgt;
@@ -139,7 +139,7 @@ namespace ClrPlus.Scripting.MsBuild.Packaging {
                             }
                             return "";
                         }, v => {
-                            if (v != null || v != string.Empty) {
+                            if (v != null || v.ToString() != string.Empty) {
                                 LookupProperty(LookupPropertyGroup(""), view.MemberName).Value = v.ToString();
                             }
                         });
@@ -173,7 +173,7 @@ namespace ClrPlus.Scripting.MsBuild.Packaging {
                 return new Accessor(() => {
                     return LookupProperty(  LookupPropertyGroup(condition), view.MemberName).Value;
                 }, v => {
-                    if (v != null || v != string.Empty) {
+                    if (v != null || v.ToString() != string.Empty) {
                         LookupProperty(LookupPropertyGroup(condition), view.MemberName).Value = v.ToString();
                     }
                 });

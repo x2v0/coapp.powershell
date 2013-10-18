@@ -370,7 +370,7 @@ namespace ClrPlus.Scripting.MsBuild.Packaging {
         private bool GetChoice(string item, out string choice, out Pivot pivot) {
             foreach (var p in _pivots.Keys) {
                 pivot = _pivots[p];
-                if (pivot.Choices.Keys.Contains(item)) {
+                if (pivot.Choices.ContainsKey(item)) {
                     choice = item;
                     return true;
                 }
