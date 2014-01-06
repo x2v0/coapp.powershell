@@ -72,7 +72,7 @@ namespace ClrPlus.Scripting.Languages.PropertySheetV3 {
         public RootPropertySheet(object backingObject)
             : this((parent) => backingObject) {
         }
-   
+
         public override void ParseText(string propertySheetText, string originalFilename) {
             base.ParseText(propertySheetText, originalFilename);
             AddChildRoutes(Routes);
@@ -116,11 +116,11 @@ namespace ClrPlus.Scripting.Languages.PropertySheetV3 {
             }
 
             // filename is now the absolute path.
-            var importedSheet = new PropertySheet(this);
+            var importedSheet = new PropertySheet(Root);
             importedSheet.ParseFile(filename);
-            _imports.Add(importedSheet);
-            AddChildRoutes(importedSheet.Routes);
-            _view.InitializeAtRootLevel(importedSheet);
+            Root._imports.Add(importedSheet);
+            Root.AddChildRoutes(importedSheet.Routes);
+            Root._view.InitializeAtRootLevel(importedSheet);
         }
 
         public override void ImportText(string propertySheetText, string originalFilename) {
@@ -128,11 +128,11 @@ namespace ClrPlus.Scripting.Languages.PropertySheetV3 {
                 return;
             }
 
-            var importedSheet = new RootPropertySheet(this);
+            var importedSheet = new PropertySheet(Root);
             importedSheet.ParseText(propertySheetText, originalFilename);
-            _imports.Add(importedSheet);
-            AddChildRoutes(importedSheet.Routes);
-            _view.InitializeAtRootLevel(importedSheet);
+            Root._imports.Add(importedSheet);
+            Root.AddChildRoutes(importedSheet.Routes);
+            Root._view.InitializeAtRootLevel(importedSheet);
         }
 
         public void AddChildRoutes(IEnumerable<ToRoute> routes) {
@@ -145,6 +145,20 @@ namespace ClrPlus.Scripting.Languages.PropertySheetV3 {
 
         public void CopyToModel() {
             _view.CopyToModel();
+        }
+    }
+
+    public class ImportedSheet : RootPropertySheet {
+        private RootPropertySheet _root;
+
+        public ImportedSheet(RootPropertySheet root) {
+            _root = root;
+        }
+
+        public override RootPropertySheet Root {
+            get {
+                return _root;
+            }
         }
     }
 }

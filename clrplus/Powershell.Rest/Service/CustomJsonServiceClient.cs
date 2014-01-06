@@ -6,8 +6,7 @@ using System.Text;
 namespace ClrPlus.Powershell.Core.Service {
     using System.Net;
     using ClrPlus.Core.Utility;
-    using ServiceStack.Common.Web;
-    using ServiceStack.ServiceClient.Web;
+    using ServiceStack;
     using ServiceStack.Text;
 
     internal class CustomJsonServiceClient : JsonServiceClient {

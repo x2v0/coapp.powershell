@@ -31,7 +31,6 @@ namespace ClrPlus.Scripting.MsBuild.Building {
     using Packaging;
     using Platform;
     using Platform.Process;
-    using ServiceStack.Text;
 
     public static class MSBuildUtility {
         public static Executable MsbuildExe = new Executable("msbuild.exe", Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86));
@@ -76,7 +75,8 @@ namespace ClrPlus.Scripting.MsBuild.Building {
                 _sheet.CurrentView.AddMacroHandler((name, context) => Environment.GetEnvironmentVariable(name));
                 // convert #product-info into a dictionary.
                 productInformation = _sheet.Metadata.Value.Keys.Where(each => each.StartsWith("product-info")).ToXDictionary(each => each.Substring(12), each => _sheet.Metadata.Value[each]);
-            } catch {
+            } catch(Exception e) { 
+                // e.PrintDump();
                 Dispose();
             }
         }
@@ -238,7 +238,8 @@ namespace ClrPlus.Scripting.MsBuild.Building {
         }
 
         private byte[] ServerOnOnExecute(IRpcClientInfo client, byte[] input) {
-                messages.Enqueue(JsonSerializer.DeserializeFromString<BuildMessage>(input.ToUtf8String()));
+                 // messages.Enqueue(JsonSerializer.DeserializeFromString<BuildMessage>(input.ToUtf8String()));
+            messages.Enqueue(ClrPlus.Scripting.MsBuild.Building.BuildMessage.DeserializeFromString(input.ToUtf8String()));
             return new byte[0];
         }
 

@@ -19,13 +19,12 @@ namespace CoApp.Powershell.Commands {
     using ClrPlus.Core.Extensions;
     using ClrPlus.Platform;
     using ClrPlus.Powershell.Core;
-    using ClrPlus.Powershell.Rest.Commands;
     using ClrPlus.Scripting.Languages.PropertySheet;
     using ClrPlus.Scripting.Languages.PropertySheetV3;
     using ClrPlus.Scripting.MsBuild.Building;
 
     [Cmdlet(AllVerbs.Invoke, "Build")]
-    public class InvokeBuildCmdlet : RestableCmdlet<InvokeBuildCmdlet> {
+    public class InvokeBuildCmdlet : BaseCmdlet {
         [Parameter]
         public string ScriptFile {get; set;}
 
@@ -74,11 +73,12 @@ namespace CoApp.Powershell.Commands {
 
 
         protected override void BeginProcessing() {
+#if USING_RESTABLE_CMDLET
             if (Remote) {
                 ProcessRecordViaRest();
                 return;
             }
-
+#endif 
             using (new PushDirectory(Path.Combine(SessionState.Drive.Current.Root, SessionState.Drive.Current.CurrentLocation) )) {
 
                 // Invoking a ptk script.

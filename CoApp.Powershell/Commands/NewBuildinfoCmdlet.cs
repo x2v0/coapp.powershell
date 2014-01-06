@@ -15,10 +15,10 @@ namespace CoApp.Powershell.Commands {
     using System.Management.Automation;
     using ClrPlus.Platform;
     using ClrPlus.Powershell.Core;
-    using ClrPlus.Powershell.Rest.Commands;
+    
 
     [Cmdlet(AllVerbs.New, "Buildinfo")]
-    public class NewBuildinfoCmdlet : RestableCmdlet<NewBuildinfoCmdlet> {
+    public class NewBuildinfoCmdlet : BaseCmdlet {
         [Parameter(HelpMessage = "Projects to include in .buildinfo (either .vcxproj or .buildinfo files)", Mandatory = true, Position = 0)]
         public string[] SourceFiles {get; set;}
 
@@ -29,10 +29,12 @@ namespace CoApp.Powershell.Commands {
         public SwitchParameter Force {get; set;}
 
         protected override void ProcessRecord() {
+#if USING_RESTABLE_CMDLET
             if (Remote) {
                 ProcessRecordViaRest();
                 return;
             }
+#endif 
 
             using (new PushDirectory((Path.Combine(SessionState.Drive.Current.Root, SessionState.Drive.Current.CurrentLocation)))) {
                 

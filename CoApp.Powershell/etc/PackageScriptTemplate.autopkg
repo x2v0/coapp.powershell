@@ -61,6 +61,10 @@ nuget := {
 
         symbols += {  
             #destination : ${d_bin};  
+
+			#add-each-file : { 
+                Items.CopyToOutput;
+            };
         };
 
         source += {  

@@ -9,7 +9,7 @@ if '%1' == '' goto get_help
 if '%1' == 'help' goto get_help
 if '%1' == '-help' goto get_help
 
-nuget overlay -OverlayPackageDirectory "%THISPKGDIR%" -Version $$VERSION$$ -Pivots %*
+nuget overlay -OverlayPackageDirectory "%THISPKGDIR%\." -Version $$VERSION$$ -Pivots %*
 goto fin
 
 

@@ -13,10 +13,9 @@
 namespace ClrPlus.Powershell.Core.Service {
     using System;
     using System.Collections.Generic;
+    using ServiceStack;
+    using ServiceStack.Auth;
     
-    using ServiceStack.ServiceInterface;
-    using ServiceStack.ServiceInterface.Auth;
-
 
 
     public class CustomBasicAuthProvider : BasicAuthProvider {

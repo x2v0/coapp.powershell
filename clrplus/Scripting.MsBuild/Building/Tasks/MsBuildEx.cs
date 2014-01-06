@@ -34,7 +34,6 @@ namespace ClrPlus.Scripting.MsBuild.Building.Tasks {
     using Microsoft.Build.Framework;
     using Platform;
     using Platform.Process;
-    using ServiceStack.Text;
     using Debug = System.Diagnostics.Debug;
 
     public class MsBuildEx : MsBuildTaskBase {
@@ -107,6 +106,7 @@ namespace ClrPlus.Scripting.MsBuild.Building.Tasks {
         public bool Result {set; get;}
 
         public bool ResetEnvironmentFirst {get; set;}
+        public bool AutoSetup { get; set; }
         public string SkippingMessage {get; set;}
         public string StartMessage {get; set;}
         public string EndMessage {get; set;}
@@ -168,6 +168,15 @@ namespace ClrPlus.Scripting.MsBuild.Building.Tasks {
 
         protected bool ValidateParameters() {
             Index = ++Counter;
+
+            if (AutoSetup) {
+                if (LoadEnvironmentFromTargets.IsNullOrEmpty()) {
+                    
+                }
+                if (string.IsNullOrEmpty(StartMessage)) {
+                    
+                }
+            }
 
             if ((((ushort)GetKeyState(0x91)) & 0xffff) != 0) {
                 Debugger.Break();
@@ -262,7 +271,8 @@ namespace ClrPlus.Scripting.MsBuild.Building.Tasks {
                     server.OnExecute +=
                         (client, arg) => {
                             // deserialize the message object and replay thru this logger. 
-                            var message = JsonSerializer.DeserializeFromString<BuildMessage>(arg.ToUtf8String());
+                            var message = BuildMessage.DeserializeFromString(arg.ToUtf8String());
+                            // var message = JsonSerializer.DeserializeFromString<BuildMessage>(arg.ToUtf8String());
                             if (!filters.Any(each => each.IsMatch(message.Message))) {
                                 Messages.Enqueue(message);
                             }

@@ -4,13 +4,13 @@
 // the alias name corresponds to the property name that gets set on the msbuild 
 // line when used with the MsBuildEx Task.
 
-@alias PlatformToolset = ::configurations.Toolset.choices;
-@alias Architecture  = ::configurations.Platform.choices;
-@alias ReleaseOrDebug  = ::configurations.Configuration.choices;
-@alias Linkage = ::configurations.Linkage.choices;
-@alias CallingConvention = ::configurations.CallingConvention.choices;
-@alias CharacterSet = ::configurations.CharacterSet.choices;
-@alias TargetApplicationType = ::configurations.TargetApplicationType.choices;
+@alias PlatformToolset = ::configurations.Toolsets.choices;
+@alias Architecture  = ::configurations.Platforms.choices;
+@alias ReleaseOrDebug  = ::configurations.Configurations.choices;
+@alias Linkage = ::configurations.Linkages.choices;
+@alias CallingConvention = ::configurations.CallingConventions.choices;
+@alias CharacterSet = ::configurations.CharacterSets.choices;
+@alias TargetApplicationType = ::configurations.TargetApplicationTypes.choices;
 
 default {
     // this simply forces the default task to exist even if it isn't declared.

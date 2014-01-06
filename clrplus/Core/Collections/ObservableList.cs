@@ -5,6 +5,7 @@ namespace ClrPlus.Core.Collections {
     using System.Linq;
     using System.Text;
     using System.Collections;
+    using Extensions;
 
     /// <summary>
     /// List that fires events when items are changed
@@ -201,4 +202,143 @@ namespace ClrPlus.Core.Collections {
             return ((IEnumerable)internalList).GetEnumerator();
         }
     }
+
+    public class OrderedList<T> : IList<T>, IList where T : IComparable<T> {
+        private List<T> internalList;
+
+        public OrderedList() {
+            internalList = new List<T>();
+        }
+
+        public OrderedList(IEnumerable<T> collection) {
+            internalList = new List<T>(collection);
+        }
+
+       
+        public virtual int IndexOf(T item) {
+            return internalList.IndexOf(item);
+        }
+
+
+        private void Sort() {
+            internalList.Sort();
+        }
+
+        public virtual void Insert(int index, T item) {
+            internalList.Insert(index, item);
+            Sort();
+        }
+
+        public virtual void Remove(object value) {
+            Remove((T)value);
+        }
+
+        public virtual void RemoveAt(int index) {
+            T item = internalList[index];
+            internalList.Remove(item);
+        }
+
+        object IList.this[int index] {
+            get {
+                return ((IList)internalList)[index];
+            }
+            set {
+                this[index] = (T)value;
+                Sort();
+            }
+        }
+
+        public virtual T this[int index] {
+            get { return internalList[index]; }
+            set {
+                internalList[index] = value;
+                Sort();
+            }
+        }
+
+        public virtual void AddRange(IEnumerable<T> items) {
+            internalList.AddRange(items);
+            Sort();
+        }
+
+        public virtual void Add(T item) {
+            internalList.Add(item);
+            Sort();
+        }
+
+        public virtual int Add(object value) {
+            var result = ((IList)internalList).Add(value);
+            Sort();
+            return result;
+        }
+
+        public virtual bool Contains(object value) {
+            return ((IList)internalList).Contains(value);
+        }
+
+        public virtual void Clear() {
+            internalList.Clear();
+        }
+
+        public virtual int IndexOf(object value) {
+            return ((IList)internalList).IndexOf(value);
+        }
+
+        public virtual void Insert(int index, object value) {
+            Insert(index, (T)value);
+        }
+
+        public virtual bool Contains(T item) {
+            return internalList.Contains(item);
+        }
+
+        public virtual void CopyTo(T[] array, int arrayIndex) {
+            internalList.CopyTo(array, arrayIndex);
+        }
+
+        public virtual void CopyTo(Array array, int index) {
+            ((IList)internalList).CopyTo(array, index);
+        }
+
+        public virtual int Count {
+            get { return internalList.Count; }
+        }
+
+        public virtual object SyncRoot {
+            get {
+                return ((IList)internalList).SyncRoot;
+            }
+        }
+
+        public virtual bool IsSynchronized {
+            get {
+                return ((IList)internalList).IsSynchronized;
+            }
+        }
+
+        public virtual bool IsReadOnly {
+            get { return IsReadOnly; }
+        }
+
+        public virtual bool IsFixedSize {
+            get {
+                return ((IList)internalList).IsFixedSize;
+            }
+        }
+
+        public virtual bool Remove(T item) {
+            lock (this) {
+                return internalList.Remove(item);
+            }
+        }
+
+        public virtual IEnumerator<T> GetEnumerator() {
+            return internalList.GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator() {
+            return ((IEnumerable)internalList).GetEnumerator();
+        }
+    }
+
 }

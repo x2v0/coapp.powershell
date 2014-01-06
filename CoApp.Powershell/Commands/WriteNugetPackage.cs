@@ -21,13 +21,12 @@ namespace CoApp.Powershell.Commands {
     using ClrPlus.Core.Utility;
     using ClrPlus.Platform;
     using ClrPlus.Powershell.Core;
-    using ClrPlus.Powershell.Rest.Commands;
     using ClrPlus.Scripting.Languages.PropertySheet;
     using ClrPlus.Scripting.Languages.PropertySheetV3;
     using ClrPlus.Scripting.MsBuild.Packaging;
 
     [Cmdlet(AllVerbs.Write, "NuGetPackage")]
-    public class WriteNuGetPackage : RestableCmdlet<WriteNuGetPackage> {
+    public class WriteNuGetPackage : BaseCmdlet {
         
         static WriteNuGetPackage() {
             // ensure that the etc folder is added to the path.
@@ -40,6 +39,9 @@ namespace CoApp.Powershell.Commands {
 
         [Parameter(HelpMessage = "Don't clean up intermediate files")]
         public SwitchParameter NoClean {get; set;}
+
+        [Parameter(HelpMessage = "Don't acutally package the files up (just generate the intemediate files)")]
+        public SwitchParameter GenerateOnly { get; set; }
 
         [Parameter(HelpMessage = "Directory where dependent packages are found ")]
         public string PackageDirectory {get; set;}
@@ -65,10 +67,12 @@ namespace CoApp.Powershell.Commands {
         }
 
         protected override void ProcessRecord() {
+#if USING_RESTABLE_CMDLET
             if (Remote) {
                 ProcessRecordViaRest();
                 return;
             }
+#endif 
 
             ProviderInfo packagePathProviderInfo;
             var pkgPath = SessionState.Path.GetResolvedProviderPathFromPSPath(Package, out packagePathProviderInfo);
@@ -115,7 +119,7 @@ namespace CoApp.Powershell.Commands {
                         }
                     }
                     IEnumerable<string> overlayPackages;
-                    var pkgFile = script.Save(PackageTypes.NuGet, !NoClean, out overlayPackages);
+                    var pkgFile = script.Save(PackageTypes.NuGet, !NoClean, GenerateOnly, out overlayPackages);
                 }
             }
         }

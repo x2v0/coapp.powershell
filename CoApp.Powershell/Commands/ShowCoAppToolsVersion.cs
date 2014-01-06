@@ -15,15 +15,16 @@ namespace CoApp.Powershell.Commands {
     using System.Management.Automation;
     using ClrPlus.Core.Extensions;
     using ClrPlus.Powershell.Core;
-    using ClrPlus.Powershell.Rest.Commands;
 
     [Cmdlet(AllVerbs.Show, "CoAppToolsVersion")]
-    public class ShowCoAppToolsVersion : RestableCmdlet<ShowCoAppToolsVersion> {
+    public class ShowCoAppToolsVersion : BaseCmdlet {
         protected override void ProcessRecord() {
+#if USING_RESTABLE_CMDLET
             if (Remote) {
                 ProcessRecordViaRest();
                 return;
             }
+#endif 
             WriteObject("CoApp Powershell Developer Tools Version: {0}".format(this.Assembly().Version()));
         }
     }

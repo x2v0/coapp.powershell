@@ -16,12 +16,42 @@ namespace ClrPlus.Scripting.Languages.PropertySheetV3.Mapping {
     using System.Collections.Generic;
     using System.Linq;
 
-    public delegate View ToRoute();
+    public class ToRoute : IComparable<ToRoute> {
+        private static int _counter;
 
+        private ToRouteFn _routeFn;
+        private int _priority;
+
+        public ToRoute( ToRouteFn fn,int? priority = null) {
+            _routeFn = fn;
+            _priority = priority ?? _counter++;
+        }
+
+        public int Priority {
+            get {
+                return _priority;
+            }
+        }
+
+        public View View {
+            get {
+                return _routeFn();
+            }
+        }
+
+        public int CompareTo(ToRoute toRoute) {
+            if (toRoute == null) {
+                return Priority;
+            }
+            return Priority - toRoute.Priority;
+        }
+    }
+
+    public delegate View ToRouteFn();
     public static class RoutingExtensions {
 
         internal static ToRoute MapToObject<TParent>(this string memberName, RouteDelegateWithView<TParent> route, IEnumerable<ToRoute> childRoutes = null, IEnumerable<ToRoute> fallbackRoutes = null) where TParent : class {
-            return () => new View<TParent>(memberName, route, childRoutes);
+            return new ToRoute(() => new View<TParent>(memberName, route, childRoutes));
         }
 
         public static ToRoute MapTo<TParent>(this string memberName, RouteWithView<TParent> route, IEnumerable<ToRoute> childRoutes = null) where TParent : class {
@@ -46,7 +76,7 @@ namespace ClrPlus.Scripting.Languages.PropertySheetV3.Mapping {
 
 
         internal static ToRoute MapToValue<TParent>(this string memberName, ValueDelegateWithView<TParent> route, IEnumerable<ToRoute> childRoutes = null) {
-            return () => new View<TParent>(memberName, route, childRoutes);
+            return new ToRoute(() => new View<TParent>(memberName, route, childRoutes));
         }
         public static ToRoute MapTo<TParent>(this string memberName, ValueRouteWithView<TParent> route, IEnumerable<ToRoute> childRoutes = null) {
             return MapToValue<TParent>(memberName, (p, v) => route(p(),v), childRoutes);
@@ -66,7 +96,7 @@ namespace ClrPlus.Scripting.Languages.PropertySheetV3.Mapping {
         }
 
         internal static ToRoute MapToEnumerable<TParent>(this string memberName, EnumerableDelegateWithView<TParent> route, IEnumerable<ToRoute> childRoutes = null) {
-            return () => new View<TParent>(memberName, route, childRoutes);
+            return new ToRoute(() => new View<TParent>(memberName, route, childRoutes));
         }
         public static ToRoute MapTo<TParent>(this string selector, EnumerableRouteWithView<TParent> route, IEnumerable<ToRoute> childRoutes = null) {
             return MapToEnumerable<TParent>(selector, (p,v) => route(p(),v), childRoutes);
@@ -85,7 +115,7 @@ namespace ClrPlus.Scripting.Languages.PropertySheetV3.Mapping {
         }
 
         internal static ToRoute MapToList<TParent>(this string memberName, ListDelegateWithView<TParent> route, IEnumerable<ToRoute> childRoutes = null) {
-            return () => new View<TParent>(memberName, route, childRoutes);
+            return new ToRoute(() => new View<TParent>(memberName, route, childRoutes));
         }
         public static ToRoute MapTo<TParent>(this string memberName, ListRouteWithView<TParent> route, IEnumerable<ToRoute> childRoutes = null) {
             return MapToList<TParent>(memberName, (p,v) => route(p(),v), childRoutes);
@@ -104,7 +134,7 @@ namespace ClrPlus.Scripting.Languages.PropertySheetV3.Mapping {
         }
 
         internal static ToRoute MapToDictionary<TParent, TKey, TVal>(this string memberName, DictionaryDelegateWithView<TParent, TKey, TVal> route, IEnumerable<ToRoute> childRoutes = null) {
-            return () => new View<TParent,TKey, TVal>(memberName, route, childRoutes);
+            return new ToRoute(() => new View<TParent,TKey, TVal>(memberName, route, childRoutes));
         }
 
         public static ToRoute MapTo<TParent, TKey, TVal>(this string memberName, DictionaryRouteWithView<TParent, TKey, TVal> route, IEnumerable<ToRoute> childRoutes = null) {
@@ -121,7 +151,7 @@ namespace ClrPlus.Scripting.Languages.PropertySheetV3.Mapping {
         }
 
         internal static ToRoute MapToDictionary<TParent, TKey, TVal>(this string memberName, DictionaryDelegateWithView<TParent, TKey, TVal> route, Func<string, string> keyExchanger, IEnumerable<ToRoute> childRoutes = null) {
-            return () => new View<TParent, TKey, TVal>(memberName, route, keyExchanger, childRoutes);
+            return new ToRoute(() => new View<TParent, TKey, TVal>(memberName, route, keyExchanger, childRoutes));
         }
 
         public static ToRoute MapTo<TParent, TKey, TVal>(this string memberName, DictionaryRouteWithView<TParent, TKey, TVal> route, Func<string, string> keyExchanger, IEnumerable<ToRoute> childRoutes = null) {
@@ -146,7 +176,7 @@ namespace ClrPlus.Scripting.Languages.PropertySheetV3.Mapping {
         internal static ToRoute MapIndexedChildrenTo<TParent>(this string memberName, IndexedChildRouteDelegate<TParent> route, IEnumerable<ToRoute> childRoutes = null) {
             // set up a virtual view as a child of the view.
             // that virutal view can then expose the #'d grandchildren as children.
-            return () =>  new View<TParent>(memberName, route, childRoutes);
+            return new ToRoute(() =>  new View<TParent>(memberName, route, childRoutes));
         }
 
         public static ToRoute MapIndexedChildrenTo<TParent>(this string memberName, IndexedChildRoute<TParent> route, IEnumerable<ToRoute> childRoutes = null) {

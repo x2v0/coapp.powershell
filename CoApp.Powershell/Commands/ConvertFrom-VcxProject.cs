@@ -19,7 +19,6 @@ namespace CoApp.Powershell.Commands {
     using ClrPlus.Platform;
     using ClrPlus.Platform.Process;
     using ClrPlus.Powershell.Core;
-    using ClrPlus.Powershell.Rest.Commands;
     using ClrPlus.Scripting.MsBuild.Building;
     using ClrPlus.Scripting.MsBuild.Packaging;
     using ClrPlus.Scripting.MsBuild.Utility;
@@ -28,7 +27,11 @@ namespace CoApp.Powershell.Commands {
     using System.Text.RegularExpressions;
 
     [Cmdlet(AllVerbs.ConvertFrom, "VcxProject")]
+#if USING_RESTABLE_CMDLET
     public class ConvertFromVcxProject : RestableCmdlet<ConvertFromVcxProject> {
+#else
+    public class ConvertFromVcxProject : BaseCmdlet {
+#endif
         [Parameter(HelpMessage = "Original VcxProject file (.vcxproj)", Mandatory = true, Position = 0)]
         public string SourceFile { get; set; }
 
@@ -42,11 +45,12 @@ namespace CoApp.Powershell.Commands {
         public SwitchParameter Force;
 
         protected override void ProcessRecord() {
+            #if USING_RESTABLE_CMDLET
             if(Remote) {
                 ProcessRecordViaRest();
                 return;
             }
-
+#endif 
             System.Environment.CurrentDirectory = (SessionState.PSVariable.GetValue("pwd") ?? "").ToString();
 
             var replacements =Overrides != null ? Overrides.Keys.Cast<object>().ToDictionary(k => new Regex(k.ToString(), RegexOptions.Compiled | RegexOptions.IgnoreCase), k => Overrides[k].ToString()) : new Dictionary<Regex, string>();

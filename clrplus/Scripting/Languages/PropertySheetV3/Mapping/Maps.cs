@@ -1,7 +1,9 @@
 ﻿namespace ClrPlus.Scripting.Languages.PropertySheetV3.Mapping {
     using System;
     using System.Collections;
+    using System.Collections.Concurrent;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using System.Linq;
     using System.Reflection;
     using Core.Collections;
@@ -59,13 +61,15 @@
             private readonly int OID = ___i___++;
 #endif
 
+            internal HashSet<string> _aliasHistory;
             internal View ParentView;
             protected internal View _thisView;
             protected IDictionary<string, View> _childItems;
             protected Dictionary<string, Func<View>> _dynamicViewInitializers;
             internal protected Action _resolveValue;
 
-            protected internal List<ToRoute> Initializers;
+            protected internal Lazy<OrderedList<ToRoute>> Initializers = new Lazy<OrderedList<ToRoute>>(() => new OrderedList<ToRoute>());
+
             internal GetMacroValueDelegate GetMacroValue;
             private string _memberName;
             protected internal bool _active;
@@ -117,11 +121,8 @@
                 */
                 MemberName = memberName;
 
-                if (childRoutes != null ) {
-                    var cr = childRoutes.ToArray();
-                    if (cr.Length > 0) {
-                        Initializers = new List<ToRoute>(cr);
-                    }
+                if (!childRoutes.IsNullOrEmpty()) {
+                    Initializers.Value.AddRange(childRoutes);
                 }
             }
 
@@ -129,7 +130,7 @@
 
             protected internal virtual IDictionary<string, View> ChildItems {
                 get {
-                    return _childItems ?? (_childItems = new XDictionary<string, View>());
+                    return _childItems ?? (_childItems = new ConcurrentDictionary<string, View>());
                 }
             }
 
@@ -143,7 +144,7 @@
 
                     if (result._map is IReplaceable && _thisView != null && _thisView.FallbackRoute != null) {
                         // if the map is replaceable, and we have a fallback route, let's apply that.
-                        var view = _thisView.FallbackRoute();
+                        var view = _thisView.FallbackRoute.View;
                         view._map.MemberName = key;
                         MergeChild(_thisView, view);
                     }
@@ -227,12 +228,12 @@
 
             internal virtual Map OnAccess(View thisView) {
                 _thisView = thisView;
-                if (Initializers != null) {
+                if (Initializers.IsValueCreated ) {
                     lock (this) {
-                        while (Initializers.Count > 0) {
+                        while (Initializers.Value.Count > 0) {
 
-                            var childRoute = Initializers.Dequeue();
-                            var childView = childRoute();
+                            var childRoute = Initializers.Value.Dequeue();
+                            var childView = childRoute.View;
 
                             if (childView != null) {
 
@@ -248,11 +249,12 @@
                                     return this;
                                 }
 
-                                var resolvedName = thisView.ResolveAlias(childView._map.MemberName);
+                                var resolvedName = thisView.ResolveAlias(childView._map.MemberName, (childView._map._aliasHistory ?? (childView._map._aliasHistory = new HashSet<string>())));
+                                  
                                 if (resolvedName.StartsWith("::")) {
-                                    RootMap.AddChildRoute(() => Unroll(resolvedName.Substring(2), childView));
+                                    RootMap.AddChildRoute(new ToRoute(() => Unroll(resolvedName.Substring(2), childView, childRoute.Priority), childRoute.Priority));
                                 } else {
-                                    MergeChild(thisView, Unroll(resolvedName, childView));                                    
+                                    MergeChild(thisView, Unroll(resolvedName, childView, childRoute.Priority));                                    
                                 }
                             }
                         }
@@ -264,27 +266,15 @@
             internal virtual Map AddChildRoute(ToRoute route) {
                 if (route != null) {
                     lock (this) {
-                        if (Initializers == null) {
-                            Initializers = new List<ToRoute>();
-                        }
-                        Initializers.Enqueue(route);
+                        Initializers.Value.Add(route);
                     }
                 }
                 return this;
             }
 
             internal virtual Map AddChildRoutes(IEnumerable<ToRoute> routes) {
-                if (routes != null) {
-                    lock (this) {
-                        if (Initializers == null) {
-                            Initializers = new List<ToRoute>();
-                        }
-                        foreach (var i in routes) {
-                            if (i != null) {
-                                Initializers.Enqueue(i);
-                            }
-                        }
-                    }
+                if (!routes.IsNullOrEmpty()) {
+                    Initializers.Value.AddRange(routes);
                 }
                 return this;
             }
@@ -309,6 +299,8 @@
 
                 //_thisView = thisView;
 
+
+
                 if (!ChildItems.ContainsKey(name)) {
                     // before adding this, let's check if it's a node map that has 
                     // 
@@ -331,10 +323,24 @@
                 var currentView = ChildItems[name];
                 currentView.ParentView = thisView;
 
+                if (currentView._map._resolveValue == RESOLVED) {
+                    Debugger.Break();
+                }
+
+                if (childView._map._resolveValue == RESOLVED) {
+                    Debugger.Break();
+                }
+
                 // first, copy over any property that is there.
                 if (childView.HasProperty) {
-                    currentView.AggregatePropertyNode.InsertRange(0, childView.AggregatePropertyNode);
+                    // currentView.AggregatePropertyNode.InsertRange(0, childView.AggregatePropertyNode);
+                    currentView.AggregatePropertyNode.AddRange(childView.AggregatePropertyNode);
                 }
+
+                if (childView._map._aliasHistory != null && currentView._map._aliasHistory != null) {
+                    childView._map._aliasHistory.ForEach( x => currentView._map._aliasHistory.Add(x) );
+                }
+                childView._map._aliasHistory = (currentView._map._aliasHistory = (currentView._map._aliasHistory ?? childView._map._aliasHistory));
 
                 // copy aliases
                 if (childView._aliases.IsValueCreated) {
@@ -365,8 +371,10 @@
                     currentView.FallbackRoute = currentView.FallbackRoute ?? childView.FallbackRoute;
 
                     currentView._map.Active = childView._map.Active || currentView._map.Active;
-                    currentView._map.AddChildRoutes(childView._map.Initializers);
-                    
+                    if (childView._map.Initializers.IsValueCreated) {
+                        currentView._map.AddChildRoutes(childView._map.Initializers.Value);
+                    }
+
                     // childView._map.GetMacroValue += currentView._map.GetMacroValue;
                     // currentView._map.GetMacroValue = childView._map.GetMacroValue;
 
@@ -401,7 +409,9 @@
 
                     newMap.Active = newMap.Active || oldMap.Active;
 
-                    oldMap.AddChildRoutes(newMap.Initializers);
+                    if (newMap.Initializers.IsValueCreated) {
+                        oldMap.AddChildRoutes(newMap.Initializers.Value);
+                    }
                     newMap.Initializers = oldMap.Initializers;
                     // newMap._parentReferenceValue = oldMap._parentReferenceValue;
                     newMap.GetMacroValue += oldMap.GetMacroValue;
@@ -423,7 +433,9 @@
 
                 if (currentView._map is ValueMap<object> && childView._map is ValueMap<object> ) {
                     currentView._map.Active = childView._map.Active || currentView._map.Active;
-                    currentView._map.AddChildRoutes(childView._map.Initializers);
+                    if (childView._map.Initializers.IsValueCreated) {
+                        currentView._map.AddChildRoutes(childView._map.Initializers.Value);
+                    }
                     currentView._map.GetMacroValue += childView._map.GetMacroValue;
                     return;
                 }
@@ -468,7 +480,7 @@
                             // create the map, and execute it and merge the view now.
                             var parentValue = _route(() => (TParent)ParentView.map.ComputedValue, item);
 
-                            var myItem = index.MapTo(() => parentValue)();
+                            var myItem = index.MapTo(() => parentValue).View;
                             myItem._map.Active = true;
                             MergeChild(ParentView, myItem);
                         }
@@ -555,10 +567,10 @@
                 // must have routes created for each of the routes in this container.
 
                 // and then we hold onto the routes in case there are more elements added after this. ?
-                if(Initializers != null && Initializers.Count > 0 ) {
+                if(Initializers.IsValueCreated && Initializers.Value.Count > 0 ) {
                     lock(this) {
-                        while(Initializers.Count > 0) {
-                            var childView = Initializers.Dequeue()();
+                        while (Initializers.Value.Count > 0) {
+                            var childView = Initializers.Value.Dequeue().View;
                             if(childView != null) {
                                 if (childView._map is ElementMap) {
                                     MergeElement(childView);
@@ -603,11 +615,8 @@
 
                     if(childInitializers != null) {
                         foreach(var i in childInitializers) {
-                            if(value._map.Initializers == null) {
-                                value._map.Initializers = new List<ToRoute>();
-                            }
-                            if(!value._map.Initializers.Contains(i)) {
-                                value._map.Initializers.Enqueue(i);
+                            if(!value._map.Initializers.Value.Contains(i)) {
+                                value._map.Initializers.Value.Add(i);
                             }
                         }
 
@@ -691,7 +700,7 @@
 
                     var accessor = new Accessor(() => Dictionary[_key], v => Dictionary[_key] = (TVal)v);
 
-                    var childMap = new ValueMap<object>(_key.ToString(), (p,v) => accessor, item.Initializers);
+                    var childMap = new ValueMap<object>(_key.ToString(), (p,v) => accessor, item.Initializers.Value);
 
 
                     childMap.GetMacroValue += (name, context) => {
@@ -837,11 +846,11 @@
                 : base(memberName, childRoutes) {
 
                 // when this map is activated, add our children to it.
-                AddChildRoute(() => {
+                AddChildRoute(new ToRoute(() => {
 
                     AddChildRoutes(MemberRoutes);
                     return null;
-                });
+                }));
             }
 
             protected IEnumerable<ToRoute> MemberRoutes {

@@ -212,7 +212,7 @@ namespace Scratch {
                 using(var script = new PackageScript("openssl.autopkg")) {
 
                     IEnumerable<string> overlayFiles;
-                    var pkgFile = script.Save(PackageTypes.NuGet, false, out overlayFiles);
+                    var pkgFile = script.Save(PackageTypes.NuGet, false, false, out overlayFiles);
                 }
                 Console.WriteLine();
             } catch (Exception e) {

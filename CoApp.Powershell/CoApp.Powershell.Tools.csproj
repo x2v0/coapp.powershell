@@ -35,112 +35,100 @@
     <Reference Include="CSharpTest.Net.RpcLibrary, Version=2.12.810.409, Culture=neutral, PublicKeyToken=06aee00cce822474, processorArchitecture=MSIL">
       <HintPath>$(SolutionDir)\packages\CSharpTest.Net.RpcLibrary.2.12.810.409\lib\net40\CSharpTest.Net.RpcLibrary.dll</HintPath>
     </Reference>
-    <Reference Include="ICSharpCode.SharpZipLib">
-      <HintPath>$(SolutionDir)\packages\ngit2.2.1.0.20130431\lib\net40\ICSharpCode.SharpZipLib.dll</HintPath>
+    <Reference Include="ICSharpCode.SharpZipLib, Version=0.86.0.518, Culture=neutral, PublicKeyToken=1b03e6acf1164f73, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\ngit2.2.1.0.20130924\lib\net40\ICSharpCode.SharpZipLib.dll</HintPath>
     </Reference>
     <Reference Include="Ionic.Zip">
-      <HintPath>$(SolutionDir)\packages\MSBuild.Extension.Pack.1.2.0\lib\net40\Ionic.Zip.dll</HintPath>
+      <HintPath>..\packages\MSBuild.Extension.Pack.1.3.0\tools\net40\Ionic.Zip.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Build" />
     <Reference Include="Microsoft.Build.Framework" />
     <Reference Include="Microsoft.Build.Tasks.v4.0" />
     <Reference Include="Microsoft.Build.Utilities.v4.0" />
-    <Reference Include="Microsoft.Data.Edm, Version=5.6.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Microsoft.Data.Edm.5.6.0\lib\net40\Microsoft.Data.Edm.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.Data.OData">
-      <HintPath>..\packages\Microsoft.Data.OData.5.6.0\lib\net40\Microsoft.Data.OData.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="Microsoft.Deployment.WindowsInstaller, Version=3.0.0.0, Culture=neutral, PublicKeyToken=ce35f76fcda82bad, processorArchitecture=MSIL">
       <HintPath>..\packages\DTF-Unofficial.3.6.2928\lib\Microsoft.Deployment.WindowsInstaller.dll</HintPath>
     </Reference>
-    <Reference Include="Microsoft.WindowsAzure.Storage">
-      <HintPath>..\packages\WindowsAzure.Storage.2.0.6.1\lib\net40\Microsoft.WindowsAzure.Storage.dll</HintPath>
+    <Reference Include="Microsoft.Threading.Tasks, Version=1.0.12.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Microsoft.Bcl.Async.1.0.165\lib\net40\Microsoft.Threading.Tasks.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Threading.Tasks.Extensions, Version=1.0.12.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Microsoft.Bcl.Async.1.0.165\lib\net40\Microsoft.Threading.Tasks.Extensions.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Threading.Tasks.Extensions.Desktop, Version=1.0.165.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Microsoft.Bcl.Async.1.0.165\lib\net40\Microsoft.Threading.Tasks.Extensions.Desktop.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.WindowsAzure.Configuration, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Microsoft.WindowsAzure.ConfigurationManager.2.0.3\lib\net40\Microsoft.WindowsAzure.Configuration.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.WindowsAzure.Storage, Version=3.0.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\WindowsAzure.Storage.3.0.1.0\lib\net40\Microsoft.WindowsAzure.Storage.dll</HintPath>
     </Reference>
     <Reference Include="Mono.Posix, Version=4.0.0.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>$(SolutionDir)\packages\ngit2.2.1.0.20130431\lib\net40\Mono.Posix.dll</HintPath>
+      <HintPath>..\packages\ngit2.2.1.0.20130924\lib\net40\Mono.Posix.dll</HintPath>
     </Reference>
-    <Reference Include="Mono.Security">
-      <HintPath>$(SolutionDir)\packages\ngit2.2.1.0.20130431\lib\net40\Mono.Security.dll</HintPath>
+    <Reference Include="Mono.Security, Version=4.0.0.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\ngit2.2.1.0.20130924\lib\net40\Mono.Security.dll</HintPath>
     </Reference>
-    <Reference Include="Mono.Security.Win32">
-      <HintPath>$(SolutionDir)\packages\ngit2.2.1.0.20130431\lib\net40\Mono.Security.Win32.dll</HintPath>
+    <Reference Include="Mono.Security.Win32, Version=4.0.0.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\ngit2.2.1.0.20130924\lib\net40\Mono.Security.Win32.dll</HintPath>
     </Reference>
     <Reference Include="MSBuild.ExtensionPack">
-      <HintPath>$(SolutionDir)\packages\MSBuild.Extension.Pack.1.2.0\lib\net40\MSBuild.ExtensionPack.dll</HintPath>
+      <HintPath>..\packages\MSBuild.Extension.Pack.1.3.0\tools\net40\MSBuild.ExtensionPack.dll</HintPath>
     </Reference>
     <Reference Include="MSBuild.ExtensionPack.Git">
-      <HintPath>$(SolutionDir)\packages\MSBuild.Extension.Pack.1.2.0\lib\net40\MSBuild.ExtensionPack.Git.dll</HintPath>
+      <HintPath>..\packages\MSBuild.Extension.Pack.1.3.0\tools\net40\MSBuild.ExtensionPack.Git.dll</HintPath>
     </Reference>
     <Reference Include="MSBuild.ExtensionPack.Loggers">
-      <HintPath>$(SolutionDir)\packages\MSBuild.Extension.Pack.1.2.0\lib\net40\MSBuild.ExtensionPack.Loggers.dll</HintPath>
+      <HintPath>..\packages\MSBuild.Extension.Pack.1.3.0\tools\net40\MSBuild.ExtensionPack.Loggers.dll</HintPath>
     </Reference>
     <Reference Include="MSBuild.ExtensionPack.TaskFactory.PowerShell">
-      <HintPath>$(SolutionDir)\packages\MSBuild.Extension.Pack.1.2.0\lib\net40\MSBuild.ExtensionPack.TaskFactory.PowerShell.dll</HintPath>
+      <HintPath>..\packages\MSBuild.Extension.Pack.1.3.0\tools\net40\MSBuild.ExtensionPack.TaskFactory.PowerShell.dll</HintPath>
     </Reference>
-    <Reference Include="MSBuild.ExtensionPack.WindowsVirtualPC">
-      <HintPath>$(SolutionDir)\packages\MSBuild.Extension.Pack.1.2.0\lib\net40\MSBuild.ExtensionPack.WindowsVirtualPC.dll</HintPath>
+    <Reference Include="Newtonsoft.Json, Version=4.5.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.5.0.8\lib\net40\Newtonsoft.Json.dll</HintPath>
     </Reference>
-    <Reference Include="NGit">
-      <HintPath>$(SolutionDir)\packages\ngit2.2.1.0.20130431\lib\net40\NGit.dll</HintPath>
+    <Reference Include="NGit, Version=2.1.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\ngit2.2.1.0.20130924\lib\net40\NGit.dll</HintPath>
     </Reference>
-    <Reference Include="NSch">
-      <HintPath>$(SolutionDir)\packages\ngit2.2.1.0.20130431\lib\net40\NSch.dll</HintPath>
+    <Reference Include="NSch, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\ngit2.2.1.0.20130924\lib\net40\NSch.dll</HintPath>
     </Reference>
-    <Reference Include="ServiceStack">
-      <HintPath>..\packages\ServiceStack.3.9.59\lib\net35\ServiceStack.dll</HintPath>
+    <Reference Include="Sharpen, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\ngit2.2.1.0.20130924\lib\net40\Sharpen.dll</HintPath>
     </Reference>
-    <Reference Include="ServiceStack.Common">
-      <HintPath>..\packages\ServiceStack.Common.3.9.59\lib\net35\ServiceStack.Common.dll</HintPath>
-    </Reference>
-    <Reference Include="ServiceStack.Interfaces">
-      <HintPath>..\packages\ServiceStack.Common.3.9.59\lib\net35\ServiceStack.Interfaces.dll</HintPath>
-    </Reference>
-    <Reference Include="ServiceStack.OrmLite">
-      <HintPath>..\packages\ServiceStack.OrmLite.SqlServer.3.9.59\lib\ServiceStack.OrmLite.dll</HintPath>
-    </Reference>
-    <Reference Include="ServiceStack.OrmLite.SqlServer">
-      <HintPath>..\packages\ServiceStack.OrmLite.SqlServer.3.9.59\lib\ServiceStack.OrmLite.SqlServer.dll</HintPath>
-    </Reference>
-    <Reference Include="ServiceStack.Redis">
-      <HintPath>..\packages\ServiceStack.Redis.3.9.59\lib\net35\ServiceStack.Redis.dll</HintPath>
-    </Reference>
-    <Reference Include="ServiceStack.ServiceInterface">
-      <HintPath>..\packages\ServiceStack.3.9.59\lib\net35\ServiceStack.ServiceInterface.dll</HintPath>
-    </Reference>
-    <Reference Include="ServiceStack.Text">
-      <HintPath>..\packages\ServiceStack.Text.3.9.59\lib\net35\ServiceStack.Text.dll</HintPath>
-    </Reference>
-    <Reference Include="Sharpen">
-      <HintPath>$(SolutionDir)\packages\ngit2.2.1.0.20130431\lib\net40\Sharpen.dll</HintPath>
-    </Reference>
-    <Reference Include="Sharpen.Unix">
-      <HintPath>$(SolutionDir)\packages\ngit2.2.1.0.20130431\lib\net40\Sharpen.Unix.dll</HintPath>
+    <Reference Include="Sharpen.Unix, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\ngit2.2.1.0.20130924\lib\net40\Sharpen.Unix.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Data.Services.Client" />
-    <Reference Include="System.IO, Version=2.6.3.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>$(SolutionDir)\packages\Microsoft.Bcl.1.1.3\lib\net40\System.IO.dll</HintPath>
+    <Reference Include="System.IO">
+      <HintPath>..\packages\Microsoft.Bcl.1.1.6\lib\net40\System.IO.dll</HintPath>
     </Reference>
     <Reference Include="System.Management.Automation, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\..\..\..\..\Program Files (x86)\Reference Assemblies\Microsoft\WindowsPowerShell\3.0\System.Management.Automation.dll</HintPath>
     </Reference>
     <Reference Include="System.Net" />
-    <Reference Include="System.Runtime, Version=2.6.3.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>$(SolutionDir)\packages\Microsoft.Bcl.1.1.3\lib\net40\System.Runtime.dll</HintPath>
+    <Reference Include="System.Runtime">
+      <HintPath>..\packages\Microsoft.Bcl.1.1.6\lib\net40\System.Runtime.dll</HintPath>
     </Reference>
     <Reference Include="System.Runtime.Serialization" />
-    <Reference Include="System.Spatial, Version=5.6.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\System.Spatial.5.6.0\lib\net40\System.Spatial.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Threading.Tasks, Version=2.6.3.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>$(SolutionDir)\packages\Microsoft.Bcl.1.1.3\lib\net40\System.Threading.Tasks.dll</HintPath>
+    <Reference Include="System.Threading.Tasks">
+      <HintPath>..\packages\Microsoft.Bcl.1.1.6\lib\net40\System.Threading.Tasks.dll</HintPath>
     </Reference>
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -199,6 +187,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="etc\PackageScriptTemplate_static.autopkg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="etc\Pivots.properties">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="etc\template-project.vcxproj">
@@ -263,10 +254,6 @@
       <Project>{b444dab8-9a7e-4b87-be31-b1a565964786}</Project>
       <Name>Powershell.Provider</Name>
     </ProjectReference>
-    <ProjectReference Include="..\clrplus\Powershell.Rest\Powershell.Rest.csproj">
-      <Project>{DF38AA27-E211-4A3C-A3AB-ADD00347A25A}</Project>
-      <Name>Powershell.Rest</Name>
-    </ProjectReference>
     <ProjectReference Include="..\clrplus\Scripting.MsBuild\Scripting.MsBuild.csproj">
       <Project>{123467A0-2FCE-43F8-9814-0EB1F6C91234}</Project>
       <Name>Scripting.MsBuild</Name>
@@ -309,10 +296,10 @@ powershell Set-content coapp.psd1 ((Get-Content coapp.psd1).Replace('CoApp.Power
 goto common
 
 :RELEASE 
-  $(SolutionDir)\tools\il-repack.exe   /targetplatform:v4 /lib:. /lib:"C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0" /lib:"C:\Program Files (x86)\Reference Assemblies\Microsoft\WindowsPowerShell\3.0" /parallel /union /out:CoApp.Powershell.Tools.dll CoApp.Powershell.dll ClrPlus.Core.dll ClrPlus.Platform.dll ClrPlus.Powershell.Azure.dll ClrPlus.Powershell.Core.dll ClrPlus.Powershell.Provider.dll ClrPlus.Powershell.Rest.dll ClrPlus.Scripting.dll ClrPlus.Scripting.MsBuild.dll ClrPlus.Windows.Api.dll ClrPlus.Windows.PeBinary.dll Microsoft.Cci.Analysis.ControlAndDataFlowGraph.dll Microsoft.Cci.AstsProjectedAsCodeModel.dll Microsoft.Cci.CodeModel.dll Microsoft.Cci.CodeModelToIL.dll Microsoft.Cci.ContractExtractor.dll Microsoft.Cci.CSharpSourceEmitter.dll Microsoft.Cci.ILGenerator.dll Microsoft.Cci.MetadataHelper.dll Microsoft.Cci.MetadataModel.dll Microsoft.Cci.MutableCodeModel.dll Microsoft.Cci.MutableMetadataModel.dll Microsoft.Cci.NewILToCodeModel.dll Microsoft.Cci.PdbReader.dll Microsoft.Cci.PdbWriter.dll Microsoft.Cci.PeReader.dll Microsoft.Cci.PeWriter.dll Microsoft.Cci.ReflectionEmitter.dll Microsoft.Cci.SourceEmitter.dll Microsoft.Cci.SourceModel.dll Microsoft.Threading.Tasks.dll Microsoft.Threading.Tasks.Extensions.dll Microsoft.Threading.Tasks.Extensions.Desktop.dll System.Runtime.dll System.Threading.Tasks.dll Microsoft.WindowsAzure.Configuration.dll Microsoft.WindowsAzure.Storage.dll ServiceStack.Common.dll ServiceStack.dll ServiceStack.Interfaces.dll ServiceStack.ServiceInterface.dll ServiceStack.Text.dll  ServiceStack.OrmLite.dll Microsoft.Deployment.WindowsInstaller.dll CSScriptLibrary.dll Mono.CSharp.dll Microsoft.Data.OData.dll Microsoft.Data.Edm.dll Ionic.Zip.dll MSBuild.ExtensionPack.dll MSBuild.ExtensionPack.Git.dll MSBuild.ExtensionPack.Loggers.dll MSBuild.ExtensionPack.TaskFactory.PowerShell.dll Sharpen.dll  ICSharpCode.SharpZipLib.dll NGit.dll NSch.dll CSharpTest.Net.RpcLibrary.dll Mono.Security.dll Interop.COMAdmin.dll Interop.IWshRuntimeLibrary.dll
+  $(SolutionDir)\tools\il-repack.exe   /targetplatform:v4 /lib:. /lib:"C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0" /lib:"C:\Program Files (x86)\Reference Assemblies\Microsoft\WindowsPowerShell\3.0" /parallel /union /out:CoApp.Powershell.Tools.dll CoApp.Powershell.dll ClrPlus.Core.dll ClrPlus.Platform.dll ClrPlus.Powershell.Azure.dll ClrPlus.Powershell.Core.dll ClrPlus.Powershell.Provider.dll ClrPlus.Scripting.dll ClrPlus.Scripting.MsBuild.dll ClrPlus.Windows.Api.dll ClrPlus.Windows.PeBinary.dll Microsoft.Cci.Analysis.ControlAndDataFlowGraph.dll Microsoft.Cci.AstsProjectedAsCodeModel.dll Microsoft.Cci.CodeModel.dll Microsoft.Cci.CodeModelToIL.dll Microsoft.Cci.ContractExtractor.dll Microsoft.Cci.CSharpSourceEmitter.dll Microsoft.Cci.ILGenerator.dll Microsoft.Cci.MetadataHelper.dll Microsoft.Cci.MetadataModel.dll Microsoft.Cci.MutableCodeModel.dll Microsoft.Cci.MutableMetadataModel.dll Microsoft.Cci.NewILToCodeModel.dll Microsoft.Cci.PdbReader.dll Microsoft.Cci.PdbWriter.dll Microsoft.Cci.PeReader.dll Microsoft.Cci.PeWriter.dll Microsoft.Cci.ReflectionEmitter.dll Microsoft.Cci.SourceEmitter.dll Microsoft.Cci.SourceModel.dll Microsoft.Threading.Tasks.dll Microsoft.Threading.Tasks.Extensions.dll Microsoft.Threading.Tasks.Extensions.Desktop.dll System.Runtime.dll System.Threading.Tasks.dll Microsoft.WindowsAzure.Configuration.dll Microsoft.WindowsAzure.Storage.dll Microsoft.Deployment.WindowsInstaller.dll CSScriptLibrary.dll Mono.CSharp.dll Ionic.Zip.dll MSBuild.ExtensionPack.dll MSBuild.ExtensionPack.Git.dll MSBuild.ExtensionPack.Loggers.dll MSBuild.ExtensionPack.TaskFactory.PowerShell.dll Sharpen.dll  ICSharpCode.SharpZipLib.dll NGit.dll NSch.dll CSharpTest.Net.RpcLibrary.dll Mono.Security.dll Microsoft.Data.Edm.dll Microsoft.Data.OData.dll Microsoft.Data.Services.Client.dll Newtonsoft.Json.dll  Interop.COMAdmin.dll Interop.IWshRuntimeLibrary.dll
 
 
-REM EmbedAssemblyAsResource CoApp.Powershell.Tools.dll ClrPlus.Core.dll ClrPlus.Platform.dll ClrPlus.Powershell.Azure.dll ClrPlus.Powershell.Core.dll ClrPlus.Powershell.Provider.dll ClrPlus.Powershell.Rest.dll ClrPlus.Scripting.dll ClrPlus.Scripting.MsBuild.dll ClrPlus.Windows.Api.dll ClrPlus.Windows.PeBinary.dll Microsoft.Cci.Analysis.ControlAndDataFlowGraph.dll Microsoft.Cci.AstsProjectedAsCodeModel.dll Microsoft.Cci.CodeModel.dll Microsoft.Cci.CodeModelToIL.dll Microsoft.Cci.ContractExtractor.dll Microsoft.Cci.CSharpSourceEmitter.dll Microsoft.Cci.ILGenerator.dll Microsoft.Cci.MetadataHelper.dll Microsoft.Cci.MetadataModel.dll Microsoft.Cci.MutableCodeModel.dll Microsoft.Cci.MutableMetadataModel.dll Microsoft.Cci.NewILToCodeModel.dll Microsoft.Cci.PdbReader.dll Microsoft.Cci.PdbWriter.dll Microsoft.Cci.PeReader.dll Microsoft.Cci.PeWriter.dll Microsoft.Cci.ReflectionEmitter.dll Microsoft.Cci.SourceEmitter.dll Microsoft.Cci.SourceModel.dll Microsoft.Threading.Tasks.dll Microsoft.Threading.Tasks.Extensions.dll Microsoft.Threading.Tasks.Extensions.Desktop.dll System.Runtime.dll System.Threading.Tasks.dll Microsoft.WindowsAzure.Configuration.dll Microsoft.WindowsAzure.Storage.dll ServiceStack.Common.dll ServiceStack.dll ServiceStack.Interfaces.dll ServiceStack.ServiceInterface.dll ServiceStack.Text.dll  ServiceStack.OrmLite.dll Microsoft.Deployment.WindowsInstaller.dll CSScriptLibrary.dll Mono.CSharp.dll Microsoft.Data.OData.dll Microsoft.Data.Edm.dll Ionic.Zip.dll MSBuild.ExtensionPack.dll MSBuild.ExtensionPack.Git.dll MSBuild.ExtensionPack.Loggers.dll MSBuild.ExtensionPack.TaskFactory.PowerShell.dll Sharpen.dll  ICSharpCode.SharpZipLib.dll NGit.dll NSch.dll CSharpTest.Net.RpcLibrary.dll Mono.Security.dll
+REM EmbedAssemblyAsResource CoApp.Powershell.Tools.dll ClrPlus.Core.dll ClrPlus.Platform.dll ClrPlus.Powershell.Azure.dll ClrPlus.Powershell.Core.dll ClrPlus.Powershell.Provider.dll ClrPlus.Scripting.dll ClrPlus.Scripting.MsBuild.dll ClrPlus.Windows.Api.dll ClrPlus.Windows.PeBinary.dll Microsoft.Cci.Analysis.ControlAndDataFlowGraph.dll Microsoft.Cci.AstsProjectedAsCodeModel.dll Microsoft.Cci.CodeModel.dll Microsoft.Cci.CodeModelToIL.dll Microsoft.Cci.ContractExtractor.dll Microsoft.Cci.CSharpSourceEmitter.dll Microsoft.Cci.ILGenerator.dll Microsoft.Cci.MetadataHelper.dll Microsoft.Cci.MetadataModel.dll Microsoft.Cci.MutableCodeModel.dll Microsoft.Cci.MutableMetadataModel.dll Microsoft.Cci.NewILToCodeModel.dll Microsoft.Cci.PdbReader.dll Microsoft.Cci.PdbWriter.dll Microsoft.Cci.PeReader.dll Microsoft.Cci.PeWriter.dll Microsoft.Cci.ReflectionEmitter.dll Microsoft.Cci.SourceEmitter.dll Microsoft.Cci.SourceModel.dll Microsoft.Threading.Tasks.dll Microsoft.Threading.Tasks.Extensions.dll Microsoft.Threading.Tasks.Extensions.Desktop.dll System.Runtime.dll System.Threading.Tasks.dll Microsoft.WindowsAzure.Configuration.dll Microsoft.WindowsAzure.Storage.dll Microsoft.Deployment.WindowsInstaller.dll CSScriptLibrary.dll Mono.CSharp.dll Ionic.Zip.dll MSBuild.ExtensionPack.dll MSBuild.ExtensionPack.Git.dll MSBuild.ExtensionPack.Loggers.dll MSBuild.ExtensionPack.TaskFactory.PowerShell.dll Sharpen.dll  ICSharpCode.SharpZipLib.dll NGit.dll NSch.dll CSharpTest.Net.RpcLibrary.dll Mono.Security.dll Microsoft.Data.Edm.dll Microsoft.Data.OData.dll Microsoft.Data.Services.Client.dll Newtonsoft.Json.dll 
   
 "C:\Program Files (x86)\Windows Kits\8.0\bin\x86\signtool.exe" sign /a /t http://timestamp.verisign.com/scripts/timstamp.dll $(TargetDir)\CoApp.Powershell.Tools.dll
 "C:\Program Files (x86)\Windows Kits\8.0\bin\x86\signtool.exe" sign /a /t http://timestamp.verisign.com/scripts/timstamp.dll $(TargetDir)\CoApp.psd1
@@ -327,10 +314,10 @@ copy /y $(TargetDir)\CoApp.NuGetNativeExtensions.* $(TargetDir)\etc
 copy /y $(TargetDir)\CoApp.NuGetNativeMSBuildTasks.* $(TargetDir)\etc
 copy /y "$(TargetDir)\etc\CoApp.NuGetNativeMSBuildTasks.dll" "$(TargetDir)\etc\CoApp.NuGetNativeMSBuildTasks.dll.orig"</PostBuildEvent>
   </PropertyGroup>
-  <Import Project="..\packages\Microsoft.Bcl.Build.1.0.10\tools\Microsoft.Bcl.Build.targets" Condition="Exists('..\packages\Microsoft.Bcl.Build.1.0.10\tools\Microsoft.Bcl.Build.targets')" />
+  <Import Project="..\packages\Microsoft.Bcl.Build.1.0.13\tools\Microsoft.Bcl.Build.targets" Condition="Exists('..\packages\Microsoft.Bcl.Build.1.0.13\tools\Microsoft.Bcl.Build.targets')" />
   <Target Name="EnsureBclBuildImported" BeforeTargets="BeforeBuild" Condition="'$(BclBuildImported)' == ''">
-    <Error Condition="!Exists('..\packages\Microsoft.Bcl.Build.1.0.10\tools\Microsoft.Bcl.Build.targets')" Text="This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=317567." HelpKeyword="BCLBUILD2001" />
-    <Error Condition="Exists('..\packages\Microsoft.Bcl.Build.1.0.10\tools\Microsoft.Bcl.Build.targets')" Text="The build restored NuGet packages. Build the project again to include these packages in the build. For more information, see http://go.microsoft.com/fwlink/?LinkID=317568." HelpKeyword="BCLBUILD2002" />
+    <Error Condition="!Exists('..\packages\Microsoft.Bcl.Build.1.0.13\tools\Microsoft.Bcl.Build.targets')" Text="This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=317567." HelpKeyword="BCLBUILD2001" />
+    <Error Condition="Exists('..\packages\Microsoft.Bcl.Build.1.0.13\tools\Microsoft.Bcl.Build.targets')" Text="The build restored NuGet packages. Build the project again to include these packages in the build. For more information, see http://go.microsoft.com/fwlink/?LinkID=317568." HelpKeyword="BCLBUILD2002" />
   </Target>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

@@ -171,8 +171,8 @@ namespace ClrPlus.Scripting.Languages.PropertySheetV3.Mapping {
         }
 
         private IEnumerable<string> LookupPropertyForMacro(string valuename, IValueContext context) {
-            var v = GetProperty(ResolveAlias(valuename), false);
-
+            //var v = GetProperty(ResolveAlias(valuename), false);
+            var v = GetProperty(valuename,false);
             if (v == null || v._map is ElementMap) {
                 return null;
             }
@@ -301,24 +301,28 @@ namespace ClrPlus.Scripting.Languages.PropertySheetV3.Mapping {
         */
 
         #region aliases
-        public Selector ResolveAlias(Selector selector) {
-            var resolved = ResolveAlias(selector.Name);
+        public Selector ResolveAlias(Selector selector, HashSet<string> history) {
+            var resolved = ResolveAlias(selector.Name,history);
             if(resolved != selector.Name) {
                 return new Selector(resolved, selector.Parameter, selector.SourceLocation, selector.AfterTheParameter);
             }
             return selector;
         }
 
-        public string ResolveAlias(string aliasName) {
+        public string ResolveAlias(string aliasName, HashSet<string> history) {
             if(_aliases.IsValueCreated) {
                 foreach(var aliases in _aliases.Value.Where(aliases => aliases.ContainsKey(aliasName))) {
-                    return aliases[aliasName];
+                    var found  = aliases[aliasName];
+                        if (!history.Contains(found)) {
+                            history.Add(found);
+                            return found;
+                        }
                 }
             }
 
             // return the original alias name if there isn't a match.
             if(ParentView != null) {
-                return ParentView.ResolveAlias(aliasName);
+                    return ParentView.ResolveAlias(aliasName, history);
             }
             return aliasName;
         }
@@ -359,8 +363,10 @@ namespace ClrPlus.Scripting.Languages.PropertySheetV3.Mapping {
             if(node is PropertyNode) {
                 AggregatePropertyNode.AddRange(node as PropertyNode);
             }
-            if(node is ObjectNode) {
-                _aliases.Value.Add((node as ObjectNode).Aliases.Value);
+            if (node is ObjectNode) {
+                if ((node as ObjectNode).Aliases.IsValueCreated && !(node as ObjectNode).Aliases.Value.IsNullOrEmpty()) {
+                    _aliases.Value.Add((node as ObjectNode).Aliases.Value);
+                }
             }
             if(node.Metadata.IsValueCreated) {
                 _metadata.Value.Add(node.Metadata.Value);
@@ -385,15 +391,17 @@ namespace ClrPlus.Scripting.Languages.PropertySheetV3.Mapping {
             InitializeAtRootLevel(node);
         }
 
-        protected static View Unroll(string memberName, View view) {
+        protected static View Unroll(string memberName, View view, int priority) {
             if (view._map.MemberName != memberName) {
                 var p = memberName.IndexOf('.');
                 if (p > -1) {
-                    return new View(new PlaceholderMap(memberName.Substring(0, p), new ToRoute[] {
-                        (() => Unroll(memberName.Substring(p + 1), view))
+                    var v= new View(new PlaceholderMap(memberName.Substring(0, p), new ToRoute[] {
+                        (new ToRoute(() => Unroll(memberName.Substring(p + 1), view,priority)))
                     }) {
                         Active = view._map.Active
                     });
+                    v._map._aliasHistory = view._map._aliasHistory;
+                    return v;
                 }
                 view._map.MemberName = memberName;
             }
@@ -404,7 +412,7 @@ namespace ClrPlus.Scripting.Languages.PropertySheetV3.Mapping {
             var p = memberName.IndexOf('.');
             if (p > -1) {
                 return new PlaceholderMap(memberName.Substring(0, p), new ToRoute[] {
-                    (() => new View(Unroll(memberName.Substring(p + 1), map)))
+                    (new ToRoute(()  => new View(Unroll(memberName.Substring(p + 1), map))))
                 });
             }
             return map(memberName);
@@ -413,7 +421,7 @@ namespace ClrPlus.Scripting.Languages.PropertySheetV3.Mapping {
         protected static Map Unroll(Selector selector, INode node) {
             if (selector.IsCompound) {
                 return new PlaceholderMap(selector.Prefix.Name, new ToRoute[] {
-                    (() => new View(Unroll(selector.Suffix, node), node))
+                    (new ToRoute( () => new View(Unroll(selector.Suffix, node), node)))
                 }) {
                     Active = true
                 };
@@ -422,7 +430,7 @@ namespace ClrPlus.Scripting.Languages.PropertySheetV3.Mapping {
             if (selector.HasParameter) {
                 // add an initializer to the new node that adds the element to the child container.
                 return new PlaceholderMap(selector.Name, new ToRoute[] {
-                    (() => new View(new ElementMap(null, selector.Parameter, node), node))
+                    (new ToRoute(() => new View(new ElementMap(null, selector.Parameter, node), node)))
                 }) {
                     Active = true
                 };
@@ -510,25 +518,26 @@ namespace ClrPlus.Scripting.Languages.PropertySheetV3.Mapping {
             }
         }
 
-        public View GetProperty(string propertyName, bool createImplicitly = true, Func<string, string> lastMinuteReplacementFunction = null) {
+        public View GetProperty(string propertyName, bool createImplicitly = true, Func<string, string> lastMinuteReplacementFunction = null, HashSet<string> history = null) {
+            history = history ?? new HashSet<string>();
+
             if (lastMinuteReplacementFunction != null) {
                 propertyName = lastMinuteReplacementFunction(propertyName);
             }
-            // this falls back to case insensitive matches if th property didn't exist.
+            // if we have a dot, we have to navigate first 
             if (propertyName.Contains('.')) {
-                return GetChild(propertyName, createImplicitly, lastMinuteReplacementFunction); // let that unroll the path.to.property
+                return GetChild(propertyName, createImplicitly, lastMinuteReplacementFunction,history); // let that unroll the path.to.property
             }
 
-            propertyName = ResolveAlias(propertyName);
+            propertyName = ResolveAlias(propertyName,history);
 
-            // if we got a new name from an alias, we'd better check again.
-            if (propertyName.Contains('.')) {
-                return GetChild(propertyName, createImplicitly, lastMinuteReplacementFunction); // let that unroll the path.to.property
-            }
-
-            
+            // if we got a new name from an alias, we'd better check to see if we're still supposed to be here.
             if (propertyName.StartsWith("::")) {
-                return RootView.GetChild(propertyName.Trim(':'), createImplicitly, lastMinuteReplacementFunction);
+                return RootView.GetChild(propertyName.Trim(':'), createImplicitly, lastMinuteReplacementFunction,history);
+            }
+
+            if (propertyName.Contains('.')) {
+                return GetChild(propertyName, createImplicitly, lastMinuteReplacementFunction,history); // let that unroll the path.to.property
             }
 
             if (map.ContainsKey(propertyName)) {
@@ -547,7 +556,8 @@ namespace ClrPlus.Scripting.Languages.PropertySheetV3.Mapping {
         }
 
 
-        internal View GetChild(Selector selector, bool createImplicity=true, Func<string,string> lastMinuteReplacementFunction = null ) {
+        internal View GetChild(Selector selector, bool createImplicity, Func<string, string> lastMinuteReplacementFunction, HashSet<string> history) {
+
             if(selector == null || selector.IsEmpty ) {
                 return this;
             }
@@ -556,42 +566,42 @@ namespace ClrPlus.Scripting.Languages.PropertySheetV3.Mapping {
                 selector = new Selector("*",selector.Parameter,selector.SourceLocation,selector.AfterTheParameter);
             }
 
-            selector = ResolveAlias(selector);
+            selector = ResolveAlias(selector,history);
 
             if(selector.IsGlobal) {
-                return RootView.GetChild(selector.DeGlobaled, createImplicity, lastMinuteReplacementFunction);
+                return RootView.GetChild(selector.DeGlobaled, createImplicity, lastMinuteReplacementFunction,history);
             }
             
             if (selector.AfterTheParameter.Is()) {
-                return GetChild(selector.WithoutAfterTheParameter, createImplicity, lastMinuteReplacementFunction).GetChild(selector.AfterSelector, createImplicity, lastMinuteReplacementFunction);
+                return GetChild(selector.WithoutAfterTheParameter, createImplicity, lastMinuteReplacementFunction,history).GetChild(selector.AfterSelector, createImplicity, lastMinuteReplacementFunction,history);
             }
 
             if(selector.IsCompound) {
                 var name = selector.Prefix.Name;
 
-                var resolved = ResolveAlias(name);
+                var resolved = ResolveAlias(name,history);
                 if (resolved != name && resolved.IndexOfAny(new char[] {'.', '[', ']',':' }) > -1) {
-                    var result = GetProperty(resolved, createImplicity, lastMinuteReplacementFunction);
+                    var result = GetProperty(resolved, createImplicity, lastMinuteReplacementFunction,history);
                     if (result != null) {
-                        return result.GetChild(selector.Suffix, createImplicity, lastMinuteReplacementFunction);
+                        return result.GetChild(selector.Suffix, createImplicity, lastMinuteReplacementFunction,history);
                     }
                     return null;
                 }
 
-                return HasChild(name) ? GetProperty(name, createImplicity, lastMinuteReplacementFunction).GetChild(selector.Suffix, createImplicity, lastMinuteReplacementFunction) : (createImplicity ? CreatePlaceholderView(name).GetChild(selector.Suffix, createImplicity, lastMinuteReplacementFunction) : null);
+                return HasChild(name) ? GetProperty(name, createImplicity, lastMinuteReplacementFunction,history).GetChild(selector.Suffix, createImplicity, lastMinuteReplacementFunction,history) : (createImplicity ? CreatePlaceholderView(name).GetChild(selector.Suffix, createImplicity, lastMinuteReplacementFunction,history) : null);
             }
 
             if (selector.IsSpecialCase) {
                 // this ensures a special case where a selector is resolving, but it has an empty auto-condition in it.
                 // this should make sure that '*[].foo' is the same thing as 'foo' 
-                return GetChild(selector.AfterSelector, createImplicity, lastMinuteReplacementFunction);
+                return GetChild(selector.AfterSelector, createImplicity, lastMinuteReplacementFunction,history);
             }
 
             if (selector.HasParameter) {
-                return HasChild(selector.Name) ? GetProperty(selector.Name, createImplicity, lastMinuteReplacementFunction).GetElement(selector.Parameter, lastMinuteReplacementFunction) : (createImplicity ? CreatePlaceholderView(selector.Name).GetElement(selector.Parameter, lastMinuteReplacementFunction) : null);
+                return HasChild(selector.Name) ? GetProperty(selector.Name, createImplicity, lastMinuteReplacementFunction,history).GetElement(selector.Parameter, lastMinuteReplacementFunction) : (createImplicity ? CreatePlaceholderView(selector.Name).GetElement(selector.Parameter, lastMinuteReplacementFunction) : null);
             }
 
-            return GetProperty(selector.Name, createImplicity, lastMinuteReplacementFunction);
+            return GetProperty(selector.Name, createImplicity, lastMinuteReplacementFunction,history);
         }
 
         private View CreatePlaceholderView(string placeholderName) {
@@ -664,7 +674,7 @@ namespace ClrPlus.Scripting.Languages.PropertySheetV3.Mapping {
             _map.AddChildRoutes(routes);
         }
         public void AddChildRoute(ToRoute route) {
-            _map.AddChildRoutes(route.SingleItemAsEnumerable());
+            _map.AddChildRoute(route);
         }
 
         public override bool TryGetIndex(GetIndexBinder binder, object[] indexes, out object result) {

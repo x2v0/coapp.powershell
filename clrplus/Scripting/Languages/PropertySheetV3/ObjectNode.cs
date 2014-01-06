@@ -92,9 +92,9 @@ namespace ClrPlus.Scripting.Languages.PropertySheetV3 {
         public virtual View CurrentView {
             get {
                 if (Parent == null) {
-                    return Root.CurrentView.GetChild(Selector);
+                    return Root.CurrentView.GetChild(Selector,true, null, new HashSet<string>());
                 }
-                return Parent.CurrentView.GetChild(Selector);
+                return Parent.CurrentView.GetChild(Selector,true, null, new HashSet<string>());
             }
         }
 
@@ -135,7 +135,7 @@ namespace ClrPlus.Scripting.Languages.PropertySheetV3 {
         
         internal IEnumerable<ToRoute> Routes {
             get {
-                return Keys.Select(key => (ToRoute)(() => new View(key, this[key])));
+                return Keys.Select(key => new ToRoute((() => new View(key, this[key]))));
             }
         }
 

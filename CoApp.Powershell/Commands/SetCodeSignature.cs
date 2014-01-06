@@ -22,11 +22,11 @@ namespace CoApp.Powershell.Commands {
     using ClrPlus.Powershell.Core;
     using ClrPlus.Powershell.Provider.Base;
     using ClrPlus.Powershell.Provider.Filesystem;
-    using ClrPlus.Powershell.Rest.Commands;
+    
     using ClrPlus.Signing.Signers;
 
     [Cmdlet(VerbsCommon.Set, "CodeSignature")]
-    public class SetCodeSignature : RestableCmdlet<SetCodeSignature> {
+    public class SetCodeSignature : BaseCmdlet {
         [Parameter(ValueFromPipeline = true, Mandatory = true, Position = 0)]
         [ValidateNotNullOrEmpty]
         public string Path {get; set;}
@@ -49,11 +49,12 @@ namespace CoApp.Powershell.Commands {
             ILocation outputPath = String.IsNullOrWhiteSpace(Destination) ? inputPath : ResolveDestinationLocation();
             Destination = outputPath.AbsolutePath;
 
+            #if USING_RESTABLE_CMDLET
             if (Remote) {
                 ProcessRecordViaRest();
                 return;
             }
-
+#endif 
             try {
                 using (var ps = Runspace.DefaultRunspace.Dynamic()) {
                     if (!String.IsNullOrWhiteSpace(Certificate)) {

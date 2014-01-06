@@ -15,10 +15,9 @@ namespace CoApp.Powershell.Commands {
     using System.Management.Automation;
     using ClrPlus.Platform;
     using ClrPlus.Powershell.Core;
-    using ClrPlus.Powershell.Rest.Commands;
 
     [Cmdlet(AllVerbs.New, "Solution")]
-    public class NewSolution : RestableCmdlet<NewSolution> {
+    public class NewSolution : BaseCmdlet {
         [Parameter(HelpMessage = "Solution file to create (.sln)", Mandatory = true, Position = 0)]
         public string OutputFile {get; set;}
 
@@ -29,11 +28,12 @@ namespace CoApp.Powershell.Commands {
         public SwitchParameter Force {get; set;}
 
         protected override void ProcessRecord() {
+#if USING_RESTABLE_CMDLET
             if (Remote) {
                 ProcessRecordViaRest();
                 return;
             }
-
+#endif 
             using (new PushDirectory((Path.Combine(SessionState.Drive.Current.Root, SessionState.Drive.Current.CurrentLocation)))) {
             }
         }

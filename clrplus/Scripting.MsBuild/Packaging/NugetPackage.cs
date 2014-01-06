@@ -29,7 +29,6 @@ namespace ClrPlus.Scripting.MsBuild.Packaging {
     using Languages.PropertySheetV3.Mapping;
     using Microsoft.Build.Construction;
     using Microsoft.Build.Evaluation;
-    using Mono.CSharp;
     using Platform;
     using Powershell.Core;
     using Utility;
@@ -266,7 +265,7 @@ namespace ClrPlus.Scripting.MsBuild.Packaging {
             // Event<Verbose>.Raise("NugetPackage.Validate", "Validating nuget package (nothing)");
         }
 
-        internal string Save(bool cleanIntermediateFiles, out IEnumerable<string> overlayPackages ) {
+        internal string Save(bool cleanIntermediateFiles, bool generateOnly  ,out IEnumerable<string> overlayPackages ) {
             
             List<string> overlays = null;
             string packageFileName = null;
@@ -422,7 +421,7 @@ namespace ClrPlus.Scripting.MsBuild.Packaging {
                             pkg._fileSets.Add(string.Empty, _fileSets[set]);
                             pkg.Process();
 
-                            pkg.Save(cleanIntermediateFiles, out tmpOverlayPackages);
+                            pkg.Save(cleanIntermediateFiles, generateOnly ,out tmpOverlayPackages);
 
                             // add each overlay package created to the master list of overlays
                             overlays.Add(overlayPackageName);
@@ -478,7 +477,7 @@ namespace ClrPlus.Scripting.MsBuild.Packaging {
                         AddFileToNuSpec(_fileSets[set][src], src);
                     }
                 }
-            }
+            } 
 
             if (Props.IsValueCreated && Props.Value.Xml.Children.Count > 0 ) {
                 Props.Value.FullPath.TryHardToDelete();
@@ -502,7 +501,15 @@ namespace ClrPlus.Scripting.MsBuild.Packaging {
             if (PkgRole == PackageRole.@default || !_fileSets.Values.IsNullOrEmpty())
             { 
                 // don't save the package if it has no files in it.
-                packageFileName = NuPack(FullPath);
+                if (!generateOnly) {
+                    packageFileName = NuPack(FullPath);
+                }
+            }
+
+            if (generateOnly) {
+                foreach (var t in temporaryFiles) {
+                    Event<Message>.Raise("", t);
+                }
             }
 
             if (cleanIntermediateFiles) {
@@ -556,7 +563,12 @@ namespace ClrPlus.Scripting.MsBuild.Packaging {
 
         private void AddFileToNuSpec(string src, string dest) {
             var file = _nuSpec.files.Add("file");
-            file.Attributes.src = src.GetFullPath().Replace("\\\\", "\\");
+            var fullSrcPath = src.GetFullPath().Replace("\\\\", "\\");
+            
+            var relativeSrcPath = Directory.RelativePathTo(fullSrcPath);
+            
+            file.Attributes.src = relativeSrcPath;
+
             file.Attributes.target = dest.FixSlashes();
         }
 

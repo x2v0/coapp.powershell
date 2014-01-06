@@ -18,11 +18,10 @@ namespace CoApp.Powershell.Commands {
     using ClrPlus.Core.Extensions;
     using ClrPlus.Platform;
     using ClrPlus.Powershell.Core;
-    using ClrPlus.Powershell.Rest.Commands;
     using Microsoft.Deployment.WindowsInstaller;
 
     [Cmdlet(AllVerbs.Update, "CoAppTools")]
-    public class UpdateCoAppTools : RestableCmdlet<UpdateCoAppTools> {
+    public class UpdateCoAppTools : BaseCmdlet {
 
         [Parameter(HelpMessage = "If specified, will attempt to kill all the powershell processes after kicking off the installer.")]
         public SwitchParameter KillPowershells;
@@ -34,10 +33,12 @@ namespace CoApp.Powershell.Commands {
         public SwitchParameter Development;
 
         protected override void ProcessRecord() {
+#if USING_RESTABLE_CMDLET
             if(Remote) {
                 ProcessRecordViaRest();
                 return;
             }
+#endif
 
             var wc = new WebClient();
             var tmp = "coapp.tools.powershell.msi".GenerateTemporaryFilename();

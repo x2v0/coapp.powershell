@@ -30,7 +30,6 @@ namespace CoApp.Powershell.Commands {
     using ClrPlus.Platform;
     using ClrPlus.Platform.Process;
     using ClrPlus.Powershell.Core;
-    using ClrPlus.Powershell.Rest.Commands;
     using Microsoft.Build.Tasks;
     using Microsoft.SqlServer.Server;
     using Error = ClrPlus.Core.Tasks.Error;
@@ -59,7 +58,7 @@ namespace CoApp.Powershell.Commands {
     }
     
     [Cmdlet(AllVerbs.Publish, "NuGetPackage")]
-    public class PublishNuGetPackage : RestableCmdlet<PublishNuGetPackage> {
+    public class PublishNuGetPackage : BaseCmdlet {
 
         static PublishNuGetPackage() {
             // ensure that the etc folder is added to the path.
@@ -132,10 +131,12 @@ namespace CoApp.Powershell.Commands {
         }
 
         protected override void ProcessRecord() {
+            #if USING_RESTABLE_CMDLET
             if (Remote) {
                 ProcessRecordViaRest();
                 return;
             }
+#endif 
 
             System.Environment.CurrentDirectory = (SessionState.PSVariable.GetValue("pwd") ?? "").ToString();
             _nugetExe = new Executable("nuget.exe");

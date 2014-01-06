@@ -59,7 +59,7 @@ namespace ClrPlus.Scripting.MsBuild.Building.Tasks {
                         }
                     }
                     IEnumerable<string> overlayFiles;
-                    var pkg = script.Save(PackageTypes.NuGet, true, out overlayFiles);
+                    var pkg = script.Save(PackageTypes.NuGet, true, false, out overlayFiles);
 
                     OverlayPackages = overlayFiles.Select(each => (ITaskItem)new TaskItem(each)).ToArray();
                     MainPackages = new ITaskItem[] { new TaskItem(pkg) };

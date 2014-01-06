@@ -16,10 +16,9 @@ namespace CoApp.Powershell.Commands {
     using System.Management.Automation;
     using ClrPlus.Platform;
     using ClrPlus.Powershell.Core;
-    using ClrPlus.Powershell.Rest.Commands;
 
     [Cmdlet(AllVerbs.New, "VcxProject")]
-    public class NewVcxProject : RestableCmdlet<NewVcxProject> {
+    public class NewVcxProject : BaseCmdlet {
         [Parameter(HelpMessage = "VCXProjfile to create (.vcxproj)", Mandatory = true, Position = 0)]
         public string OutputFile {get; set;}
 
@@ -33,11 +32,12 @@ namespace CoApp.Powershell.Commands {
         public Hashtable Overrides {get; set;}
 
         protected override void ProcessRecord() {
+#if USING_RESTABLE_CMDLET
             if (Remote) {
                 ProcessRecordViaRest();
                 return;
             }
-
+#endif 
             using (new PushDirectory((Path.Combine(SessionState.Drive.Current.Root, SessionState.Drive.Current.CurrentLocation)))) {
             }
         }

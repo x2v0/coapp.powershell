@@ -24,9 +24,8 @@ namespace ClrPlus.Powershell.Rest.Commands {
     using ClrPlus.Core.Utility;
     using ClrPlus.Powershell.Core.Service;
     using Core;
-    using ServiceStack.ServiceClient.Web;
-    using ServiceStack.ServiceHost;
-    using ServiceStack.ServiceInterface.Auth;
+    using ServiceStack;
+    using ServiceStack.Auth;
     using ServiceStack.Text;
 
     internal interface IHasSession {
@@ -211,7 +210,7 @@ namespace ClrPlus.Powershell.Rest.Commands {
                     
                 }
                 var dynamicResult = dps.Invoke(restCommand.Name, _persistableElements, cmdlet, restCommand.DefaultParameters, restCommand.ForcedParameters, out errors);
-                result.Output = dynamicResult.ToArray();
+                result.Output = Enumerable.ToArray(dynamicResult);
                 result.LastIsTerminatingError = dynamicResult.LastIsTerminatingError;
 
             }

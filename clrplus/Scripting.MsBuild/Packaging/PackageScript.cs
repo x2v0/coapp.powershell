@@ -30,7 +30,6 @@ namespace ClrPlus.Scripting.MsBuild.Packaging {
     using Languages.PropertySheetV3.Mapping;
     using Microsoft.Build.Evaluation;
     using Microsoft.Build.Tasks;
-    using Mono.CSharp;
     using Platform;
     using Powershell.Core;
     using Warning = Core.Tasks.Warning;
@@ -252,7 +251,11 @@ namespace ClrPlus.Scripting.MsBuild.Packaging {
             _processed = true;
         }
 
-        public string Save(PackageTypes packageTypes, bool cleanIntermediateFiles, out IEnumerable<string> overlayPackages ) {
+        public string Save(PackageTypes packageTypes, bool cleanIntermediateFiles, bool generateOnly,  out IEnumerable<string> overlayPackages ) {
+            if (generateOnly) {
+                cleanIntermediateFiles = false;
+            }
+            
             if (!_processed) {
                 Process();
             }
@@ -260,7 +263,7 @@ namespace ClrPlus.Scripting.MsBuild.Packaging {
             NugetPackage.SplitThreshold = SplitThreshold;
 
             
-            var result =  NugetPackage.Save(cleanIntermediateFiles, out overlayPackages);
+            var result =  NugetPackage.Save(cleanIntermediateFiles, generateOnly,  out overlayPackages);
 
             // clean up our temporary files when we're done.
             foreach (var f in _tempFiles) {

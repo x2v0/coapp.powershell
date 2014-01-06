@@ -15,13 +15,20 @@ namespace ClrPlus.Powershell.Azure.Commands {
     using System.Management.Automation;
     using System.Management.Automation.Runspaces;
     using ClrPlus.Core.Extensions;
+    using Core;
     using Microsoft.WindowsAzure.Storage;
     using Microsoft.WindowsAzure.Storage.Auth;
     using Microsoft.WindowsAzure.Storage.Blob;
+    #if USING_RESTABLE_CMDLET
     using Rest.Commands;
+#endif 
 
     [Cmdlet(VerbsCommon.Get, "UploadLocation")]
+#if USING_RESTABLE_CMDLET
     public class GetUploadLocation : RestableCmdlet<GetUploadLocation> {
+#else 
+    public class GetUploadLocation : BaseCmdlet {
+#endif
         public const string DELETEABLE = "deleteable";
 
         [Parameter]
@@ -29,13 +36,14 @@ namespace ClrPlus.Powershell.Azure.Commands {
         public PSCredential AzureStorageCredential { get; set;}
 
         protected override void ProcessRecord() {
+#if USING_RESTABLE_CMDLET
             // must use this to support processing record remotely.
             if (Remote)
             {
                 ProcessRecordViaRest();
                 return;
             }
-
+#endif
             //this actually connects to the Azure service
             CloudStorageAccount account = new CloudStorageAccount(new StorageCredentials(AzureStorageCredential.UserName, AzureStorageCredential.Password.ToUnsecureString()), true);
 

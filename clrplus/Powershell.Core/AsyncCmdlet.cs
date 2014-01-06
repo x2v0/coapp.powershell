@@ -3,6 +3,73 @@
     using System.Collections.Concurrent;
     using System.Management.Automation;
     using System.Threading.Tasks;
+    using ClrPlus.Core.Extensions;
+    using ClrPlus.Core.Tasks;
+
+    public class BaseCmdlet : PSCmdlet {
+
+        [Parameter(HelpMessage = "Suppress output of all warnings")]
+        public SwitchParameter NoWarnings { get; set; }
+
+        [Parameter(HelpMessage = "Suppress output of all non-essential messages")]
+        public SwitchParameter Quiet { get; set; }
+
+        protected LocalEventSource LocalEventSource {
+            get {
+                var local = CurrentTask.Local;
+
+                local.Events += new Error((code, message, objects) => {
+                    Host.UI.WriteErrorLine("{0}:{1}".format(code, message.format(objects)));
+                    return true;
+                });
+
+                if (!NoWarnings && !Quiet) {
+                    local.Events += new Warning((code, message, objects) => {
+                        WriteWarning("{0}:{1}".format(code, message.format(objects)));
+                        return false;
+                    });
+                }
+
+                local.Events += new Debug((code, message, objects) => {
+                    WriteDebug("{0}:{1}".format(code, message.format(objects)));
+                    return false;
+                });
+
+                local.Events += new Verbose((code, message, objects) => {
+                    WriteVerbose("{0}:{1}".format(code, message.format(objects)));
+                    return false;
+                });
+
+                local.Events += new Progress((code, progress, message, objects) => {
+                    WriteProgress(new ProgressRecord(0, code, message.format(objects)) {
+                        PercentComplete = progress
+                    });
+                    return false;
+                });
+
+                if (!Quiet) {
+                    local.Events += new Message((code, message, objects) => {
+                        Host.UI.WriteLine("{0}{1}".format(code, message.format(objects)));
+                        return false;
+                    });
+                }
+                return local;
+            }
+        }
+
+
+        private string _originalDir;
+        protected override void BeginProcessing() {
+            _originalDir = Environment.CurrentDirectory;
+            Environment.CurrentDirectory = (SessionState.PSVariable.GetValue("pwd") ?? "").ToString();
+        }
+
+        protected override void EndProcessing() {
+            if (_originalDir != null) {
+                Environment.CurrentDirectory = _originalDir;
+            }
+        }
+    }
 
     public abstract class AsyncCmdlet : PSCmdlet {
         private BlockingCollection<Action> _messages;

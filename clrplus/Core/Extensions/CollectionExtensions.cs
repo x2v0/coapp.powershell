@@ -338,19 +338,6 @@ namespace ClrPlus.Core.Extensions {
             return from object i in collection select (T)i;
         }
 
-        public static void Enqueue<T>(this IList<T> list, T item) {
-            list.Add(item);
-        }
-        public static void EnqueueFirst<T>(this IList<T> list, T item) {
-            list.Insert(0, item);
-        }
-        public static void Enqueue<T>(this List<T> list, IEnumerable<T> items) {
-            list.AddRange(items);
-        }
-        public static void EnqueueFirst<T>(this List<T> list, IEnumerable<T> items) {
-            list.InsertRange(0, items);
-        }
-
         public static T Dequeue<T>(this IList<T> list) {
             if (list != null && list.Count > 0) {
                 var result = list[0];
@@ -359,5 +346,6 @@ namespace ClrPlus.Core.Extensions {
             }
             return default(T);
         }
+
     }
 }

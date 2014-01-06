@@ -33,15 +33,10 @@ namespace ClrPlus.Powershell.Core.Service {
     using Platform;
     using Rest.Commands;
     using Scripting.Languages.PropertySheet;
-    using ServiceStack.Common.Web;
+    using ServiceStack;
+    using ServiceStack.Auth;
     using ServiceStack.Configuration;
     using ServiceStack.Logging;
-    using ServiceStack.Logging.Support.Logging;
-    using ServiceStack.ServiceHost;
-    using ServiceStack.ServiceInterface;
-    using ServiceStack.ServiceInterface.Auth;
-    using ServiceStack.WebHost.Endpoints;
-    using ServiceStack.WebHost.Endpoints.Extensions;
 
     public class RestService : AppHostHttpListenerBase{
 

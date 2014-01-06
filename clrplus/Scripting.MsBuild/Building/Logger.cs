@@ -16,28 +16,41 @@ namespace ClrPlus.Scripting.MsBuild.Building {
     using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.Diagnostics;
+    using System.IO;
     using System.Runtime.InteropServices;
     using System.Threading;
     using System.Threading.Tasks;
+    using System.Xml.Serialization;
     using CSharpTest.Net.RpcLibrary;
     using Core.Extensions;
     using Languages.PropertySheet;
     using Microsoft.Build.Framework;
-    using ServiceStack.Text;
 
     public delegate bool MSBuildMessage(BuildMessage message);
 
 
     public class BuildMessage {
+        private static XmlSerializer xs = new XmlSerializer(typeof(BuildMessage));
+        
         [DllImport("kernel32.dll")]
         static extern void OutputDebugString(string lpOutputString);
 
         public byte[] ToByteArray() {
-            var result = JsonSerializer.SerializeToString(this);
-            OutputDebugString(result);
+            
+            var tw = new StringWriter();
+            xs.Serialize(tw, this);
+            var result = tw.ToString();
+
+            // var result = JsonSerializer.SerializeToString(this);
+            // OutputDebugString(result);
 
             // return JsonSerializer.SerializeToString(this).ToByteArray();
             return result.ToByteArray();
+        }
+
+        public static BuildMessage DeserializeFromString(string message) {
+            var tw = new StringReader(message);
+            return (BuildMessage)xs.Deserialize(tw);
         }
 
         public string EventType {get; set;}

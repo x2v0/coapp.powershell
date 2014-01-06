@@ -7,11 +7,14 @@ namespace ClrPlus.Powershell.Azure.Commands
 {
     using System.Management.Automation;
     using ClrPlus.Core.Extensions;
+    using Core;
     using Microsoft.WindowsAzure.Storage;
     using Microsoft.WindowsAzure.Storage.Auth;
     using Microsoft.WindowsAzure.Storage.Blob;
     using Provider;
+#if USING_RESTABLE_CMDLET
     using Rest.Commands;
+#endif 
 
     public class boo {
         public string Name { get; set;}
@@ -19,7 +22,11 @@ namespace ClrPlus.Powershell.Azure.Commands
     }
 
     [Cmdlet(VerbsCommon.Get, "AzureCredentials")]
+#if USING_RESTABLE_CMDLET
     public class GetAzureCredentials: RestableCmdlet<GetAzureCredentials>
+#else
+    public class GetAzureCredentials: BaseCmdlet
+#endif
     {
         [Parameter]
         [ValidateNotNullOrEmpty]
@@ -30,12 +37,13 @@ namespace ClrPlus.Powershell.Azure.Commands
         public PSCredential AzureStorageCredential { get; set; }
 
         protected override void ProcessRecord() {
+#if USING_RESTABLE_CMDLET
             if (Remote)
             {
                 ProcessRecordViaRest();
                 return;
             }
-
+#endif 
             //this actually connects to the Azure service
             CloudStorageAccount account = new CloudStorageAccount(new StorageCredentials(AzureStorageCredential.UserName, AzureStorageCredential.Password.ToUnsecureString()), true);
             var blobPolicy = new SharedAccessBlobPolicy {

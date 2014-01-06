@@ -104,6 +104,12 @@ call replace.cmd ".Product.Id=""\*"".Name=""CoApp.Powershell.*" "&lt;Product Id=
 call replace.cmd ".UpgradeVersion.OnlyDetect=""no"".*" "&lt;UpgradeVersion OnlyDetect=""no"" Property=""PREVIOUSFOUND"" Minimum=""1.0.0"" IncludeMinimum=""yes"" Maximum=""%25NEWVER%25"" IncludeMaximum=""no""&gt;&lt;/UpgradeVersion&gt;" %25SLNDIR%25\Installer\Product.wxs
 
 call replace.cmd "ModuleVersion =.*" "ModuleVersion ='%25NEWVER%25'" %25SLNDIR%25\CoApp.Powershell\CoApp.psd1
+
+cd $(SolutionDir)
+
+for /r %25%25z in (*.nuspec) do call replace.cmd "&lt;version&gt;.*&lt;/version&gt;" "&lt;version&gt;%25NEWVER%25&lt;/version&gt;" %25%25z
+
+for /r %25%25z in (*.nuspec) do call replace.cmd "(id=.ClrPlus.*version=.)(\d*\.\d*\.\d*\.\d*)(.*)" "$1%25NEWVER%25$3"  %25%25z
 </PreBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
