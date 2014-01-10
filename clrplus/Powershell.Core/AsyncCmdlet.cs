@@ -47,6 +47,13 @@
                     return false;
                 });
 
+                local.Events += new OutputObject(obj => {
+                    if (obj != null) {
+                        WriteObject(obj);
+                    }
+                    return false;
+                });
+
                 if (!Quiet) {
                     local.Events += new Message((code, message, objects) => {
                         Host.UI.WriteLine("{0}{1}".format(code, message.format(objects)));

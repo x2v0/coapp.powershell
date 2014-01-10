@@ -22,6 +22,7 @@ namespace ClrPlus.Core.Tasks {
     public delegate bool Debug(string messageCode, string message, params object[] args);
     public delegate bool Verbose(string messageCode, string message, params object[] args);
     public delegate bool Progress(string messageCode, int progress, string message, params object[] args);
+    public delegate bool OutputObject(object obj);
 
     public class EventSource {
         public static EventSource Instance = new EventSource();

@@ -503,12 +503,13 @@ namespace ClrPlus.Scripting.MsBuild.Packaging {
                 // don't save the package if it has no files in it.
                 if (!generateOnly) {
                     packageFileName = NuPack(FullPath);
+                    Event<OutputObject>.Raise(new FileInfo(packageFileName.GetFullPath()));
                 }
             }
 
             if (generateOnly) {
                 foreach (var t in temporaryFiles) {
-                    Event<Message>.Raise("", t);
+                    Event<OutputObject>.Raise( new FileInfo(t.GetFullPath()));
                 }
             }
 
@@ -635,10 +636,11 @@ namespace ClrPlus.Scripting.MsBuild.Packaging {
                         }
 
                         if (s.IndexOf("Successfully created package '") > -1) {
-                            packageFileName = s.Substring(s.IndexOf("Successfully created package '") + 1);
+                            
 
                             var scp = s.IndexOf('\'') + 1;
                             var pkg = s.Substring(scp, s.LastIndexOf('\'') - scp);
+                            packageFileName = pkg;
                             if (pkg.Length > 0) {
                                 (_packages ?? (_packages = new List<string>())).Add(pkg);
                             }
@@ -650,8 +652,10 @@ namespace ClrPlus.Scripting.MsBuild.Packaging {
                     // Description: The assembly 'build\native\bin\Win32\v110\Release\WinRT\casablanca110.winrt.dll' is not inside the 'lib' folder and hence it won't be added as reference when the package is installed into a project.
                     // Solution: Move it into the 'lib' folder if it should be referenced.
                     
-                    Event<Message>.Raise(" >", "{0}", s);
-                   
+                    // Event<Message>.Raise(" >", "{0}", s);
+                    if (s.Is()) {
+                        Event<Progress>.Raise("Runing 'NuGet Pack'", -1, "{0}", s);
+                    }
                 }
                 if (results.LastIsTerminatingError) {
                     throw new ClrPlusException("NuGet Pack Failed");

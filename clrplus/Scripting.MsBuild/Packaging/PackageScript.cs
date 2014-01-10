@@ -167,8 +167,8 @@ namespace ClrPlus.Scripting.MsBuild.Packaging {
 
             // map the file routes 
             nugetView.AddChildRoute("files".MapTo(new object() , new [] {
-                "condition".MapTo(conditions, key => Pivots.GetExpressionFilepath(_nuspec.id, key)),
-                "*".MapTo(conditions, key => Pivots.GetExpressionFilepath(_nuspec.id, key))
+                "condition".MapTo(conditions, key => Pivots.GetExpressionFilepath(_nuspec.id, nugetView.ResolveMacrosInContext(key))),
+                "*".MapTo(conditions, key => Pivots.GetExpressionFilepath(_nuspec.id, nugetView.ResolveMacrosInContext(key)))
             }));
 
             var nuspecid = _nuspec.id;
