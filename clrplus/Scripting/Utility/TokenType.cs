@@ -31,6 +31,7 @@ namespace ClrPlus.Scripting.Utility {
 
         Equal,
         EqualEqual,
+        EqualPlus,
         Lambda,
 
         Slash,
@@ -71,6 +72,7 @@ namespace ClrPlus.Scripting.Utility {
 
         QuestionMark,
         QuestionMarkQuestionMark,
+        QuestionMarkEqual,
 
         OpenBrace,
         CloseBrace,

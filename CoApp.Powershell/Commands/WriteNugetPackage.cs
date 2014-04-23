@@ -49,6 +49,9 @@ namespace CoApp.Powershell.Commands {
         [Parameter(HelpMessage = "Size (in megabytes) after which pivot combinations split into satellite packages. Defaults to 10")]
         public int SplitThreshold { get; set; }
 
+        [Parameter(HelpMessage = "Never ")]
+        public SwitchParameter NoSplit { get; set; }
+
 
         [Parameter]
         public string[] Define {

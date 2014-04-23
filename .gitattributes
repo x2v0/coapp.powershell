@@ -13,14 +13,14 @@
 *.png  binary
 *.gif  binary
 
-*.cs -text diff=csharp 
-*.vb -text
-*.c -text
-*.cpp -text
-*.cxx -text
-*.h -text
-*.hxx -text
-*.py -text
+*.cs -text diff=csharp eol=crlf
+*.vb -text eol=crlf
+*.c -text eol=crlf
+*.cpp -text eol=crlf
+*.cxx -text eol=crlf
+*.h -text eol=crlf
+*.hxx -text eol=crlf
+*.py -text 
 *.rb -text
 *.java -text
 *.html -text
@@ -42,9 +42,10 @@
 *.fsx -text
 *.hs -text
 
-*.csproj -text merge=union 
-*.vbproj -text merge=union 
-*.fsproj -text merge=union 
-*.dbproj -text merge=union 
+*.csproj -text merge=union eol=crlf
+*.vbproj -text merge=union eol=crlf
+*.fsproj -text merge=union eol=crlf
+*.dbproj -text merge=union eol=crlf
+*.pssproj -text merge=union eol=crlf
 *.sln -text eol=crlf merge=union 
 * -text 
