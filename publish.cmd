@@ -26,13 +26,14 @@ powershell set-executionpolicy unrestricted
 
 REM powershell  " ipmo 'C:\Program Files (x86)\Outercurve Foundation\Modules\CoApp\CoApp.psd1' ; copy-itemex -force %TargetDir%\CoApp.Tools.Powershell.msi coapp:files\Development.CoApp.Tools.Powershell.msi"
 
-mkdir c:\root\builds 
-
-copy %OutputFile% c:\root\builds\Development.CoApp.Tools.Powershell.msi || goto fin
 
 pskill powershell 
 msiexec /i %OutputFile% || goto fin
 
-powershell ipmo coapp ; copy-itemex -force %OutputFile% coapp:files\Development.CoApp.Tools.Powershell.msi"
+
+: uh, ignore this stuff...
+:mkdir c:\root\builds 
+:copy %OutputFile% c:\root\builds\Development.CoApp.Tools.Powershell.msi || goto fin
+:powershell ipmo coapp ; copy-itemex -force %OutputFile% coapp:files\Development.CoApp.Tools.Powershell.msi"
 
 :FIN
