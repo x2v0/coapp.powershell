@@ -261,7 +261,7 @@ namespace ClrPlus.Scripting.MsBuild.Packaging {
             }
 
             NugetPackage.SplitThreshold = SplitThreshold;
-
+            NugetPackage.NoSplit = NoSplit;
             
             var result =  NugetPackage.Save(cleanIntermediateFiles, generateOnly,  out overlayPackages);
 
@@ -423,6 +423,8 @@ namespace ClrPlus.Scripting.MsBuild.Packaging {
                 return NugetPackage.Packages;
             }
         }
+
+        public bool NoSplit {get; set;}
 
         private IEnumerable<ToRoute> MapDependencies() {
             yield break;

@@ -382,7 +382,7 @@ namespace ClrPlus.Scripting.MsBuild.Packaging {
             Event<Verbose>.Raise("NugetPackage.Save", "Saving nuget spec file to [{0}].", FullPath);
 
             // this is where we decide if we're going to split this into overlays or not.
-            if (PkgRole == PackageRole.@default && _fileSets.Keys.Count > 1 && _fileSets.Keys.SelectMany(set => _fileSets[set].Values).Sum(srcPath => new FileInfo(srcPath).Length) > SplitThreshold) {
+            if (!NoSplit && (PkgRole == PackageRole.@default && _fileSets.Keys.Count > 1 && _fileSets.Keys.SelectMany(set => _fileSets[set].Values).Sum(srcPath => new FileInfo(srcPath).Length) > SplitThreshold)) {
                 // ok, this package is gonna get split 
 
                 // first, add the init target stuff in the .props
@@ -525,6 +525,8 @@ namespace ClrPlus.Scripting.MsBuild.Packaging {
         public IEnumerable<string> Packages { get {
             return _packages.IsNullOrEmpty() ? Enumerable.Empty<string>() : _packages;
         }}
+
+        public bool NoSplit {get; set;}
 
         private bool SaveConfigurationFile(string cfgPath) {
             var sb = new StringBuilder();

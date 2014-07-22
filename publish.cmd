@@ -20,7 +20,7 @@ candle %INSTALLERDIR%\Product.wxs  || goto fin
 light "%TARGETDIR%\product.wixobj"  -sice:ICE80 -out %OutputFile%
 
 echo signing installer 
-"C:\Program Files (x86)\Windows Kits\8.0\bin\x86\signtool.exe" sign /a /t http://timestamp.verisign.com/scripts/timstamp.dll %OutputFile% || goto fin
+REM "C:\Program Files (x86)\Windows Kits\8.0\bin\x86\signtool.exe" sign /a /t http://timestamp.verisign.com/scripts/timstamp.dll %OutputFile% || goto fin
 
 powershell set-executionpolicy unrestricted 
 

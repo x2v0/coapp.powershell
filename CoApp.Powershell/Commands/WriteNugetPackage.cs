@@ -47,9 +47,9 @@ namespace CoApp.Powershell.Commands {
         public string PackageDirectory {get; set;}
 
         [Parameter(HelpMessage = "Size (in megabytes) after which pivot combinations split into satellite packages. Defaults to 10")]
-        public int SplitThreshold { get; set; }
+        public long SplitThreshold { get; set; }
 
-        [Parameter(HelpMessage = "Never ")]
+        [Parameter(HelpMessage = "Never Split the package into overlays.")]
         public SwitchParameter NoSplit { get; set; }
 
 
@@ -101,6 +101,9 @@ namespace CoApp.Powershell.Commands {
 
                 using (var script = new PackageScript(pkgPath.FirstOrDefault())) {
                     script.SplitThreshold = SplitThreshold * 1024 * 1024;
+                    if (NoSplit.IsPresent) {
+                        script.NoSplit = true;
+                    }
 
                     if (PackageDirectory.Is()) {
                         script.AddNuGetPackageDirectory(PackageDirectory.GetFullPath());
