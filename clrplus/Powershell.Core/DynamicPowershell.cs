@@ -10,19 +10,19 @@
 // </license>
 //-----------------------------------------------------------------------
 
-namespace ClrPlus.Powershell.Core {
-    using System;
-    using System.Collections.Generic;
-    using System.Dynamic;
-    using System.Linq;
-    using System.Management.Automation;
-    using System.Management.Automation.Runspaces;
-    using System.Threading;
-    using ClrPlus.Core.Collections;
-    using ClrPlus.Core.Exceptions;
-    using ClrPlus.Core.Extensions;
-    using ClrPlus.Core.Utility;
+using System;
+using System.Collections.Generic;
+using System.Dynamic;
+using System.Linq;
+using System.Management.Automation;
+using System.Management.Automation.Runspaces;
+using System.Threading;
+using ClrPlus.Core.Collections;
+using ClrPlus.Core.Exceptions;
+using ClrPlus.Core.Extensions;
+using ClrPlus.Core.Utility;
 
+namespace ClrPlus.Powershell.Core {
     public class DynamicPowershell : DynamicObject, IDisposable  {
         private readonly dynamic _runspacePool;
         private Runspace _runspace;

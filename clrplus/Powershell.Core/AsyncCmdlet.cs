@@ -1,11 +1,11 @@
-﻿namespace ClrPlus.Powershell.Core {
-    using System;
-    using System.Collections.Concurrent;
-    using System.Management.Automation;
-    using System.Threading.Tasks;
-    using ClrPlus.Core.Extensions;
-    using ClrPlus.Core.Tasks;
+﻿using System;
+using System.Collections.Concurrent;
+using System.Management.Automation;
+using System.Threading.Tasks;
+using ClrPlus.Core.Extensions;
+using ClrPlus.Core.Tasks;
 
+namespace ClrPlus.Powershell.Core {
     public class BaseCmdlet : PSCmdlet {
 
         [Parameter(HelpMessage = "Suppress output of all warnings")]

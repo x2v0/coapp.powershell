@@ -14,7 +14,7 @@ rmdir /s /q intermediate\v40
 rmdir /s /q intermediate\v45
 
 :: Build .NET 4.0 and 4.5 versions
-msbuild /t:Rebuild ClrPlus.sln /p:Configuration=Release /p:TargetFrameworkVersion=v4.0 || goto failed
+::msbuild /t:Rebuild ClrPlus.sln /p:Configuration=Release /p:TargetFrameworkVersion=v4.0 || goto failed
 msbuild /t:Rebuild ClrPlus.sln /p:Configuration=Release /p:TargetFrameworkVersion=v4.5 || goto failed
 
 :: Do merges for monolithic packages
